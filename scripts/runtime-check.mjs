@@ -41,12 +41,20 @@ const stateExpression = `(() => {
     categories: document.querySelectorAll("[data-category]").length,
     templates: document.querySelectorAll("[data-template]").length,
     features: document.querySelectorAll("[data-feature]").length,
-    projects: document.querySelectorAll(".project-card").length,
+    libraryTabs: document.querySelectorAll("[data-library-tab]").length,
+    libraryFilters: document.querySelectorAll("[data-story-filter]").length,
+    storyCards: document.querySelectorAll(".story-card").length,
+    plannerMessages: document.querySelectorAll(".planner-message").length,
+    docSections: document.querySelectorAll(".doc-section").length,
     assets: document.querySelectorAll(".asset-card").length,
     members: document.querySelectorAll(".member-row").length,
     ledgerRows: document.querySelectorAll(".ledger-row").length,
     canvasHidden: document.querySelector("#canvasStudio")?.hidden,
+    canvasNodes: document.querySelectorAll(".canvas-node").length,
+    generatePanelHidden: document.querySelector("#generatePanel")?.hidden,
+    editorPanelHidden: document.querySelector("#editorPanel")?.hidden,
     modalHidden: document.querySelector("#modalLayer")?.hidden,
+    zoomLabel: document.querySelector("#zoomLabel")?.textContent || "",
     images
   };
 })()`;
@@ -94,10 +102,13 @@ try {
   assertCheck(state.yuyu, "YUYU branding not visible", state);
   assertCheck(!state.originalBrandVisible, "Original branding is visible in runtime text", state);
   assertCheck(state.activeView === "explore", "Explore should be active by default", state);
-  assertCheck(state.routeCount >= 6 && state.viewCount === 5, "Route/view counts are wrong", state);
+  assertCheck(state.routeCount >= 6 && state.viewCount === 6, "Route/view counts are wrong", state);
   assertCheck(state.promptTools === 4 && state.categories === 4 && state.templates === 2 && state.features === 5, "Explore controls did not initialize", state);
-  assertCheck(state.projects >= 4 && state.assets >= 3 && state.members >= 4 && state.ledgerRows >= 4, "Secondary modules did not render", state);
-  assertCheck(state.canvasHidden === true && state.modalHidden === true, "Canvas and modal should start hidden", state);
+  assertCheck(state.libraryTabs === 3 && state.libraryFilters === 5 && state.storyCards >= 4, "Story library did not initialize", state);
+  assertCheck(state.plannerMessages >= 4 && state.docSections >= 4, "Script planning view did not initialize", state);
+  assertCheck(state.assets >= 3 && state.members >= 4 && state.ledgerRows >= 4, "Secondary modules did not render", state);
+  assertCheck(state.canvasHidden === true && state.generatePanelHidden === true && state.editorPanelHidden === true && state.modalHidden === true, "Hidden surfaces should start hidden", state);
+  assertCheck(state.canvasNodes >= 10 && state.zoomLabel === "33%", "Canvas graph did not initialize", state);
   assertCheck(badImages.length === 0, "Broken images detected", { badImages, state });
   assertCheck(Object.values(bad).every(items => items.length === 0), "Runtime has console/network errors", bad);
 
@@ -110,7 +121,7 @@ try {
       noRuntimeExceptions: true,
       noNetworkFailures: true,
       imagesLoaded: true,
-      fullSiteInitialized: true
+      expandedSiteInitialized: true
     },
     state
   };

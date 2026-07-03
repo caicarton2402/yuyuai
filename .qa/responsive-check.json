@@ -7,90 +7,60 @@
       "height": 1000,
       "name": "desktop-wide",
       "exploreEvidence": "replica/responsive/yuyu-fullsite-1920x1000-desktop-wide-explore.png",
-      "projectEvidence": "replica/responsive/yuyu-fullsite-1920x1000-desktop-wide-projects.png",
-      "exploreVisible": {
-        "hero": true,
-        "promptBox": true,
-        "categories": true,
-        "templates": true,
-        "features": true,
-        "sideNav": true,
-        "navStack": true,
-        "projectBoard": false
-      },
-      "projectCount": 4
+      "libraryEvidence": "replica/responsive/yuyu-fullsite-1920x1000-desktop-wide-library.png",
+      "scriptEvidence": "replica/responsive/yuyu-fullsite-1920x1000-desktop-wide-script.png",
+      "canvasEvidence": "replica/responsive/yuyu-fullsite-1920x1000-desktop-wide-canvas.png",
+      "storyCount": 4,
+      "plannerMessages": 4,
+      "canvasNodes": 10
     },
     {
       "width": 1440,
       "height": 1000,
       "name": "desktop",
       "exploreEvidence": "replica/responsive/yuyu-fullsite-1440x1000-desktop-explore.png",
-      "projectEvidence": "replica/responsive/yuyu-fullsite-1440x1000-desktop-projects.png",
-      "exploreVisible": {
-        "hero": true,
-        "promptBox": true,
-        "categories": true,
-        "templates": true,
-        "features": true,
-        "sideNav": true,
-        "navStack": true,
-        "projectBoard": false
-      },
-      "projectCount": 4
+      "libraryEvidence": "replica/responsive/yuyu-fullsite-1440x1000-desktop-library.png",
+      "scriptEvidence": "replica/responsive/yuyu-fullsite-1440x1000-desktop-script.png",
+      "canvasEvidence": "replica/responsive/yuyu-fullsite-1440x1000-desktop-canvas.png",
+      "storyCount": 4,
+      "plannerMessages": 4,
+      "canvasNodes": 10
     },
     {
       "width": 1024,
       "height": 1000,
       "name": "tablet-landscape",
       "exploreEvidence": "replica/responsive/yuyu-fullsite-1024x1000-tablet-landscape-explore.png",
-      "projectEvidence": "replica/responsive/yuyu-fullsite-1024x1000-tablet-landscape-projects.png",
-      "exploreVisible": {
-        "hero": true,
-        "promptBox": true,
-        "categories": true,
-        "templates": true,
-        "features": true,
-        "sideNav": true,
-        "navStack": true,
-        "projectBoard": false
-      },
-      "projectCount": 4
+      "libraryEvidence": "replica/responsive/yuyu-fullsite-1024x1000-tablet-landscape-library.png",
+      "scriptEvidence": "replica/responsive/yuyu-fullsite-1024x1000-tablet-landscape-script.png",
+      "canvasEvidence": "replica/responsive/yuyu-fullsite-1024x1000-tablet-landscape-canvas.png",
+      "storyCount": 4,
+      "plannerMessages": 4,
+      "canvasNodes": 10
     },
     {
       "width": 768,
       "height": 1000,
       "name": "tablet",
       "exploreEvidence": "replica/responsive/yuyu-fullsite-768x1000-tablet-explore.png",
-      "projectEvidence": "replica/responsive/yuyu-fullsite-768x1000-tablet-projects.png",
-      "exploreVisible": {
-        "hero": true,
-        "promptBox": true,
-        "categories": true,
-        "templates": true,
-        "features": true,
-        "sideNav": true,
-        "navStack": true,
-        "projectBoard": false
-      },
-      "projectCount": 4
+      "libraryEvidence": "replica/responsive/yuyu-fullsite-768x1000-tablet-library.png",
+      "scriptEvidence": "replica/responsive/yuyu-fullsite-768x1000-tablet-script.png",
+      "canvasEvidence": "replica/responsive/yuyu-fullsite-768x1000-tablet-canvas.png",
+      "storyCount": 4,
+      "plannerMessages": 4,
+      "canvasNodes": 10
     },
     {
       "width": 375,
       "height": 812,
       "name": "mobile",
       "exploreEvidence": "replica/responsive/yuyu-fullsite-375x812-mobile-explore.png",
-      "projectEvidence": "replica/responsive/yuyu-fullsite-375x812-mobile-projects.png",
-      "exploreVisible": {
-        "hero": true,
-        "promptBox": true,
-        "categories": true,
-        "templates": true,
-        "features": true,
-        "sideNav": true,
-        "navStack": true,
-        "projectBoard": false
-      },
-      "projectCount": 4
+      "libraryEvidence": "replica/responsive/yuyu-fullsite-375x812-mobile-library.png",
+      "scriptEvidence": "replica/responsive/yuyu-fullsite-375x812-mobile-script.png",
+      "canvasEvidence": "replica/responsive/yuyu-fullsite-375x812-mobile-canvas.png",
+      "storyCount": 4,
+      "plannerMessages": 4,
+      "canvasNodes": 10
     }
   ]
 }

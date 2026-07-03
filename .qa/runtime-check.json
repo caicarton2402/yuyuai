@@ -7,7 +7,7 @@
     "noRuntimeExceptions": true,
     "noNetworkFailures": true,
     "imagesLoaded": true,
-    "fullSiteInitialized": true
+    "expandedSiteInitialized": true
   },
   "state": {
     "title": "YUYU - AI Video Studio",
@@ -15,18 +15,26 @@
     "yuyu": true,
     "originalBrandVisible": false,
     "routeCount": 8,
-    "viewCount": 5,
+    "viewCount": 6,
     "activeView": "explore",
     "promptTools": 4,
     "categories": 4,
     "templates": 2,
     "features": 5,
-    "projects": 4,
+    "libraryTabs": 3,
+    "libraryFilters": 5,
+    "storyCards": 4,
+    "plannerMessages": 4,
+    "docSections": 4,
     "assets": 3,
     "members": 4,
     "ledgerRows": 4,
     "canvasHidden": true,
+    "canvasNodes": 10,
+    "generatePanelHidden": true,
+    "editorPanelHidden": true,
     "modalHidden": true,
+    "zoomLabel": "33%",
     "images": [
       {
         "src": "./public/assets/yuyu-logo.png",
@@ -57,6 +65,72 @@
         "complete": true,
         "naturalWidth": 343,
         "naturalHeight": 169
+      },
+      {
+        "src": "./public/assets/yuyu-logo.png",
+        "complete": true,
+        "naturalWidth": 139,
+        "naturalHeight": 256
+      },
+      {
+        "src": "./public/assets/story/dog.png",
+        "complete": true,
+        "naturalWidth": 218,
+        "naturalHeight": 118
+      },
+      {
+        "src": "./public/assets/story/cat.png",
+        "complete": true,
+        "naturalWidth": 218,
+        "naturalHeight": 118
+      },
+      {
+        "src": "./public/assets/story/elevator.png",
+        "complete": true,
+        "naturalWidth": 119,
+        "naturalHeight": 158
+      },
+      {
+        "src": "./public/assets/story/hall.png",
+        "complete": true,
+        "naturalWidth": 119,
+        "naturalHeight": 157
+      },
+      {
+        "src": "./public/assets/story/video-elevator-dog.png",
+        "complete": true,
+        "naturalWidth": 212,
+        "naturalHeight": 116
+      },
+      {
+        "src": "./public/assets/story/video-dog-side.png",
+        "complete": true,
+        "naturalWidth": 212,
+        "naturalHeight": 136
+      },
+      {
+        "src": "./public/assets/story/video-cat-close.png",
+        "complete": true,
+        "naturalWidth": 212,
+        "naturalHeight": 117
+      },
+      {
+        "src": "./public/assets/story/video-elevator-dog.png",
+        "complete": true,
+        "naturalWidth": 212,
+        "naturalHeight": 116
+      },
+      {
+        "src": "./public/assets/story/video-dog-side.png",
+        "complete": true,
+        "naturalWidth": 212,
+        "naturalHeight": 136
+      },
+      {
+        "src": "./public/assets/story/video-dog-sit.png",
+        "complete": true,
+        "naturalWidth": 212,
+        "naturalHeight": 118
       }
     ]
   }

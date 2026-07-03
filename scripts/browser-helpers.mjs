@@ -1,5 +1,8 @@
 import { spawn } from "node:child_process";
-import { rm } from "node:fs/promises";
+import { createReadStream } from "node:fs";
+import { rm, stat } from "node:fs/promises";
+import { createServer } from "node:http";
+import path from "node:path";
 import net from "node:net";
 
 export const root = process.cwd();
@@ -45,7 +48,30 @@ export function spawnHidden(command, args, options = {}) {
 }
 
 export async function stopProcess(child) {
-  if (!child || child.exitCode !== null || child.signalCode !== null) return;
+  if (!child) return;
+  if (typeof child.close === "function" && !child.kill) {
+    await new Promise(resolve => child.close(resolve));
+    return;
+  }
+  if (child.exitCode !== null || child.signalCode !== null) return;
+  if (process.platform === "win32" && child.pid) {
+    await new Promise(resolve => {
+      const killer = spawn("taskkill", ["/PID", String(child.pid), "/T", "/F"], {
+        stdio: "ignore",
+        windowsHide: true
+      });
+      const timer = setTimeout(resolve, 3000);
+      killer.once("exit", () => {
+        clearTimeout(timer);
+        resolve();
+      });
+      killer.once("error", () => {
+        clearTimeout(timer);
+        resolve();
+      });
+    });
+    return;
+  }
   await new Promise(resolve => {
     const timer = setTimeout(resolve, 3000);
     child.once("exit", () => {
@@ -167,8 +193,58 @@ export function assertCheck(condition, message, details = {}) {
 }
 
 export async function startStaticServer(port) {
-  const server = spawnHidden("python", ["-m", "http.server", String(port), "--bind", "127.0.0.1"]);
-  const readServerOutput = await collectOutput(server);
+  const output = { stdout: "", stderr: "" };
+  const mime = {
+    ".html": "text/html; charset=utf-8",
+    ".css": "text/css; charset=utf-8",
+    ".js": "text/javascript; charset=utf-8",
+    ".mjs": "text/javascript; charset=utf-8",
+    ".json": "application/json; charset=utf-8",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".svg": "image/svg+xml",
+    ".ico": "image/x-icon"
+  };
+  const rootDir = path.resolve(root);
+  const server = createServer(async (request, response) => {
+    try {
+      const url = new URL(request.url || "/", `http://127.0.0.1:${port}`);
+      let pathname = decodeURIComponent(url.pathname);
+      if (pathname.endsWith("/")) pathname += "index.html";
+      const target = path.resolve(rootDir, `.${pathname.replaceAll("/", path.sep)}`);
+      if (target !== rootDir && !target.startsWith(`${rootDir}${path.sep}`)) {
+        response.writeHead(403);
+        response.end("Forbidden");
+        return;
+      }
+      const info = await stat(target);
+      if (!info.isFile()) {
+        response.writeHead(404);
+        response.end("Not found");
+        return;
+      }
+      response.writeHead(200, {
+        "Content-Type": mime[path.extname(target).toLowerCase()] || "application/octet-stream",
+        "Content-Length": info.size
+      });
+      output.stderr += `127.0.0.1 ${request.method} ${url.pathname} 200\n`;
+      if (request.method === "HEAD") {
+        response.end();
+        return;
+      }
+      createReadStream(target).pipe(response);
+    } catch (error) {
+      output.stderr += `127.0.0.1 ${request.method} ${request.url} ${error.code || error.message}\n`;
+      response.writeHead(error.code === "ENOENT" ? 404 : 500);
+      response.end(error.code === "ENOENT" ? "Not found" : "Server error");
+    }
+  });
+  await new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(port, "127.0.0.1", resolve);
+  });
+  const readServerOutput = () => output;
   await waitForHttp(`http://127.0.0.1:${port}/`);
   return { server, readServerOutput };
 }

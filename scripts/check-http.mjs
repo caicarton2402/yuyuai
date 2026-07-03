@@ -20,7 +20,15 @@ const urls = [
   "/public/assets/explore/feature-effects.png",
   "/public/assets/explore/feature-seedance.png",
   "/public/assets/explore/feature-grid.png",
-  "/public/assets/explore/feature-panorama.png"
+  "/public/assets/explore/feature-panorama.png",
+  "/public/assets/story/dog.png",
+  "/public/assets/story/cat.png",
+  "/public/assets/story/elevator.png",
+  "/public/assets/story/hall.png",
+  "/public/assets/story/video-elevator-dog.png",
+  "/public/assets/story/video-dog-side.png",
+  "/public/assets/story/video-cat-close.png",
+  "/public/assets/story/video-dog-sit.png"
 ].map(url => `http://127.0.0.1:${port}${url}`);
 
 const { server, readServerOutput } = await startStaticServer(port);

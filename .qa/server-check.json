@@ -5,26 +5,26 @@
     {
       "url": "http://127.0.0.1:5181/",
       "status": 200,
-      "type": "text/html",
-      "length": "17683"
+      "type": "text/html; charset=utf-8",
+      "length": "23734"
     },
     {
       "url": "http://127.0.0.1:5181/src/styles.css",
       "status": 200,
-      "type": "text/css",
-      "length": "29554"
+      "type": "text/css; charset=utf-8",
+      "length": "51008"
     },
     {
       "url": "http://127.0.0.1:5181/src/app.js",
       "status": 200,
-      "type": "text/javascript",
-      "length": "27678"
+      "type": "text/javascript; charset=utf-8",
+      "length": "39902"
     },
     {
       "url": "http://127.0.0.1:5181/scripts/browser-helpers.mjs",
       "status": 200,
-      "type": "text/javascript",
-      "length": "5864"
+      "type": "text/javascript; charset=utf-8",
+      "length": "8422"
     },
     {
       "url": "http://127.0.0.1:5181/public/assets/yuyu-logo.png",
@@ -73,10 +73,58 @@
       "status": 200,
       "type": "image/png",
       "length": "81632"
+    },
+    {
+      "url": "http://127.0.0.1:5181/public/assets/story/dog.png",
+      "status": 200,
+      "type": "image/png",
+      "length": "46099"
+    },
+    {
+      "url": "http://127.0.0.1:5181/public/assets/story/cat.png",
+      "status": 200,
+      "type": "image/png",
+      "length": "40605"
+    },
+    {
+      "url": "http://127.0.0.1:5181/public/assets/story/elevator.png",
+      "status": 200,
+      "type": "image/png",
+      "length": "27949"
+    },
+    {
+      "url": "http://127.0.0.1:5181/public/assets/story/hall.png",
+      "status": 200,
+      "type": "image/png",
+      "length": "17336"
+    },
+    {
+      "url": "http://127.0.0.1:5181/public/assets/story/video-elevator-dog.png",
+      "status": 200,
+      "type": "image/png",
+      "length": "47452"
+    },
+    {
+      "url": "http://127.0.0.1:5181/public/assets/story/video-dog-side.png",
+      "status": 200,
+      "type": "image/png",
+      "length": "41439"
+    },
+    {
+      "url": "http://127.0.0.1:5181/public/assets/story/video-cat-close.png",
+      "status": 200,
+      "type": "image/png",
+      "length": "44555"
+    },
+    {
+      "url": "http://127.0.0.1:5181/public/assets/story/video-dog-sit.png",
+      "status": 200,
+      "type": "image/png",
+      "length": "30479"
     }
   ],
   "server": {
     "stdout": "",
-    "stderr": "127.0.0.1 - - [03/Jul/2026 21:39:02] \"GET / HTTP/1.1\" 200 -\r\n127.0.0.1 - - [03/Jul/2026 21:39:02] \"HEAD / HTTP/1.1\" 200 -\r\n127.0.0.1 - - [03/Jul/2026 21:39:02] \"HEAD /src/styles.css HTTP/1.1\" 200 -\r\n127.0.0.1 - - [03/Jul/2026 21:39:02] \"HEAD /src/app.js HTTP/1.1\" 200 -\r\n127.0.0.1 - - [03/Jul/2026 21:39:02] \"HEAD /scripts/browser-helpers.mjs HTTP/1.1\" 200 -\r\n127.0.0.1 - - [03/Jul/2026 21:39:02] \"HEAD /public/assets/yuyu-logo.png HTTP/1.1\" 200 -\r\n127.0.0.1 - - [03/Jul/2026 21:39:02] \"HEAD /public/assets/yuyu-favicon.png HTTP/1.1\" 200 -\r\n127.0.0.1 - - [03/Jul/2026 21:39:02] \"HEAD /public/assets/explore/template-dialog.png HTTP/1.1\" 200 -\r\n127.0.0.1 - - [03/Jul/2026 21:39:02] \"HEAD /public/assets/explore/template-narration.png HTTP/1.1\" 200 -\r\n127.0.0.1 - - [03/Jul/2026 21:39:02] \"HEAD /public/assets/explore/feature-effects.png HTTP/1.1\" 200 -\r\n127.0.0.1 - - [03/Jul/2026 21:39:02] \"HEAD /public/assets/explore/feature-seedance.png HTTP/1.1\" 200 -\r\n127.0.0.1 - - [03/Jul/2026 21:39:02] \"HEAD /public/assets/explore/feature-grid.png HTTP/1.1\" 200 -\r\n127.0.0.1 - - [03/Jul/2026 21:39:02] \"HEAD /public/assets/explore/feature-panorama.png HTTP/1.1\" 200 -\r\n"
+    "stderr": "127.0.0.1 GET / 200\n127.0.0.1 HEAD / 200\n127.0.0.1 HEAD /src/styles.css 200\n127.0.0.1 HEAD /src/app.js 200\n127.0.0.1 HEAD /scripts/browser-helpers.mjs 200\n127.0.0.1 HEAD /public/assets/yuyu-logo.png 200\n127.0.0.1 HEAD /public/assets/yuyu-favicon.png 200\n127.0.0.1 HEAD /public/assets/explore/template-dialog.png 200\n127.0.0.1 HEAD /public/assets/explore/template-narration.png 200\n127.0.0.1 HEAD /public/assets/explore/feature-effects.png 200\n127.0.0.1 HEAD /public/assets/explore/feature-seedance.png 200\n127.0.0.1 HEAD /public/assets/explore/feature-grid.png 200\n127.0.0.1 HEAD /public/assets/explore/feature-panorama.png 200\n127.0.0.1 HEAD /public/assets/story/dog.png 200\n127.0.0.1 HEAD /public/assets/story/cat.png 200\n127.0.0.1 HEAD /public/assets/story/elevator.png 200\n127.0.0.1 HEAD /public/assets/story/hall.png 200\n127.0.0.1 HEAD /public/assets/story/video-elevator-dog.png 200\n127.0.0.1 HEAD /public/assets/story/video-dog-side.png 200\n127.0.0.1 HEAD /public/assets/story/video-cat-close.png 200\n127.0.0.1 HEAD /public/assets/story/video-dog-sit.png 200\n"
   }
 }

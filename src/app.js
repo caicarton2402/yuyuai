@@ -17,7 +17,10 @@ const modalBody = $("#modalBody");
 const modalActions = $("#modalActions");
 const canvasStudio = $("#canvasStudio");
 const canvasPlane = $("#canvasPlane");
+const generatePanel = $("#generatePanel");
+const editorPanel = $("#editorPanel");
 const zoomLabel = $("#zoomLabel");
+const bottomZoomLabel = $("#bottomZoomLabel");
 const toast = $("#toast");
 
 const categories = {
@@ -26,18 +29,8 @@ const categories = {
     title: "出海短剧项目已创建",
     copy: "已按出海短剧结构拆解爽点、反转和多集节奏。",
     templates: [
-      {
-        id: "dialog",
-        title: "对话剧情",
-        image: "../public/assets/explore/template-dialog.png",
-        prompt: "一位普通女孩误入豪门继承人争夺战，用三场高反转对话推进剧情。"
-      },
-      {
-        id: "narration",
-        title: "旁白解说",
-        image: "../public/assets/explore/template-narration.png",
-        prompt: "用旁白解说风格讲述女主被背叛后逆袭出海创业的短剧第一集。"
-      }
+      { id: "dialog", title: "对话剧情", image: "../public/assets/explore/template-dialog.png", prompt: "一位普通女孩误入豪门继承人争夺战，用三场高反转对话推进剧情。" },
+      { id: "narration", title: "旁白解说", image: "../public/assets/explore/template-narration.png", prompt: "用旁白解说风格讲述女主被背叛后逆袭出海创业的短剧第一集。" }
     ]
   },
   comic: {
@@ -45,18 +38,8 @@ const categories = {
     title: "漫剧项目已创建",
     copy: "已切换为漫画分镜与角色表情驱动的制作流程。",
     templates: [
-      {
-        id: "comic-dialog",
-        title: "角色对白",
-        image: "../public/assets/explore/template-narration.png",
-        prompt: "制作一段都市奇幻漫剧，女主在雨夜发现自己能听见时间倒流的声音。"
-      },
-      {
-        id: "comic-panel",
-        title: "分格叙事",
-        image: "../public/assets/explore/template-dialog.png",
-        prompt: "把校园悬疑故事拆成 8 格漫画分镜，每格都有明确动作和情绪。"
-      }
+      { id: "comic-dialog", title: "角色对白", image: "../public/assets/explore/template-narration.png", prompt: "制作一段都市奇幻漫剧，女主在雨夜发现自己能听见时间倒流的声音。" },
+      { id: "comic-panel", title: "分格叙事", image: "../public/assets/explore/template-dialog.png", prompt: "把校园悬疑故事拆成 8 格漫画分镜，每格都有明确动作和情绪。" }
     ]
   },
   mv: {
@@ -64,18 +47,8 @@ const categories = {
     title: "音乐 MV 项目已创建",
     copy: "已准备歌词段落、节拍点、画面风格和镜头转场。",
     templates: [
-      {
-        id: "mv-beat",
-        title: "节拍剪辑",
-        image: "../public/assets/explore/feature-grid.png",
-        prompt: "为一首夏日流行歌生成九宫格节拍画面，明亮、轻快、镜头随鼓点切换。"
-      },
-      {
-        id: "mv-cinematic",
-        title: "电影感 MV",
-        image: "../public/assets/explore/feature-panorama.png",
-        prompt: "生成一支沙漠公路 MV，孤独旅人、漂浮岩石、黄金日落和慢动作运镜。"
-      }
+      { id: "mv-beat", title: "节拍剪辑", image: "../public/assets/explore/feature-grid.png", prompt: "为一首夏日流行歌生成九宫格节拍画面，明亮、轻快、镜头随鼓点切换。" },
+      { id: "mv-cinematic", title: "电影感 MV", image: "../public/assets/explore/feature-panorama.png", prompt: "生成一支沙漠公路 MV，孤独旅人、漂浮岩石、黄金日落和慢动作运镜。" }
     ]
   },
   knowledge: {
@@ -83,23 +56,13 @@ const categories = {
     title: "知识视频项目已创建",
     copy: "已切换为脚本提纲、重点提炼和画面示意流程。",
     templates: [
-      {
-        id: "knowledge-list",
-        title: "三段式讲解",
-        image: "../public/assets/explore/feature-seedance.png",
-        prompt: "用三段式结构解释 AI 视频生成的工作流：输入、规划、生成。"
-      },
-      {
-        id: "knowledge-card",
-        title: "知识卡片",
-        image: "../public/assets/explore/feature-grid.png",
-        prompt: "做一个 60 秒知识分享视频，解释如何把短剧创意扩展成连续剧集。"
-      }
+      { id: "knowledge-list", title: "三段式讲解", image: "../public/assets/explore/feature-seedance.png", prompt: "用三段式结构解释 AI 视频生成的工作流：输入、规划、生成。" },
+      { id: "knowledge-card", title: "知识卡片", image: "../public/assets/explore/feature-grid.png", prompt: "做一个 60 秒知识分享视频，解释如何把短剧创意扩展成连续剧集。" }
     ]
   }
 };
 
-const tools = {
+const promptTools = {
   upload: {
     title: "上传参考素材",
     body: "支持图片、视频片段、角色设定和文档。素材会进入当前故事项目，作为角色、场景或镜头参考。",
@@ -115,46 +78,147 @@ const tools = {
   mention: {
     title: "引用角色",
     body: "在提示词中引用已有角色或协作成员，让生成流程保持相同人设和语气。",
-    chips: ["@女主", "@反派", "@导演视角"],
+    chips: ["@蛋卷", "@云朵", "@导演视角"],
     action: "mentions"
   },
   style: {
     title: "风格控制",
     body: "选择画面风格、镜头语言和色彩倾向。当前默认匹配短剧漫剧的高对比暗色氛围。",
-    chips: ["写实短剧", "国漫质感", "赛博夜景"],
+    chips: ["写实短剧", "国漫质感", "办公喜剧"],
     action: "style"
   }
 };
 
-const projects = [
-  { id: "p1", title: "出海短剧 EP01", type: "短剧", status: "生成中", progress: 68, updated: "刚刚", thumb: "feature-effects.png" },
-  { id: "p2", title: "沙漠公路 MV", type: "音乐 MV", status: "草稿", progress: 24, updated: "12 分钟前", thumb: "feature-panorama.png" },
-  { id: "p3", title: "AI 工作流知识分享", type: "知识视频", status: "可导出", progress: 100, updated: "今天", thumb: "feature-seedance.png" },
-  { id: "p4", title: "九宫格旅行封面", type: "图像", status: "可导出", progress: 100, updated: "昨天", thumb: "feature-grid.png" }
+const storyProjects = [
+  {
+    id: "story-1",
+    tab: "story",
+    category: "overseas",
+    title: "霸总猫与憨憨狗的职场日常",
+    subtitle: "@蛋卷 (Eggrol) @云朵 (Cloud)",
+    status: "全能模式",
+    mode: "画布",
+    updated: "2026/07/03 18:38",
+    progress: 78,
+    cover: "linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.72)), url('./public/assets/story/video-elevator-dog.png')"
+  },
+  {
+    id: "story-2",
+    tab: "story",
+    category: "comic",
+    title: "第1集：打呼纸的复仇",
+    subtitle: "办公室萌宠喜剧分镜",
+    status: "脚本策划",
+    mode: "策划",
+    updated: "2026/07/03 19:16",
+    progress: 64,
+    cover: "linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.72)), url('./public/assets/story/video-cat-close.png')"
+  },
+  {
+    id: "story-3",
+    tab: "story",
+    category: "mv",
+    title: "电梯里的 15 秒主题曲",
+    subtitle: "音乐节拍与镜头同步",
+    status: "可导出",
+    mode: "MV",
+    updated: "今天 14:08",
+    progress: 100,
+    cover: "linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.72)), url('./public/assets/story/elevator.png')"
+  },
+  {
+    id: "story-4",
+    tab: "story",
+    category: "knowledge",
+    title: "用画布拆解一条宠物短剧",
+    subtitle: "知识分享脚本",
+    status: "草稿",
+    mode: "知识",
+    updated: "昨天 22:10",
+    progress: 36,
+    cover: "linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.72)), url('./public/assets/explore/feature-grid.png')"
+  },
+  {
+    id: "digital-1",
+    tab: "digital",
+    category: "digital",
+    title: "YUYU 口播主持人",
+    subtitle: "可用于剧情解说和课程讲解",
+    status: "已训练",
+    mode: "数字人",
+    updated: "今天 09:30",
+    progress: 92,
+    cover: "linear-gradient(135deg, rgba(84,188,230,.28), rgba(228,106,189,.18))"
+  },
+  {
+    id: "canvas-1",
+    tab: "canvas",
+    category: "canvas",
+    title: "第1集画布图谱",
+    subtitle: "主体、场景、镜头和视频节点",
+    status: "可编辑",
+    mode: "画布",
+    updated: "刚刚",
+    progress: 88,
+    cover: "linear-gradient(180deg, rgba(184,233,72,.14), rgba(0,0,0,.72)), url('./public/assets/yuyu-captured-state.png')"
+  }
 ];
 
 const assets = {
   characters: [
-    { title: "逆袭女主", meta: "写实 / 蓝白球衣", color: "#92b9ff" },
-    { title: "冷面继承人", meta: "商务 / 夜景", color: "#b8e948" },
-    { title: "旁白主持", meta: "知识分享", color: "#54bce6" }
+    { title: "蛋卷 Eggrol", meta: "拉布拉多 / 主体一致性", color: "#d8b46a", image: "./public/assets/story/dog.png" },
+    { title: "云朵 Cloud", meta: "布偶猫 / 表情素材", color: "#9fc5df", image: "./public/assets/story/cat.png" },
+    { title: "旁白主持", meta: "知识分享 / 口播", color: "#54bce6" }
   ],
   scenes: [
-    { title: "豪门走廊", meta: "室内 / 暖光", color: "#c99665" },
-    { title: "沙漠公路", meta: "外景 / 日落", color: "#f0b14c" },
-    { title: "赛博街区", meta: "夜景 / 霓虹", color: "#7867dc" }
+    { title: "电梯内部", meta: "室内 / 冷色金属", color: "#7f8690", image: "./public/assets/story/elevator.png" },
+    { title: "电梯厅走廊", meta: "办公楼 / 现代感", color: "#b5b8ae", image: "./public/assets/story/hall.png" },
+    { title: "会议室", meta: "职场喜剧", color: "#7867dc" }
   ],
   props: [
-    { title: "继承合同", meta: "剧情道具", color: "#e4e4e4" },
-    { title: "复古巴士", meta: "移动场景", color: "#d3985b" },
-    { title: "悬浮岩石", meta: "奇幻元素", color: "#c6a177" }
+    { title: "工作牌", meta: "剧情道具", color: "#e4e4e4" },
+    { title: "便签纸", meta: "反转线索", color: "#ffc33f" },
+    { title: "宠物项圈", meta: "角色识别", color: "#e46abd" }
   ],
   styles: [
     { title: "写实短剧", meta: "高对比 / 近景", color: "#ff8f72" },
-    { title: "国漫质感", meta: "线稿 / 分格", color: "#e46abd" },
+    { title: "轻喜剧质感", meta: "柔光 / 办公室", color: "#b8e948" },
     { title: "广告大片", meta: "慢镜 / 大光比", color: "#ffc33f" }
   ]
 };
+
+const plannerMessages = [
+  { role: "system", title: "设计短片主要场景细节", body: "将剧本转化为详细的镜头语言和动作描述。", steps: ["提取并确认角色设定", "提取并确认场景设定"] },
+  { role: "assistant", title: "YUYU", body: "收到！职场萌宠喜剧第一集即将开机，让我们看看云朵总裁和蛋卷又会闹出什么职场笑话吧。", steps: ["设计角色特征", "调用工具生成角色图", "设计短片主要场景细节", "调用工具生成场景图"] },
+  { role: "user", title: "你", body: "继续做第二集，增加一次电梯门口的反转。", card: "第2集：门口偶遇" },
+  { role: "assistant", title: "YUYU", body: "已补充第二集结构：蛋卷误触电梯开关，云朵以为它在暗中操控全局，最后发现只是项圈卡住按钮。" }
+];
+
+const scriptSections = [
+  {
+    title: "剧本内容",
+    paragraphs: [
+      "电梯门眼看就要合上了，我盯着那道缝隙，后腿猛地发力，像颗炮弹一样冲了过去。尾巴在身后摇成了螺旋桨，总算在金属门彻底闭合前，把湿漉漉的鼻子挤了进去。",
+      "电梯里，云朵正优雅地站在正中央，那一身布偶猫的长毛顺滑得发亮，高冷得像尊冰雕。我拼命收着拉布拉多的大肚子，试图把自己塞进角落，结果一个没站稳，厚实的爪子直接踩在了云朵那条蓬松的大尾巴上。",
+      "就在这时，电梯发出了那声让人绝望的滴。超载警报响得惊天动地。我瞬间僵住，憋红了脸死命缩着肚子，很不得把自己原地缩成一只吉娃娃。云朵一言不发，只用那双蓝宝石般的眼睛缓缓下移，死死盯着我踩在它尾巴上的爪子。"
+    ]
+  },
+  {
+    title: "美术风格",
+    bullets: [
+      "基础画风风格词：影视质感，现代办公室氛围，冷灰金属与暖色宠物形成反差。",
+      "视觉风格描述：采用高保真的影视级写实风格，画面呈现通透、明亮的现代办公空间质感。"
+    ]
+  },
+  {
+    title: "主体列表",
+    bullets: ["蛋卷：笨拙、憨厚且充满活力的拉布拉多，多动但很真诚。", "云朵：高冷、优雅且极具威严的布偶猫，总能用沉默制造笑点。"]
+  },
+  {
+    title: "场景列表",
+    bullets: ["电梯内部：金属墙面、镜面反射、顶部冷光，空间略显局促。", "电梯厅走廊：办公楼走廊，浅灰墙面与地毯，适合角色出场和反转。"]
+  }
+];
 
 const members = [
   { name: "Yuyu", role: "Owner", state: "在线" },
@@ -164,8 +228,8 @@ const members = [
 ];
 
 const usageLedger = [
-  ["视频生成", "-180", "出海短剧 EP01"],
-  ["九宫格图", "-60", "旅行封面"],
+  ["视频生成", "-180", "职场萌宠喜剧 EP01"],
+  ["九宫格图", "-60", "封面拆图"],
   ["多剧集策划", "-40", "短剧漫剧"],
   ["会员补给", "+500", "标准会员"]
 ];
@@ -178,14 +242,31 @@ const featureDetails = {
   panorama: ["720° 全景图", "生成全景空间，用于奇幻、旅行和沉浸式场景。"]
 };
 
+const generatorCopy = {
+  text: "把当前节点扩展成三段镜头说明，包含动作、情绪、景别和转场。",
+  image: "写实。全景，正面拍摄，拉布拉多犬，耳朵下垂，尾巴自然伸展，体型匀称，毛发短而光滑，黄色，姿态端正，眼神平静专注。",
+  video: "将蛋卷冲进电梯、误踩云朵尾巴、超载警报响起三个动作串成 6 秒视频，镜头轻微手持。"
+};
+
+const shotRows = [
+  ["01", "电梯门即将关闭", "推镜", "2.5s"],
+  ["02", "蛋卷冲入电梯", "低机位", "3.0s"],
+  ["03", "误踩云朵尾巴", "特写", "2.0s"],
+  ["04", "超载警报响起", "广角", "3.5s"]
+];
+
 let activeCategory = "overseas";
 let activeAssetTab = "characters";
+let activeLibraryTab = "story";
+let activeStoryFilter = "all";
+let activeEpisode = 1;
 let credits = 5083;
 let toastTimer = 0;
 let generationTimer = 0;
-let zoom = 1;
+let zoom = 0.33;
+let renderScale = 0.72;
 let activeCanvasTool = "select";
-let selectedAsset = "逆袭女主";
+let selectedAsset = "蛋卷 Eggrol";
 
 function escapeHtml(value) {
   return String(value)
@@ -219,13 +300,18 @@ function closeToolPanel() {
 }
 
 function routeTo(name) {
-  if (!$(`[data-view="${name}"]`)) return;
+  const target = $(`[data-view="${name}"]`);
+  if (!target) return;
   $$(".view").forEach(view => view.classList.toggle("active", view.dataset.view === name));
   $$("[data-route]").forEach(button => button.classList.toggle("active", button.dataset.route === name));
   canvasStudio.hidden = true;
   closeModal();
   closeToolPanel();
-  if (name === "projects") renderProjects();
+  if (name === "projects") renderLibrary();
+  if (name === "script") {
+    renderPlannerChat();
+    renderScriptDocument();
+  }
   if (name === "assets") renderAssets();
   if (name === "team") renderTeam();
   if (name === "account") renderAccount();
@@ -242,7 +328,7 @@ function renderTemplates() {
 }
 
 function openToolPanel(toolName) {
-  const tool = tools[toolName];
+  const tool = promptTools[toolName];
   if (!tool) return;
   $$("[data-tool]").forEach(button => {
     button.setAttribute("aria-pressed", String(button.dataset.tool === toolName));
@@ -305,7 +391,7 @@ function showWorkspace(title = categories[activeCategory].title, copy = categori
 
 function startGeneration() {
   const text = promptInput.value.trim();
-  showWorkspace(categories[activeCategory].title, text ? `已接收灵感：“${text}”` : categories[activeCategory].copy, 1);
+  showWorkspace(categories[activeCategory].title, text ? `已接收灵感：${text}` : categories[activeCategory].copy, 1);
   let step = 1;
   window.clearInterval(generationTimer);
   generationTimer = window.setInterval(() => {
@@ -314,22 +400,36 @@ function startGeneration() {
     if (step === 2) workspaceCopy.textContent = "正在抽取角色、场景和道具资产。";
     if (step === 3) workspaceCopy.textContent = "正在生成分镜脚本和镜头调度。";
     if (step >= 4) {
-      workspaceCopy.textContent = "视频任务已进入预览阶段，可进入画布继续编辑。";
+      workspaceCopy.textContent = "视频任务已进入预览阶段，可进入策划或画布继续编辑。";
       setCredits(credits - 80);
       window.clearInterval(generationTimer);
     }
   }, 520);
 }
 
-function renderProjects() {
+function renderLibrary() {
+  $$("[data-library-tab]").forEach(button => button.classList.toggle("active", button.dataset.libraryTab === activeLibraryTab));
+  $$("[data-story-filter]").forEach(button => button.classList.toggle("active", button.dataset.storyFilter === activeStoryFilter));
   const query = $("#projectSearch")?.value?.trim().toLowerCase() || "";
-  const filtered = projects.filter(item => `${item.title}${item.type}${item.status}`.toLowerCase().includes(query));
-  $("#projectBoard").innerHTML = filtered.map(project => `
-    <article class="project-card" data-project="${project.id}">
-      <div class="project-thumb" style="background-image:url('./public/assets/explore/${project.thumb}')"></div>
-      <div class="project-meta"><span>${escapeHtml(project.type)}</span><em>${escapeHtml(project.updated)}</em></div>
-      <h2>${escapeHtml(project.title)}</h2>
-      <div class="status-line"><strong>${escapeHtml(project.status)}</strong><small>${project.progress}%</small></div>
+  const items = storyProjects.filter(item => {
+    const tabOk = item.tab === activeLibraryTab;
+    const filterOk = activeLibraryTab !== "story" || activeStoryFilter === "all" || item.category === activeStoryFilter;
+    const queryOk = `${item.title}${item.subtitle}${item.status}${item.mode}`.toLowerCase().includes(query);
+    return tabOk && filterOk && queryOk;
+  });
+  $("#projectBoard").innerHTML = items.map(project => `
+    <article class="story-card project-card" data-project="${project.id}">
+      <div class="story-cover" style="background:${project.cover}">
+        <div class="story-badges"><span>⌘ ${escapeHtml(project.status)}</span><span>${escapeHtml(project.mode)}</span></div>
+        <p>${escapeHtml(project.subtitle)}</p>
+      </div>
+      <div class="story-foot">
+        <span class="story-icon">▣</span>
+        <div>
+          <h2>${escapeHtml(project.title)}</h2>
+          <small>${escapeHtml(project.updated)}</small>
+        </div>
+      </div>
       <div class="bar"><i style="width:${project.progress}%"></i></div>
       <div class="card-actions">
         <button type="button" data-project-action="continue">继续</button>
@@ -337,7 +437,49 @@ function renderProjects() {
         <button type="button" data-project-action="export">导出</button>
       </div>
     </article>
+  `).join("") || `<p class="empty-state">没有找到匹配内容。</p>`;
+}
+
+function renderPlannerChat() {
+  $("#plannerChat").innerHTML = plannerMessages.map(message => `
+    <article class="planner-message ${message.role}">
+      <div class="message-avatar">${message.role === "assistant" ? "Y" : message.role === "user" ? "你" : "✓"}</div>
+      <div class="message-body">
+        <strong>${escapeHtml(message.title)}</strong>
+        ${message.card ? `<button class="message-card" type="button" data-action="open-canvas">▣ ${escapeHtml(message.card)}</button>` : ""}
+        <p>${escapeHtml(message.body)}</p>
+        ${message.steps ? `<div class="planner-steps">${message.steps.map(step => `<span>✓ ${escapeHtml(step)}</span>`).join("")}</div>` : ""}
+      </div>
+    </article>
   `).join("");
+  const feed = $("#plannerChat");
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function renderScriptDocument() {
+  $("#scriptDocument").innerHTML = scriptSections.map(section => `
+    <section class="doc-section">
+      <h3>${escapeHtml(section.title)}</h3>
+      ${section.paragraphs ? `<div class="doc-block">${section.paragraphs.map(text => `<p>${escapeHtml(text)}</p>`).join("")}</div>` : ""}
+      ${section.bullets ? `<ul>${section.bullets.map(text => `<li>${escapeHtml(text)}</li>`).join("")}</ul>` : ""}
+    </section>
+  `).join("");
+}
+
+function sendPlannerMessage() {
+  const input = $("#plannerInput");
+  const value = input.value.trim();
+  if (!value) {
+    showToast("请输入策划问题");
+    return;
+  }
+  plannerMessages.push({ role: "user", title: "你", body: value });
+  plannerMessages.push({ role: "assistant", title: "YUYU", body: "已收到，我会把这个要求同步到右侧策划文档，并更新画布中的镜头节点。" });
+  scriptSections.unshift({ title: "新增策划要求", bullets: [value, "已同步到画布生成提示词。"] });
+  input.value = "";
+  renderPlannerChat();
+  renderScriptDocument();
+  showToast("策划内容已更新");
 }
 
 function renderAssets() {
@@ -347,7 +489,7 @@ function renderAssets() {
   const items = assets[activeAssetTab] || [];
   $("#assetGrid").innerHTML = items.map((asset, index) => `
     <button class="asset-card ${asset.title === selectedAsset || (!selectedAsset && index === 0) ? "selected" : ""}" type="button" data-asset="${escapeHtml(asset.title)}">
-      <span class="asset-swatch" style="--swatch:${asset.color}"></span>
+      <span class="asset-swatch" style="--swatch:${asset.color};${asset.image ? `background-image:linear-gradient(180deg, rgba(0,0,0,.02), rgba(0,0,0,.34)), url('${asset.image}')` : ""}"></span>
       <strong>${escapeHtml(asset.title)}</strong>
       <small>${escapeHtml(asset.meta)}</small>
     </button>
@@ -365,8 +507,8 @@ function renderTeam() {
   if (!$("#commentFeed").dataset.rendered) {
     $("#commentFeed").innerHTML = [
       "导演：镜头 3 的反转需要更明确。",
-      "编剧：已补充女主内心独白。",
-      "美术：场景色调已统一为暖灰。"
+      "编剧：已补充蛋卷内心独白。",
+      "美术：场景色调已统一为冷灰金属。"
     ].map(text => `<p>${text}</p>`).join("");
     $("#commentFeed").dataset.rendered = "true";
   }
@@ -375,6 +517,14 @@ function renderTeam() {
 function renderAccount() {
   $("#usageLedger").innerHTML = usageLedger.map(row => `
     <div class="ledger-row"><span>${row[0]}</span><strong>${row[1]}</strong><small>${row[2]}</small></div>
+  `).join("");
+}
+
+function renderShotList() {
+  $("#shotList").innerHTML = shotRows.map(row => `
+    <button type="button" data-shot="${row[0]}">
+      <span>${row[0]}</span><strong>${row[1]}</strong><small>${row[2]} · ${row[3]}</small>
+    </button>
   `).join("");
 }
 
@@ -395,7 +545,7 @@ function openModal(kind, data = {}) {
     notifications: {
       kicker: "Notifications",
       title: "通知中心",
-      body: `<div class="modal-list"><p>出海短剧 EP01 已完成 68%</p><p>团队成员 Director 留下 1 条评论</p><p>720° 全景图已可预览</p></div>`,
+      body: `<div class="modal-list"><p>职场萌宠喜剧 EP01 已完成 78%</p><p>团队成员 Director 留下 1 条评论</p><p>720° 全景图已可预览</p></div>`,
       actions: [["全部标为已读", "mark-read"]]
     },
     export: {
@@ -419,13 +569,13 @@ function openModal(kind, data = {}) {
     mentions: {
       kicker: "Mention",
       title: "引用角色",
-      body: `<div class="option-grid"><button>@逆袭女主</button><button>@冷面继承人</button><button>@旁白主持</button><button>@导演视角</button></div>`,
+      body: `<div class="option-grid"><button>@蛋卷</button><button>@云朵</button><button>@旁白主持</button><button>@导演视角</button></div>`,
       actions: [["加入提示词", "apply-mention"]]
     },
     style: {
       kicker: "Style",
       title: "风格控制",
-      body: `<div class="option-grid"><button class="selected">写实短剧</button><button>国漫质感</button><button>广告大片</button><button>赛博夜景</button></div>`,
+      body: `<div class="option-grid"><button class="selected">写实短剧</button><button>轻喜剧质感</button><button>广告大片</button><button>办公冷灰</button></div>`,
       actions: [["应用风格", "apply-style"]]
     }
   };
@@ -437,33 +587,57 @@ function openModal(kind, data = {}) {
   modalLayer.hidden = false;
 }
 
-function openCanvas() {
+function openCanvas(mode = "canvas") {
   closeModal();
   workspacePanel.hidden = true;
   $$(".view").forEach(view => view.classList.remove("active"));
   canvasStudio.hidden = false;
+  setCanvasMode(mode);
   setZoom(zoom);
+  renderShotList();
+}
+
+function setCanvasMode(mode) {
+  if (mode === "script") {
+    canvasStudio.hidden = true;
+    routeTo("script");
+    return;
+  }
+  $$("[data-canvas-mode]").forEach(button => button.classList.toggle("active", button.dataset.canvasMode === mode));
+  editorPanel.hidden = mode !== "editor";
+  $(".graph-surface").classList.toggle("editor-open", mode === "editor");
+  if (mode === "editor") {
+    generatePanel.hidden = true;
+    renderShotList();
+  }
 }
 
 function selectCanvasNode(node) {
   $$(".canvas-node").forEach(item => item.classList.toggle("selected", item === node));
-  $("#inspector h2").textContent = node.querySelector("span").textContent;
-  $("#nodeNameInput").value = node.querySelector("strong").textContent;
-  $("#nodeCopyInput").value = node.querySelector("p").textContent;
+  showToast(`已选择节点：${node.querySelector("span")?.textContent || "视频"}`);
 }
 
 function setZoom(nextZoom) {
-  zoom = Math.min(1.5, Math.max(0.65, Math.round(nextZoom * 100) / 100));
-  canvasPlane.style.transform = `scale(${zoom})`;
-  zoomLabel.textContent = `${Math.round(zoom * 100)}%`;
+  zoom = Math.min(0.9, Math.max(0.22, Math.round(nextZoom * 100) / 100));
+  renderScale = Math.min(1.15, Math.max(0.55, Math.round(zoom * 220) / 100));
+  canvasPlane.style.transform = `scale(${renderScale})`;
+  const label = `${Math.round(zoom * 100)}%`;
+  zoomLabel.textContent = label;
+  bottomZoomLabel.textContent = label;
 }
 
 function resetCanvasLayout() {
   const positions = {
-    prompt: ["120px", "118px"],
-    character: ["108px", "358px"],
-    shots: ["640px", "276px"],
-    video: ["1098px", "458px"]
+    eggro: ["0px", "0px"],
+    cloud: ["0px", "170px"],
+    elevator: ["0px", "360px"],
+    hall: ["0px", "540px"],
+    shot1: ["430px", "140px"],
+    shot2: ["430px", "290px"],
+    shot3: ["430px", "445px"],
+    shot4: ["760px", "155px"],
+    shot5: ["760px", "310px"],
+    shot6: ["760px", "465px"]
   };
   Object.entries(positions).forEach(([id, [x, y]]) => {
     const node = $(`.canvas-node[data-node-id="${id}"]`);
@@ -471,38 +645,93 @@ function resetCanvasLayout() {
     node.style.setProperty("--x", x);
     node.style.setProperty("--y", y);
   });
-  setZoom(1);
+  setZoom(0.33);
 }
 
-function addCanvasNode() {
+function addGeneratedNode(label = "生成视频") {
+  const count = $$(".video-card").length + 1;
   const node = document.createElement("article");
-  node.className = "canvas-node";
-  node.dataset.nodeId = `node-${Date.now()}`;
-  node.style.setProperty("--x", "420px");
-  node.style.setProperty("--y", "120px");
-  node.innerHTML = "<span>新节点</span><strong>创作节点</strong><p>可编辑、选择并加入流程。</p>";
+  node.className = "media-node video-card canvas-node generated-node";
+  node.dataset.nodeId = `generated-${Date.now()}`;
+  node.style.setProperty("--x", `${760 + (count % 2) * 150}px`);
+  node.style.setProperty("--y", `${110 + (count % 4) * 120}px`);
+  node.innerHTML = `<span>${escapeHtml(label)}</span><img src="./public/assets/story/video-elevator-dog.png" alt="" />`;
   canvasPlane.appendChild(node);
   selectCanvasNode(node);
-  showToast("节点已添加");
+  return node;
+}
+
+function openGeneratePanel() {
+  generatePanel.hidden = false;
+  $$("[data-canvas-mode]").forEach(button => button.classList.toggle("active", button.dataset.canvasMode === "canvas"));
+  editorPanel.hidden = true;
+  showToast("生成面板已打开");
+}
+
+function switchGeneratorTab(tab) {
+  $$("[data-generator-tab]").forEach(button => button.classList.toggle("active", button.dataset.generatorTab === tab));
+  $("#generatorPrompt").value = generatorCopy[tab] || generatorCopy.image;
+}
+
+function runGenerator() {
+  const active = $("[data-generator-tab].active")?.dataset.generatorTab || "image";
+  addGeneratedNode(active === "video" ? "生成视频" : active === "text" ? "脚本节点" : "生成图片");
+  setCredits(credits - (active === "video" ? 120 : 30));
+  showToast("已生成新节点");
 }
 
 function handleAction(action) {
   if (action === "close-workspace") workspacePanel.hidden = true;
-  if (action === "continue-workflow" || action === "open-canvas") openCanvas();
-  if (action === "close-canvas") routeTo("explore");
+  if (action === "open-script") routeTo("script");
+  if (action === "open-canvas") openCanvas("canvas");
+  if (action === "close-canvas") routeTo("projects");
   if (action === "model") openModal("model");
   if (action === "assistant") showToast("YUYU 助手已打开");
   if (action === "notifications") openModal("notifications");
-  if (action === "upload-modal" || action === "batch-import") openModal("upload-modal");
+  if (action === "upload-modal" || action === "batch-import" || action === "attach-reference") openModal("upload-modal");
+  if (action === "mention-character") {
+    const input = $("#plannerInput");
+    input.value = `${input.value.trim()} @蛋卷`.trim();
+    input.focus();
+  }
+  if (action === "send-planner") sendPlannerMessage();
+  if (action === "refresh-doc") {
+    renderScriptDocument();
+    showToast("策划文档已刷新");
+  }
+  if (action === "add-episode") {
+    const next = $$(".episode-rail button[data-episode]").length + 1;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.episode = String(next);
+    button.textContent = String(next).padStart(2, "0");
+    $(".episode-rail").insertBefore(button, $('[data-action="add-episode"]'));
+    showToast(`已新增第 ${next} 集`);
+  }
   if (action === "new-project") {
-    projects.unshift({ id: `p${Date.now()}`, title: "新的 YUYU 项目", type: "短剧", status: "草稿", progress: 8, updated: "刚刚", thumb: "feature-effects.png" });
-    renderProjects();
-    showToast("新项目已创建");
+    storyProjects.unshift({
+      id: `story-${Date.now()}`,
+      tab: "story",
+      category: activeStoryFilter === "all" ? "overseas" : activeStoryFilter,
+      title: "新的 YUYU 故事",
+      subtitle: "等待策划内容",
+      status: "草稿",
+      mode: "策划",
+      updated: "刚刚",
+      progress: 8,
+      cover: "linear-gradient(135deg, rgba(184,233,72,.18), rgba(84,188,230,.18))"
+    });
+    activeLibraryTab = "story";
+    renderLibrary();
+    showToast("新故事已创建");
   }
   if (action === "use-selected-asset") {
     showToast(`已加入当前项目：${selectedAsset}`);
     showWorkspace("资产已加入", "选中的角色、场景或风格已绑定到当前生成流程。", 2);
   }
+  if (action === "select-generated") showToast("已选择生成结果");
+  if (action === "run-generator") runGenerator();
+  if (action === "render-preview") openModal("preview");
   if (action === "invite") openModal("invite");
   if (action === "add-comment") {
     const input = $("#commentInput");
@@ -522,40 +751,34 @@ function handleModalAction(action) {
   if (action.includes("upload")) routeTo("assets");
   if (action.includes("export")) setCredits(credits - 20);
   if (action === "apply-mention") {
-    promptInput.value = `${promptInput.value.trim()} @逆袭女主`.trim();
+    promptInput.value = `${promptInput.value.trim()} @蛋卷`.trim();
   }
   showToast("操作已完成");
 }
 
 function handleProjectAction(action, card) {
-  const project = projects.find(item => item.id === card?.dataset.project);
-  if (action === "continue") openCanvas();
+  const project = storyProjects.find(item => item.id === card?.dataset.project);
+  if (action === "continue") {
+    if (project?.tab === "canvas") openCanvas("canvas");
+    else routeTo("script");
+  }
   if (action === "duplicate" && project) {
-    projects.unshift({ ...project, id: `p${Date.now()}`, title: `${project.title} 副本`, updated: "刚刚", status: "草稿", progress: Math.min(project.progress, 20) });
-    renderProjects();
+    storyProjects.unshift({ ...project, id: `copy-${Date.now()}`, title: `${project.title} 副本`, updated: "刚刚", status: "草稿", progress: Math.min(project.progress, 20) });
+    renderLibrary();
     showToast("项目副本已创建");
   }
   if (action === "export") openModal("export", { title: `导出${project?.title || "项目"}` });
 }
 
 function handleCanvasAction(action) {
-  if (action === "add-node") addCanvasNode();
+  if (action === "open-generate") openGeneratePanel();
   if (action === "auto-layout") {
     resetCanvasLayout();
     showToast("画布已自动布局");
   }
-  if (action === "zoom-in") setZoom(zoom + 0.1);
-  if (action === "zoom-out") setZoom(zoom - 0.1);
-  if (action === "preview") openModal("preview");
+  if (action === "zoom-in") setZoom(zoom + 0.05);
+  if (action === "zoom-out") setZoom(zoom - 0.05);
   if (action === "export") openModal("export", { title: "导出视频与项目" });
-  if (action === "apply-node") {
-    const node = $(".canvas-node.selected");
-    if (node) {
-      node.querySelector("strong").textContent = $("#nodeNameInput").value;
-      node.querySelector("p").textContent = $("#nodeCopyInput").value;
-      showToast("节点已更新");
-    }
-  }
 }
 
 document.addEventListener("click", event => {
@@ -608,6 +831,30 @@ document.addEventListener("click", event => {
     return;
   }
 
+  const libraryTab = event.target.closest("[data-library-tab]");
+  if (libraryTab) {
+    activeLibraryTab = libraryTab.dataset.libraryTab;
+    renderLibrary();
+    return;
+  }
+
+  const storyFilter = event.target.closest("[data-story-filter]");
+  if (storyFilter) {
+    activeStoryFilter = storyFilter.dataset.storyFilter;
+    activeLibraryTab = "story";
+    renderLibrary();
+    return;
+  }
+
+  const episode = event.target.closest("[data-episode]");
+  if (episode) {
+    activeEpisode = Number(episode.dataset.episode);
+    $$("[data-episode]").forEach(item => item.classList.toggle("active", item === episode));
+    $("#scriptTitle").textContent = `第${activeEpisode}集：职场萌宠喜剧`;
+    showToast(`已切换到第 ${activeEpisode} 集`);
+    return;
+  }
+
   const assetTab = event.target.closest("[data-asset-tab]");
   if (assetTab) {
     activeAssetTab = assetTab.dataset.assetTab;
@@ -642,6 +889,25 @@ document.addEventListener("click", event => {
     return;
   }
 
+  const canvasMode = event.target.closest("[data-canvas-mode]")?.dataset.canvasMode;
+  if (canvasMode) {
+    setCanvasMode(canvasMode);
+    return;
+  }
+
+  const generatorTab = event.target.closest("[data-generator-tab]")?.dataset.generatorTab;
+  if (generatorTab) {
+    switchGeneratorTab(generatorTab);
+    return;
+  }
+
+  const preset = event.target.closest("[data-generator-preset]")?.dataset.generatorPreset;
+  if (preset) {
+    openGeneratePanel();
+    $("#generatorPrompt").value = `${event.target.textContent}：${generatorCopy.image}`;
+    return;
+  }
+
   const canvasAction = event.target.closest("[data-canvas-action]")?.dataset.canvasAction;
   if (canvasAction) {
     handleCanvasAction(canvasAction);
@@ -673,9 +939,7 @@ document.addEventListener("pointerdown", event => {
   selectCanvasNode(node);
   try {
     node.setPointerCapture(event.pointerId);
-  } catch {
-    // Synthetic browser events used by QA may not own an active pointer.
-  }
+  } catch {}
   const startX = event.clientX;
   const startY = event.clientY;
   const originX = Number.parseFloat(node.style.getPropertyValue("--x")) || 0;
@@ -683,8 +947,8 @@ document.addEventListener("pointerdown", event => {
   node.classList.add("dragging");
 
   function move(moveEvent) {
-    const dx = (moveEvent.clientX - startX) / zoom;
-    const dy = (moveEvent.clientY - startY) / zoom;
+    const dx = (moveEvent.clientX - startX) / renderScale;
+    const dy = (moveEvent.clientY - startY) / renderScale;
     node.style.setProperty("--x", `${originX + dx}px`);
     node.style.setProperty("--y", `${originY + dy}px`);
   }
@@ -707,18 +971,29 @@ $("#seriesToggle").addEventListener("change", event => {
   showToast(event.target.checked ? "已开启多剧集策划" : "已切换为单集创作");
 });
 
-$("#projectSearch").addEventListener("input", renderProjects);
+$("#projectSearch").addEventListener("input", renderLibrary);
+
+$("#plannerInput").addEventListener("keydown", event => {
+  if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+    event.preventDefault();
+    sendPlannerMessage();
+  }
+});
 
 canvasPlane.addEventListener("wheel", event => {
   if (!event.ctrlKey) return;
   event.preventDefault();
-  setZoom(zoom + (event.deltaY > 0 ? -0.08 : 0.08));
+  setZoom(zoom + (event.deltaY > 0 ? -0.04 : 0.04));
 }, { passive: false });
 
 renderTemplates();
 renderWorkflow(1);
-renderProjects();
+renderLibrary();
+renderPlannerChat();
+renderScriptDocument();
 renderAssets();
 renderTeam();
 renderAccount();
+renderShotList();
 setCredits(credits);
+setZoom(zoom);
