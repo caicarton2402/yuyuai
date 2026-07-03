@@ -8,7 +8,7 @@ const root = process.cwd();
 const qaDir = path.join(root, ".qa");
 const outDir = path.join(root, "replica", "responsive");
 const chrome = process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
-const profileDir = path.join(os.tmpdir(), `seko-responsive-profile-${process.pid}`);
+const profileDir = path.join(os.tmpdir(), `yuyu-responsive-profile-${process.pid}`);
 
 const viewports = [
   { width: 1920, height: 1000, name: "desktop-wide" },
@@ -246,8 +246,8 @@ async function screenshot(cdp, filePath) {
   await writeFile(filePath, Buffer.from(result.data, "base64"));
 }
 
-const serverPort = Number(process.env.SEKO_RESPONSIVE_QA_PORT || await findFreePort(5200));
-const debugPort = Number(process.env.SEKO_RESPONSIVE_CDP_PORT || await findFreePort(9390));
+const serverPort = Number(process.env.YUYU_RESPONSIVE_QA_PORT || await findFreePort(5200));
+const debugPort = Number(process.env.YUYU_RESPONSIVE_CDP_PORT || await findFreePort(9390));
 const url = `http://127.0.0.1:${serverPort}/?interactive=1`;
 
 const server = spawnHidden("python", ["-m", "http.server", String(serverPort), "--bind", "127.0.0.1"]);
@@ -295,7 +295,7 @@ try {
     await delay(120);
 
     const state = await evaluate(cdp, viewportSnapshotExpression());
-    const evidence = path.join(outDir, `seko-${viewport.width}x${viewport.height}-${viewport.name}.png`);
+    const evidence = path.join(outDir, `yuyu-${viewport.width}x${viewport.height}-${viewport.name}.png`);
     await screenshot(cdp, evidence);
 
     assertCheck(state.viewport[0] === viewport.width && state.viewport[1] === viewport.height, "Viewport dimensions do not match request", { viewport, state });
@@ -365,10 +365,13 @@ print(json.dumps(stats, indent=2))
       width: item.width,
       height: item.height,
       name: item.name,
-      evidence: item.evidence,
+      evidence: path.relative(root, item.evidence).replace(/\\/g, "/"),
       fit: item.state.cssFit,
       visible: item.state.visible,
-      imageStats: imageStats[index]
+      imageStats: {
+        ...imageStats[index],
+        path: path.relative(root, imageStats[index].path).replace(/\\/g, "/")
+      }
     }))
   };
   await writeFile(path.join(qaDir, "responsive-check.json"), JSON.stringify(result, null, 2), "utf8");

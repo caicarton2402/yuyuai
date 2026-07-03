@@ -48,7 +48,7 @@
       ],
       "images": [
         {
-          "src": "./public/assets/seko-captured-state.png",
+          "src": "./public/assets/yuyu-captured-state.png",
           "complete": true,
           "width": 1920,
           "height": 863
@@ -70,6 +70,12 @@
           "complete": true,
           "width": 506,
           "height": 303
+        },
+        {
+          "src": "./public/assets/yuyu-logo.png",
+          "complete": true,
+          "width": 139,
+          "height": 256
         }
       ],
       "toastVisible": false
@@ -108,7 +114,7 @@
       ],
       "images": [
         {
-          "src": "./public/assets/seko-captured-state.png",
+          "src": "./public/assets/yuyu-captured-state.png",
           "complete": true,
           "width": 1920,
           "height": 863
@@ -130,6 +136,12 @@
           "complete": true,
           "width": 506,
           "height": 303
+        },
+        {
+          "src": "./public/assets/yuyu-logo.png",
+          "complete": true,
+          "width": 139,
+          "height": 256
         }
       ],
       "toastVisible": false
@@ -168,7 +180,7 @@
       ],
       "images": [
         {
-          "src": "./public/assets/seko-captured-state.png",
+          "src": "./public/assets/yuyu-captured-state.png",
           "complete": true,
           "width": 1920,
           "height": 863
@@ -190,6 +202,12 @@
           "complete": true,
           "width": 506,
           "height": 303
+        },
+        {
+          "src": "./public/assets/yuyu-logo.png",
+          "complete": true,
+          "width": 139,
+          "height": 256
         }
       ],
       "toastVisible": true
@@ -222,7 +240,7 @@
           "y": "333px"
         },
         {
-          "id": "prompt-1783075625362",
+          "id": "prompt-1783079047163",
           "x": "820px",
           "y": "182px"
         }
@@ -233,7 +251,7 @@
       ],
       "images": [
         {
-          "src": "./public/assets/seko-captured-state.png",
+          "src": "./public/assets/yuyu-captured-state.png",
           "complete": true,
           "width": 1920,
           "height": 863
@@ -255,6 +273,12 @@
           "complete": true,
           "width": 506,
           "height": 303
+        },
+        {
+          "src": "./public/assets/yuyu-logo.png",
+          "complete": true,
+          "width": 139,
+          "height": 256
         }
       ],
       "toastVisible": true
@@ -287,7 +311,7 @@
           "y": "333px"
         },
         {
-          "id": "prompt-1783075625362",
+          "id": "prompt-1783079047163",
           "x": "820px",
           "y": "182px"
         }
@@ -298,7 +322,7 @@
       ],
       "images": [
         {
-          "src": "./public/assets/seko-captured-state.png",
+          "src": "./public/assets/yuyu-captured-state.png",
           "complete": true,
           "width": 1920,
           "height": 863
@@ -320,6 +344,12 @@
           "complete": true,
           "width": 506,
           "height": 303
+        },
+        {
+          "src": "./public/assets/yuyu-logo.png",
+          "complete": true,
+          "width": 139,
+          "height": 256
         }
       ],
       "toastVisible": true
@@ -352,7 +382,7 @@
           "y": "333px"
         },
         {
-          "id": "prompt-1783075625362",
+          "id": "prompt-1783079047163",
           "x": "820px",
           "y": "182px"
         }
@@ -363,7 +393,7 @@
       ],
       "images": [
         {
-          "src": "./public/assets/seko-captured-state.png",
+          "src": "./public/assets/yuyu-captured-state.png",
           "complete": true,
           "width": 1920,
           "height": 863
@@ -385,6 +415,12 @@
           "complete": true,
           "width": 506,
           "height": 303
+        },
+        {
+          "src": "./public/assets/yuyu-logo.png",
+          "complete": true,
+          "width": 139,
+          "height": 256
         }
       ],
       "toastVisible": true
@@ -417,7 +453,7 @@
           "y": "333px"
         },
         {
-          "id": "prompt-1783075625362",
+          "id": "prompt-1783079047163",
           "x": "820px",
           "y": "182px"
         }
@@ -428,7 +464,7 @@
       ],
       "images": [
         {
-          "src": "./public/assets/seko-captured-state.png",
+          "src": "./public/assets/yuyu-captured-state.png",
           "complete": true,
           "width": 1920,
           "height": 863
@@ -450,6 +486,12 @@
           "complete": true,
           "width": 506,
           "height": 303
+        },
+        {
+          "src": "./public/assets/yuyu-logo.png",
+          "complete": true,
+          "width": 139,
+          "height": 256
         }
       ],
       "toastVisible": true

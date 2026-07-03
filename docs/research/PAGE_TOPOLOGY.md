@@ -1,8 +1,8 @@
-# Seko Canvas Page Topology
+# YUYU Canvas Page Topology
 
-Target URL: `https://seko.sensetime.com/infinite-canvas?canvasId=2072913030502780929`
+Target: captured AI video canvas state customized for the YUYU brand.
 
-Capture basis: `reference/seko-current-viewport.png` at `1920x863`.
+Capture basis: `reference/yuyu-current-viewport.png` at `1920x863`.
 
 ## Global Frame
 
@@ -35,4 +35,3 @@ Capture basis: `reference/seko-current-viewport.png` at `1920x863`.
 - Zoom control updates the canvas scale.
 - Auto layout returns nodes to the captured reference positions.
 - Add control creates a small placeholder prompt node.
-

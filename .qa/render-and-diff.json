@@ -27,14 +27,14 @@
         1920,
         863
       ],
-      "diff": "C:\\Users\\Administrator\\Documents\\复刻视频生成独立站\\seko-sensetime-clone\\diff\\seko-1920x863-top-diff.png",
+      "diff": "diff/yuyu-1920x863-top-diff.png",
       "viewport": [
         1920,
         863
       ],
       "kind": "top",
-      "ref": "C:\\Users\\Administrator\\Documents\\复刻视频生成独立站\\seko-sensetime-clone\\reference\\seko-1920x863-top.png",
-      "rep": "C:\\Users\\Administrator\\Documents\\复刻视频生成独立站\\seko-sensetime-clone\\replica\\seko-1920x863-top.png"
+      "ref": "reference/yuyu-1920x863-top.png",
+      "rep": "replica/yuyu-1920x863-top.png"
     }
   ],
   "interactiveCheck": {
@@ -42,9 +42,9 @@
       1920,
       863
     ],
-    "nonDarkPixels": 329871,
-    "changedFromDefaultPixels": 27901,
-    "maxDeltaFromDefault": 95,
+    "nonDarkPixels": 345131,
+    "changedFromDefaultPixels": 61353,
+    "maxDeltaFromDefault": 153,
     "ok": true
   }
 }

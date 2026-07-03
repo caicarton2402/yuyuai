@@ -3,13 +3,13 @@
     "url": "http://127.0.0.1:5180/",
     "status": 200,
     "type": "text/html",
-    "length": "5390"
+    "length": "5412"
   },
   {
     "url": "http://127.0.0.1:5180/src/styles.css",
     "status": 200,
     "type": "text/css",
-    "length": "9879"
+    "length": "9559"
   },
   {
     "url": "http://127.0.0.1:5180/src/app.js",
@@ -18,10 +18,22 @@
     "length": "7197"
   },
   {
-    "url": "http://127.0.0.1:5180/public/assets/seko-captured-state.png",
+    "url": "http://127.0.0.1:5180/public/assets/yuyu-captured-state.png",
     "status": 200,
     "type": "image/png",
-    "length": "97546"
+    "length": "488679"
+  },
+  {
+    "url": "http://127.0.0.1:5180/public/assets/yuyu-logo.png",
+    "status": 200,
+    "type": "image/png",
+    "length": "30355"
+  },
+  {
+    "url": "http://127.0.0.1:5180/public/assets/yuyu-favicon.png",
+    "status": 200,
+    "type": "image/png",
+    "length": "8232"
   },
   {
     "url": "http://127.0.0.1:5180/public/assets/node-character-snapshot.png",

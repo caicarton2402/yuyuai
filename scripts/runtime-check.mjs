@@ -7,7 +7,7 @@ import path from "node:path";
 const root = process.cwd();
 const qaDir = path.join(root, ".qa");
 const chrome = process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
-const profileDir = path.join(os.tmpdir(), `seko-runtime-profile-${process.pid}`);
+const profileDir = path.join(os.tmpdir(), `yuyu-runtime-profile-${process.pid}`);
 
 await mkdir(qaDir, { recursive: true });
 await rm(profileDir, { recursive: true, force: true });
@@ -242,8 +242,8 @@ async function inspectPage(cdp, url, mode) {
   return { mode, url, state, eventCount: events.length };
 }
 
-const serverPort = Number(process.env.SEKO_RUNTIME_QA_PORT || await findFreePort(5210));
-const debugPort = Number(process.env.SEKO_RUNTIME_CDP_PORT || await findFreePort(9490));
+const serverPort = Number(process.env.YUYU_RUNTIME_QA_PORT || await findFreePort(5210));
+const debugPort = Number(process.env.YUYU_RUNTIME_CDP_PORT || await findFreePort(9490));
 const baseUrl = `http://127.0.0.1:${serverPort}/`;
 
 const server = spawnHidden("python", ["-m", "http.server", String(serverPort), "--bind", "127.0.0.1"]);

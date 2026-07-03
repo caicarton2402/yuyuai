@@ -15,12 +15,14 @@ const required = [
   "scripts/diff_images.py",
   "public/assets/character-card-image.png",
   "public/assets/location-reference-image.png",
-  "public/assets/seko-captured-state.png",
+  "public/assets/yuyu-captured-state.png",
+  "public/assets/yuyu-logo.png",
+  "public/assets/yuyu-favicon.png",
   "public/assets/node-character-snapshot.png",
   "public/assets/node-location-snapshot.png",
   "public/assets/node-video-snapshot.png",
   "public/assets/favicon.svg",
-  "reference/seko-current-viewport.png",
+  "reference/yuyu-current-viewport.png",
   "docs/research/PAGE_TOPOLOGY.md",
   "docs/research/BEHAVIORS.md",
   "docs/research/components/canvas-app.spec.md"
@@ -43,8 +45,9 @@ const responsiveCheck = await readFile(path.join(root, "scripts/responsive-check
 const runtimeCheck = await readFile(path.join(root, "scripts/runtime-check.mjs"), "utf8");
 
 const checks = {
-  hasCanvasTitle: html.includes("未命名故事"),
+  hasCanvasTitle: html.includes("YUYU"),
   hasViolationText: html.includes("生成内容违规"),
+  hasYuyuLogo: html.includes("yuyu-logo.png"),
   hasZoom: html.includes("78%"),
   hasDottedGrid: styles.includes("radial-gradient"),
   hasDragLogic: app.includes("makeDraggable"),

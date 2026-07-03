@@ -7,7 +7,7 @@ import path from "node:path";
 const root = process.cwd();
 const qaDir = path.join(root, ".qa");
 const chrome = process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
-const profileDir = path.join(os.tmpdir(), `seko-interactive-profile-${process.pid}`);
+const profileDir = path.join(os.tmpdir(), `yuyu-interactive-profile-${process.pid}`);
 
 await mkdir(qaDir, { recursive: true });
 await rm(profileDir, { recursive: true, force: true });
@@ -236,8 +236,8 @@ function snapshotExpression() {
   })()`;
 }
 
-const serverPort = Number(process.env.SEKO_INTERACTIVE_QA_PORT || await findFreePort(5190));
-const debugPort = Number(process.env.SEKO_CDP_PORT || await findFreePort(9290));
+const serverPort = Number(process.env.YUYU_INTERACTIVE_QA_PORT || await findFreePort(5190));
+const debugPort = Number(process.env.YUYU_CDP_PORT || await findFreePort(9290));
 const url = `http://127.0.0.1:${serverPort}/?interactive=1`;
 
 const server = spawnHidden("python", ["-m", "http.server", String(serverPort), "--bind", "127.0.0.1"]);
@@ -275,11 +275,15 @@ try {
     deviceScaleFactor: 1,
     mobile: false
   });
-  await delay(600);
+  await waitForCondition(cdp, `document.readyState === "complete"`, 15000);
   await waitForCondition(cdp, `(() => {
     const pixel = document.querySelector(".pixel-underlay");
     return pixel && Number(getComputedStyle(pixel).opacity) <= 0.01;
-  })()`);
+  })()`, 15000);
+  await waitForCondition(cdp, `(() => {
+    const images = [...document.images];
+    return images.length > 0 && images.every(img => img.complete && img.naturalWidth > 0 && img.naturalHeight > 0);
+  })()`, 15000);
 
   const initial = await evaluate(cdp, snapshotExpression());
   assertCheck(initial.readyState === "complete", "Page did not finish loading", initial);

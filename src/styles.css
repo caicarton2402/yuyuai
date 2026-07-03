@@ -230,7 +230,7 @@ svg {
 .brand {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 12px;
   min-width: 0;
 }
 
@@ -240,31 +240,11 @@ svg {
   letter-spacing: 0;
 }
 
-.seko-mark {
-  position: relative;
-  width: 34px;
-  height: 34px;
-}
-
-.seko-mark::before,
-.seko-mark::after {
-  content: "";
-  position: absolute;
-  left: 8px;
-  width: 18px;
-  height: 10px;
-  background: #eef0f2;
-  transform: skewY(-28deg);
-  clip-path: polygon(0 20%, 100% 0, 100% 70%, 0 100%);
-}
-
-.seko-mark::before {
-  top: 5px;
-}
-
-.seko-mark::after {
-  top: 17px;
-  transform: skewY(28deg) scaleX(-1);
+.brand-logo {
+  display: block;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
 }
 
 .mode-switch {

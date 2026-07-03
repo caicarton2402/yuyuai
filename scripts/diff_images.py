@@ -68,6 +68,10 @@ def compare_pair(ref_path, rep_path, diff_path, threshold):
     }
 
 
+def make_report_path(root, value):
+    return os.path.relpath(value, root).replace(os.sep, "/")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Compare breakpoint screenshots for a website clone.")
     parser.add_argument("--root", required=True)
@@ -91,12 +95,24 @@ def main():
             rep_path = os.path.join(args.root, args.rep, filename)
             diff_path = os.path.join(args.root, args.out, f"{args.prefix}-{w}x{h}-{kind}-diff.png")
             if not os.path.exists(ref_path) or not os.path.exists(rep_path):
-                record = {"viewport": [w, h], "kind": kind, "missing": True, "ref": ref_path, "rep": rep_path}
+                record = {
+                    "viewport": [w, h],
+                    "kind": kind,
+                    "missing": True,
+                    "ref": make_report_path(args.root, ref_path),
+                    "rep": make_report_path(args.root, rep_path),
+                }
                 records.append(record)
                 failed = True
                 continue
             record = compare_pair(ref_path, rep_path, diff_path, args.threshold)
-            record.update({"viewport": [w, h], "kind": kind, "ref": ref_path, "rep": rep_path})
+            record.update({
+                "viewport": [w, h],
+                "kind": kind,
+                "diff": make_report_path(args.root, record["diff"]),
+                "ref": make_report_path(args.root, ref_path),
+                "rep": make_report_path(args.root, rep_path),
+            })
             records.append(record)
             if record["sizeMismatch"] or record["changedPixels"]:
                 failed = True
@@ -112,4 +128,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

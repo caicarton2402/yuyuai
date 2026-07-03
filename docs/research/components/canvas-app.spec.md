@@ -3,7 +3,7 @@
 ## Overview
 
 - Target file: `index.html`, `src/styles.css`, `src/app.js`
-- Screenshot: `docs/design-references/seko-current-viewport.png`
+- Screenshot: `docs/design-references/yuyu-current-viewport.png`
 - Interaction model: drag, pan, zoom, click-driven overlay controls
 
 ## Visual Tokens
@@ -50,4 +50,3 @@ The video card is rebuilt as native HTML/CSS to preserve the blocked-state text 
 - Desktop: preserves captured `1920x863` coordinate space.
 - Tablet/mobile: scales the full workspace to fit while keeping the same topology.
 - Controls remain fixed and compact; card text uses ellipsis to avoid overflow.
-

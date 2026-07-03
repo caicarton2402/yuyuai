@@ -16,11 +16,11 @@ The script opens `/?interactive=1` through local HTTP, drives Chrome via CDP, sa
 
 | Viewport | Name | Screenshot | Result |
 | --- | --- | --- | --- |
-| `1920x1000` | desktop-wide | `replica/responsive/seko-1920x1000-desktop-wide.png` | Pass |
-| `1440x1000` | desktop | `replica/responsive/seko-1440x1000-desktop.png` | Pass |
-| `1024x1000` | tablet-landscape | `replica/responsive/seko-1024x1000-tablet-landscape.png` | Pass |
-| `768x1000` | tablet | `replica/responsive/seko-768x1000-tablet.png` | Pass |
-| `375x812` | mobile | `replica/responsive/seko-375x812-mobile.png` | Pass |
+| `1920x1000` | desktop-wide | `replica/responsive/yuyu-1920x1000-desktop-wide.png` | Pass |
+| `1440x1000` | desktop | `replica/responsive/yuyu-1440x1000-desktop.png` | Pass |
+| `1024x1000` | tablet-landscape | `replica/responsive/yuyu-1024x1000-tablet-landscape.png` | Pass |
+| `768x1000` | tablet | `replica/responsive/yuyu-768x1000-tablet.png` | Pass |
+| `375x812` | mobile | `replica/responsive/yuyu-375x812-mobile.png` | Pass |
 
 ## Assertions
 

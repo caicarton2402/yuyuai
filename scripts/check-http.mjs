@@ -4,7 +4,7 @@ import path from "node:path";
 
 const root = process.cwd();
 const qaDir = path.join(root, ".qa");
-const port = Number(process.env.SEKO_QA_PORT || 5180);
+const port = Number(process.env.YUYU_QA_PORT || 5180);
 
 await mkdir(qaDir, { recursive: true });
 
@@ -22,7 +22,9 @@ const urls = [
   "/",
   "/src/styles.css",
   "/src/app.js",
-  "/public/assets/seko-captured-state.png",
+  "/public/assets/yuyu-captured-state.png",
+  "/public/assets/yuyu-logo.png",
+  "/public/assets/yuyu-favicon.png",
   "/public/assets/node-character-snapshot.png",
   "/public/assets/node-location-snapshot.png",
   "/public/assets/node-video-snapshot.png",

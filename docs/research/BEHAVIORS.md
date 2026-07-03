@@ -1,4 +1,4 @@
-# Seko Canvas Behaviors
+# YUYU Canvas Behaviors
 
 ## Capture Notes
 

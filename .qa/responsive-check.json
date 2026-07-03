@@ -6,7 +6,7 @@
       "width": 1920,
       "height": 1000,
       "name": "desktop-wide",
-      "evidence": "C:\\Users\\Administrator\\Documents\\复刻视频生成独立站\\seko-sensetime-clone\\replica\\responsive\\seko-1920x1000-desktop-wide.png",
+      "evidence": "replica/responsive/yuyu-1920x1000-desktop-wide.png",
       "fit": "1.0000",
       "visible": {
         "topbar": true,
@@ -19,20 +19,20 @@
         "account": true
       },
       "imageStats": {
-        "path": "C:\\Users\\Administrator\\Documents\\复刻视频生成独立站\\seko-sensetime-clone\\replica\\responsive\\seko-1920x1000-desktop-wide.png",
+        "path": "replica/responsive/yuyu-1920x1000-desktop-wide.png",
         "size": [
           1920,
           1000
         ],
-        "nonDarkPixels": 339479,
-        "brightPixels": 189558
+        "nonDarkPixels": 339166,
+        "brightPixels": 189214
       }
     },
     {
       "width": 1440,
       "height": 1000,
       "name": "desktop",
-      "evidence": "C:\\Users\\Administrator\\Documents\\复刻视频生成独立站\\seko-sensetime-clone\\replica\\responsive\\seko-1440x1000-desktop.png",
+      "evidence": "replica/responsive/yuyu-1440x1000-desktop.png",
       "fit": "0.7500",
       "visible": {
         "topbar": true,
@@ -45,20 +45,20 @@
         "account": true
       },
       "imageStats": {
-        "path": "C:\\Users\\Administrator\\Documents\\复刻视频生成独立站\\seko-sensetime-clone\\replica\\responsive\\seko-1440x1000-desktop.png",
+        "path": "replica/responsive/yuyu-1440x1000-desktop.png",
         "size": [
           1440,
           1000
         ],
-        "nonDarkPixels": 216135,
-        "brightPixels": 109588
+        "nonDarkPixels": 215822,
+        "brightPixels": 109244
       }
     },
     {
       "width": 1024,
       "height": 1000,
       "name": "tablet-landscape",
-      "evidence": "C:\\Users\\Administrator\\Documents\\复刻视频生成独立站\\seko-sensetime-clone\\replica\\responsive\\seko-1024x1000-tablet-landscape.png",
+      "evidence": "replica/responsive/yuyu-1024x1000-tablet-landscape.png",
       "fit": "0.5333",
       "visible": {
         "topbar": true,
@@ -71,20 +71,20 @@
         "account": true
       },
       "imageStats": {
-        "path": "C:\\Users\\Administrator\\Documents\\复刻视频生成独立站\\seko-sensetime-clone\\replica\\responsive\\seko-1024x1000-tablet-landscape.png",
+        "path": "replica/responsive/yuyu-1024x1000-tablet-landscape.png",
         "size": [
           1024,
           1000
         ],
-        "nonDarkPixels": 135372,
-        "brightPixels": 58124
+        "nonDarkPixels": 135059,
+        "brightPixels": 57780
       }
     },
     {
       "width": 768,
       "height": 1000,
       "name": "tablet",
-      "evidence": "C:\\Users\\Administrator\\Documents\\复刻视频生成独立站\\seko-sensetime-clone\\replica\\responsive\\seko-768x1000-tablet.png",
+      "evidence": "replica/responsive/yuyu-768x1000-tablet.png",
       "fit": "0.4000",
       "visible": {
         "topbar": true,
@@ -97,20 +97,20 @@
         "account": true
       },
       "imageStats": {
-        "path": "C:\\Users\\Administrator\\Documents\\复刻视频生成独立站\\seko-sensetime-clone\\replica\\responsive\\seko-768x1000-tablet.png",
+        "path": "replica/responsive/yuyu-768x1000-tablet.png",
         "size": [
           768,
           1000
         ],
-        "nonDarkPixels": 98431,
-        "brightPixels": 35488
+        "nonDarkPixels": 98118,
+        "brightPixels": 35144
       }
     },
     {
       "width": 375,
       "height": 812,
       "name": "mobile",
-      "evidence": "C:\\Users\\Administrator\\Documents\\复刻视频生成独立站\\seko-sensetime-clone\\replica\\responsive\\seko-375x812-mobile.png",
+      "evidence": "replica/responsive/yuyu-375x812-mobile.png",
       "fit": "0.1953",
       "visible": {
         "topbar": true,
@@ -123,13 +123,13 @@
         "account": false
       },
       "imageStats": {
-        "path": "C:\\Users\\Administrator\\Documents\\复刻视频生成独立站\\seko-sensetime-clone\\replica\\responsive\\seko-375x812-mobile.png",
+        "path": "replica/responsive/yuyu-375x812-mobile.png",
         "size": [
           375,
           812
         ],
-        "nonDarkPixels": 40044,
-        "brightPixels": 10442
+        "nonDarkPixels": 40125,
+        "brightPixels": 10460
       }
     }
   ]

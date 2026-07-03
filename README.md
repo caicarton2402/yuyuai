@@ -1,6 +1,6 @@
-# Seko Sensetime Canvas Clone
+# YUYU AI Video Canvas
 
-Local clone of the captured logged-in Seko infinite-canvas state.
+Local static AI video canvas demo branded as YUYU.
 
 ## Open
 
@@ -32,7 +32,7 @@ This performs:
 - Local HTTP resource checks.
 - Runtime checks for console errors, JavaScript exceptions, network failures, and bad HTTP responses.
 - Chrome headless screenshot at `1936x951`, cropped to the captured `1920x863` reference region.
-- Pixel diff against `reference/seko-1920x863-top.png`.
+- Pixel diff against `reference/yuyu-1920x863-top.png`.
 - Interactive-layer screenshot and nonblank/different-from-default checks.
 - Browser-level DOM interaction regression checks for zoom, mode switch, add node, drag, pan, and auto layout reset.
 - Responsive runtime checks and screenshots at `1920x1000`, `1440x1000`, `1024x1000`, `768x1000`, and `375x812`.

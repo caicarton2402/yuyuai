@@ -6,11 +6,11 @@ const root = process.cwd();
 const chrome = process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const qaDir = path.join(root, ".qa");
 const profileDir = path.join(qaDir, "chrome-headless-profile");
-const widePath = path.join(root, "replica", "seko-local-viewport-wide.png");
-const croppedPath = path.join(root, "replica", "seko-local-viewport.png");
-const namedReplicaPath = path.join(root, "replica", "seko-1920x863-top.png");
-const interactiveWidePath = path.join(root, "replica", "seko-interactive-viewport-wide.png");
-const interactivePath = path.join(root, "replica", "seko-interactive-viewport.png");
+const widePath = path.join(root, "replica", "yuyu-local-viewport-wide.png");
+const croppedPath = path.join(root, "replica", "yuyu-local-viewport.png");
+const namedReplicaPath = path.join(root, "replica", "yuyu-1920x863-top.png");
+const interactiveWidePath = path.join(root, "replica", "yuyu-interactive-viewport-wide.png");
+const interactivePath = path.join(root, "replica", "yuyu-interactive-viewport.png");
 const htmlUrl = new URL(`file:///${path.join(root, "index.html").replace(/\\/g, "/")}`).href;
 const interactiveUrl = `${htmlUrl}?interactive=1`;
 
@@ -58,9 +58,9 @@ const cropScript = `
 from PIL import Image
 from pathlib import Path
 root = Path(r'''${root}''')
-wide = root / 'replica' / 'seko-local-viewport-wide.png'
-cropped = root / 'replica' / 'seko-local-viewport.png'
-named = root / 'replica' / 'seko-1920x863-top.png'
+wide = root / 'replica' / 'yuyu-local-viewport-wide.png'
+cropped = root / 'replica' / 'yuyu-local-viewport.png'
+named = root / 'replica' / 'yuyu-1920x863-top.png'
 im = Image.open(wide)
 im.crop((0, 0, 1920, 863)).save(cropped)
 named.write_bytes(cropped.read_bytes())
@@ -74,7 +74,7 @@ await run("python", [
   "--ref", "reference",
   "--rep", "replica",
   "--out", "diff",
-  "--prefix", "seko",
+  "--prefix", "yuyu",
   "--viewports", "1920x863",
   "--kinds", "top",
   "--threshold", "16",
@@ -88,9 +88,9 @@ from PIL import Image, ImageChops
 from pathlib import Path
 import json
 root = Path(r'''${root}''')
-wide = root / 'replica' / 'seko-interactive-viewport-wide.png'
-out = root / 'replica' / 'seko-interactive-viewport.png'
-ref = root / 'reference' / 'seko-1920x863-top.png'
+wide = root / 'replica' / 'yuyu-interactive-viewport-wide.png'
+out = root / 'replica' / 'yuyu-interactive-viewport.png'
+ref = root / 'reference' / 'yuyu-1920x863-top.png'
 im = Image.open(wide).convert('RGB')
 crop = im.crop((0, 0, 1920, 863))
 crop.save(out)

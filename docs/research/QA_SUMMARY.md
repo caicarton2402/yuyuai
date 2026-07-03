@@ -2,20 +2,20 @@
 
 ## Evidence Files
 
-- Reference screenshot: `reference/seko-current-viewport.png`
-- Replica screenshot: `replica/seko-local-viewport.png`
-- Diff overlay: `diff/seko-1920x863-top-diff.png`
+- Reference screenshot: `reference/yuyu-current-viewport.png`
+- Replica screenshot: `replica/yuyu-local-viewport.png`
+- Diff overlay: `diff/yuyu-1920x863-top-diff.png`
 - Diff report: `diff/report.json`
 - HTTP resource check: `.qa/server-check.json`
 - Runtime check: `.qa/runtime-check.json`
 - Runtime QA notes: `docs/research/RUNTIME_QA.md`
-- Interactive screenshot: `replica/seko-interactive-viewport.png`
+- Interactive screenshot: `replica/yuyu-interactive-viewport.png`
 - Interactive check: `.qa/interactive-check.json`
 - DOM interaction check: `.qa/interactive-dom-check.json`
 - Responsive check: `.qa/responsive-check.json`
 - Responsive screenshots: `replica/responsive/`
 - Responsive QA notes: `docs/research/RESPONSIVE_QA.md`
-- Captured default pixel layer: `public/assets/seko-captured-state.png`
+- Captured default pixel layer: `public/assets/yuyu-captured-state.png`
 
 ## Commands Run
 
@@ -41,7 +41,7 @@ python -m http.server 5180 --bind 127.0.0.1
 Chrome headless render:
 
 ```powershell
-chrome.exe --headless=new --disable-gpu --window-size=1936,951 --screenshot=replica\seko-local-viewport-wide.png index.html
+chrome.exe --headless=new --disable-gpu --window-size=1936,951 --screenshot=replica\yuyu-local-viewport-wide.png index.html
 ```
 
 The `1936x951` render was cropped to the top-left `1920x863` region to match the captured reference screenshot dimensions. Chrome headless on this Windows host reserves a 16px right-side internal viewport gutter when using `1920x951`, so `1936x951` is required for an apples-to-apples `1920x863` comparison.

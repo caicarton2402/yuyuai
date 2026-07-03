@@ -14,7 +14,7 @@
       "mode": "default",
       "url": "http://127.0.0.1:5210/",
       "state": {
-        "title": "Seko - World Class AI Video Generation Platform",
+        "title": "YUYU - AI Video Canvas",
         "readyState": "complete",
         "url": "http://127.0.0.1:5210/",
         "interactiveActive": false,
@@ -23,7 +23,7 @@
         "connectorCount": 2,
         "images": [
           {
-            "src": "./public/assets/seko-captured-state.png",
+            "src": "./public/assets/yuyu-captured-state.png",
             "complete": true,
             "naturalWidth": 1920,
             "naturalHeight": 863
@@ -45,6 +45,12 @@
             "complete": true,
             "naturalWidth": 506,
             "naturalHeight": 303
+          },
+          {
+            "src": "./public/assets/yuyu-logo.png",
+            "complete": true,
+            "naturalWidth": 139,
+            "naturalHeight": 256
           }
         ],
         "scripts": [
@@ -54,13 +60,13 @@
           "http://127.0.0.1:5210/src/styles.css"
         ]
       },
-      "eventCount": 70
+      "eventCount": 85
     },
     {
       "mode": "interactive",
       "url": "http://127.0.0.1:5210/?interactive=1",
       "state": {
-        "title": "Seko - World Class AI Video Generation Platform",
+        "title": "YUYU - AI Video Canvas",
         "readyState": "complete",
         "url": "http://127.0.0.1:5210/?interactive=1",
         "interactiveActive": true,
@@ -69,7 +75,7 @@
         "connectorCount": 2,
         "images": [
           {
-            "src": "./public/assets/seko-captured-state.png",
+            "src": "./public/assets/yuyu-captured-state.png",
             "complete": true,
             "naturalWidth": 1920,
             "naturalHeight": 863
@@ -91,6 +97,12 @@
             "complete": true,
             "naturalWidth": 506,
             "naturalHeight": 303
+          },
+          {
+            "src": "./public/assets/yuyu-logo.png",
+            "complete": true,
+            "naturalWidth": 139,
+            "naturalHeight": 256
           }
         ],
         "scripts": [
@@ -100,7 +112,7 @@
           "http://127.0.0.1:5210/src/styles.css"
         ]
       },
-      "eventCount": 48
+      "eventCount": 53
     }
   ]
 }
