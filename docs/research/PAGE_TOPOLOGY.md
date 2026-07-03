@@ -1,37 +1,47 @@
-# YUYU Canvas Page Topology
+# YUYU Full Site Page Topology
 
-Target: captured AI video canvas state customized for the YUYU brand.
+## Global Shell
 
-Capture basis: `reference/yuyu-current-viewport.png` at `1920x863`.
+- Fixed left navigation on desktop, bottom navigation on mobile.
+- YUYU logo uses `public/assets/yuyu-logo.png`.
+- Account credit pill, notification action, floating YUYU assistant, toast layer, modal layer, and workspace panel are global.
 
-## Global Frame
+## Views
 
-- Full-viewport infinite canvas application.
-- Dark near-black dotted grid background.
-- Fixed overlays sit above the canvas: top bar, left tool rail, minimap, bottom zoom bar, right floating assistant button.
-- Main content is a node graph positioned on a large freeform plane.
+1. Explore
+   - Hero prompt composer.
+   - Four prompt tools: upload, asset, mention, style.
+   - Model selector, multi-episode switch, send action.
+   - Creation category tabs and two templates per category.
+   - Featured function cards for blank canvas, effects, video, grid, and panorama.
 
-## Fixed Overlays
+2. Project Center
+   - Search bar.
+   - New project and open-canvas actions.
+   - Project cards with progress, duplicate, continue, and export actions.
 
-- Top-left brand mark and story title: `未命名故事`.
-- Top-center segmented control: active `画布`, inactive `编辑器`.
-- Top-right account pill: credit value `5980`, membership `标准会员`.
-- Left tool rail: create, folder/assets, actor/reference, prompt/material controls.
-- Bottom-left minimap with `自动布局` pill.
-- Bottom toolbar: view/grid/hand/tools controls, zoom controls showing `78%`, keyboard helper button.
-- Right floating red assistant/language pill.
+3. Asset Center
+   - Asset tabs for characters, scenes, props, and styles.
+   - Upload/import actions.
+   - Selectable asset cards and add-to-project workflow.
 
-## Canvas Nodes
+4. Team Collaboration
+   - Member list.
+   - Invite modal.
+   - Comment feed and approval action.
 
-- Character image node: label starts with `1779931305633_e652q06h_image_imag...`; card has large portrait image with rounded dark border.
-- Location reference node: label `位置参考图`; wide sketch card beneath character card.
-- Video node: label `视频`; black output card showing `生成内容违规`.
-- Two curved connector paths flow from the image/reference nodes into the video node.
+5. Account
+   - Credits, membership tier, generation queue, and team seats.
+   - Usage ledger.
+
+6. Canvas Editor
+   - Full-screen editor overlay.
+   - Tool rail, top actions, node graph surface, inspector, and timeline.
+   - Prompt, character, shot, and video nodes are connected visually.
 
 ## Interaction Model
 
-- Primary model: freeform canvas with draggable cards and zoom/pan affordances.
-- Top segment switches visual mode locally.
-- Zoom control updates the canvas scale.
-- Auto layout returns nodes to the captured reference positions.
-- Add control creates a small placeholder prompt node.
+- Single-page static frontend.
+- Route buttons switch visible views with local state.
+- Primary controls either open a modal, mutate mock data, update the workspace workflow, or open the canvas editor.
+- Canvas nodes can be selected, dragged, edited, zoomed, reset, previewed, and exported.

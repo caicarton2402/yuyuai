@@ -6,3 +6,4 @@ node_modules/
 Thumbs.db
 Desktop.ini
 .qa/chrome-*-profile/
+.qa/preview-server.*

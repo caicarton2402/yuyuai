@@ -1,13 +1,21 @@
-import { spawn } from "node:child_process";
 import { mkdir, rm, writeFile } from "node:fs/promises";
-import net from "node:net";
 import os from "node:os";
 import path from "node:path";
+import {
+  assertCheck,
+  delay,
+  evaluate,
+  findFreePort,
+  launchChrome,
+  removeWithRetry,
+  startStaticServer,
+  stopProcess,
+  waitForCondition
+} from "./browser-helpers.mjs";
 
 const root = process.cwd();
 const qaDir = path.join(root, ".qa");
 const outDir = path.join(root, "replica", "responsive");
-const chrome = process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const profileDir = path.join(os.tmpdir(), `yuyu-responsive-profile-${process.pid}`);
 
 const viewports = [
@@ -21,157 +29,6 @@ const viewports = [
 await mkdir(qaDir, { recursive: true });
 await mkdir(outDir, { recursive: true });
 await rm(profileDir, { recursive: true, force: true });
-
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function findFreePort(start) {
-  for (let port = start; port < start + 80; port += 1) {
-    const available = await new Promise(resolve => {
-      const server = net.createServer();
-      server.once("error", () => resolve(false));
-      server.once("listening", () => server.close(() => resolve(true)));
-      server.listen(port, "127.0.0.1");
-    });
-    if (available) return port;
-  }
-  throw new Error(`No free port found starting at ${start}`);
-}
-
-async function waitForHttp(url, timeoutMs = 10000) {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    try {
-      const response = await fetch(url);
-      if (response.ok) return response;
-    } catch {
-      await delay(200);
-    }
-  }
-  throw new Error(`Timed out waiting for ${url}`);
-}
-
-function spawnHidden(command, args, options = {}) {
-  return spawn(command, args, {
-    cwd: root,
-    stdio: ["ignore", "pipe", "pipe"],
-    windowsHide: true,
-    ...options
-  });
-}
-
-async function stopProcess(child) {
-  if (!child || child.exitCode !== null || child.signalCode !== null) return;
-  await new Promise(resolve => {
-    const timer = setTimeout(resolve, 3000);
-    child.once("exit", () => {
-      clearTimeout(timer);
-      resolve();
-    });
-    child.kill();
-  });
-}
-
-async function removeWithRetry(target) {
-  for (let attempt = 0; attempt < 8; attempt += 1) {
-    try {
-      await rm(target, { recursive: true, force: true });
-      return;
-    } catch {
-      await delay(250);
-    }
-  }
-}
-
-async function collectOutput(child) {
-  let stdout = "";
-  let stderr = "";
-  child.stdout?.on("data", chunk => { stdout += chunk.toString(); });
-  child.stderr?.on("data", chunk => { stderr += chunk.toString(); });
-  return () => ({ stdout, stderr });
-}
-
-class CdpClient {
-  constructor(webSocketUrl) {
-    this.nextId = 1;
-    this.pending = new Map();
-    this.ws = new WebSocket(webSocketUrl);
-  }
-
-  async open() {
-    await new Promise((resolve, reject) => {
-      this.ws.addEventListener("open", resolve, { once: true });
-      this.ws.addEventListener("error", reject, { once: true });
-    });
-    this.ws.addEventListener("message", event => {
-      const message = JSON.parse(event.data);
-      if (!message.id) return;
-      const pending = this.pending.get(message.id);
-      if (!pending) return;
-      this.pending.delete(message.id);
-      if (message.error) pending.reject(new Error(JSON.stringify(message.error)));
-      else pending.resolve(message.result);
-    });
-  }
-
-  send(method, params = {}) {
-    const id = this.nextId++;
-    this.ws.send(JSON.stringify({ id, method, params }));
-    return new Promise((resolve, reject) => {
-      this.pending.set(id, { resolve, reject });
-    });
-  }
-
-  close() {
-    this.ws.close();
-  }
-}
-
-async function getPageWebSocket(debugPort) {
-  const deadline = Date.now() + 10000;
-  while (Date.now() < deadline) {
-    try {
-      const targets = await fetch(`http://127.0.0.1:${debugPort}/json/list`).then(response => response.json());
-      const page = targets.find(target => target.type === "page");
-      if (page?.webSocketDebuggerUrl) return page.webSocketDebuggerUrl;
-    } catch {
-      await delay(200);
-    }
-  }
-  throw new Error("Could not find Chrome page target");
-}
-
-async function evaluate(cdp, expression) {
-  const result = await cdp.send("Runtime.evaluate", {
-    expression,
-    returnByValue: true,
-    awaitPromise: true
-  });
-  if (result.exceptionDetails) {
-    throw new Error(`Runtime.evaluate failed: ${JSON.stringify(result.exceptionDetails)}`);
-  }
-  return result.result.value;
-}
-
-async function waitForCondition(cdp, expression, timeoutMs = 8000) {
-  const deadline = Date.now() + timeoutMs;
-  let lastValue;
-  while (Date.now() < deadline) {
-    lastValue = await evaluate(cdp, expression);
-    if (lastValue) return;
-    await delay(80);
-  }
-  throw new Error(`Timed out waiting for condition: ${expression}; last value: ${JSON.stringify(lastValue)}`);
-}
-
-function assertCheck(condition, message, details = {}) {
-  if (!condition) {
-    const error = new Error(message);
-    error.details = details;
-    throw error;
-  }
-}
 
 const snapshotExpression = `(() => {
   const visible = selector => {
@@ -189,7 +46,8 @@ const snapshotExpression = `(() => {
   };
   return {
     viewport: [window.innerWidth, window.innerHeight],
-    bodyOverflow: getComputedStyle(document.body).overflow,
+    activeView: document.querySelector(".view.active")?.dataset.view || "",
+    horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth + 2,
     visible: {
       hero: visible(".hero"),
       promptBox: visible(".prompt-box"),
@@ -197,18 +55,21 @@ const snapshotExpression = `(() => {
       templates: visible(".template-grid"),
       features: visible(".feature-section"),
       sideNav: visible(".side-nav"),
-      navStack: visible(".nav-stack")
+      navStack: visible(".nav-stack"),
+      projectBoard: visible(".project-board")
     },
     counts: {
       tools: document.querySelectorAll("[data-tool]").length,
       categories: document.querySelectorAll("[data-category]").length,
       templates: document.querySelectorAll("[data-template]").length,
-      features: document.querySelectorAll("[data-feature]").length
+      features: document.querySelectorAll("[data-feature]").length,
+      projects: document.querySelectorAll(".project-card").length
     },
     rects: {
       hero: rect(".hero"),
       prompt: rect(".prompt-box"),
-      featureSection: rect(".feature-section")
+      featureSection: rect(".feature-section"),
+      sideNav: rect(".side-nav")
     }
   };
 })()`;
@@ -226,33 +87,15 @@ const serverPort = Number(process.env.YUYU_RESPONSIVE_QA_PORT || await findFreeP
 const debugPort = Number(process.env.YUYU_RESPONSIVE_CDP_PORT || await findFreePort(9390));
 const url = `http://127.0.0.1:${serverPort}/`;
 
-const server = spawnHidden("python", ["-m", "http.server", String(serverPort), "--bind", "127.0.0.1"]);
-const readServerOutput = await collectOutput(server);
+let server;
+let readServerOutput = () => ({ stdout: "", stderr: "" });
 let chromeProcess;
 let readChromeOutput = () => ({ stdout: "", stderr: "" });
 let cdp;
 
 try {
-  await waitForHttp(url);
-  chromeProcess = spawnHidden(chrome, [
-    "--headless=new",
-    "--disable-gpu",
-    "--no-first-run",
-    "--no-default-browser-check",
-    "--hide-scrollbars",
-    `--user-data-dir=${profileDir}`,
-    `--remote-debugging-port=${debugPort}`,
-    "--window-size=1920,1000",
-    "about:blank"
-  ]);
-  readChromeOutput = await collectOutput(chromeProcess);
-  await waitForHttp(`http://127.0.0.1:${debugPort}/json/version`);
-
-  cdp = new CdpClient(await getPageWebSocket(debugPort));
-  await cdp.open();
-  await cdp.send("Runtime.enable");
-  await cdp.send("Page.enable");
-  await cdp.send("DOM.enable");
+  ({ server, readServerOutput } = await startStaticServer(serverPort));
+  ({ chromeProcess, readChromeOutput, cdp } = await launchChrome(debugPort, profileDir, "1920,1000"));
 
   const results = [];
   for (const viewport of viewports) {
@@ -265,23 +108,33 @@ try {
     await cdp.send("Page.navigate", { url });
     await waitForCondition(cdp, `document.readyState === "complete"`);
     await waitForCondition(cdp, `[...document.images].every(img => img.complete && img.naturalWidth > 0)`);
+    await delay(180);
+
+    const exploreState = await evaluate(cdp, snapshotExpression);
+    const exploreEvidence = path.join(outDir, `yuyu-fullsite-${viewport.width}x${viewport.height}-${viewport.name}-explore.png`);
+    await screenshot(cdp, exploreEvidence);
+
+    assertCheck(exploreState.viewport[0] === viewport.width && exploreState.viewport[1] === viewport.height, "Viewport dimensions do not match request", { viewport, exploreState });
+    assertCheck(!exploreState.horizontalOverflow, "Explore view has horizontal overflow", { viewport, exploreState });
+    assertCheck(exploreState.visible.hero && exploreState.visible.promptBox && exploreState.visible.categories && exploreState.visible.templates && exploreState.visible.features, "Explore sections are not visible", { viewport, exploreState });
+    assertCheck(exploreState.visible.sideNav && exploreState.visible.navStack, "Navigation should be visible at all breakpoints", { viewport, exploreState });
+    assertCheck(exploreState.counts.tools === 4 && exploreState.counts.categories === 4 && exploreState.counts.templates === 2 && exploreState.counts.features === 5, "Explore control counts changed", { viewport, exploreState });
+
+    await evaluate(cdp, `document.querySelector("[data-route='projects']").click()`);
     await delay(160);
+    const projectState = await evaluate(cdp, snapshotExpression);
+    const projectEvidence = path.join(outDir, `yuyu-fullsite-${viewport.width}x${viewport.height}-${viewport.name}-projects.png`);
+    await screenshot(cdp, projectEvidence);
+    assertCheck(projectState.activeView === "projects" && projectState.visible.projectBoard && projectState.counts.projects >= 4, "Projects view is not responsive-ready", { viewport, projectState });
+    assertCheck(!projectState.horizontalOverflow, "Projects view has horizontal overflow", { viewport, projectState });
 
-    const state = await evaluate(cdp, snapshotExpression);
-    const evidence = path.join(outDir, `yuyu-explore-${viewport.width}x${viewport.height}-${viewport.name}.png`);
-    await screenshot(cdp, evidence);
-
-    assertCheck(state.viewport[0] === viewport.width && state.viewport[1] === viewport.height, "Viewport dimensions do not match request", { viewport, state });
-    assertCheck(state.visible.hero && state.visible.promptBox && state.visible.categories && state.visible.templates && state.visible.features, "Required explore sections are not visible", { viewport, state });
-    assertCheck(state.counts.tools === 4 && state.counts.categories === 4 && state.counts.templates === 2 && state.counts.features === 5, "Required control counts changed", { viewport, state });
-    if (viewport.width <= 760) {
-      assertCheck(state.visible.sideNav && !state.visible.navStack, "Mobile should keep logo rail but hide expanded nav stack", { viewport, state });
-      assertCheck(state.bodyOverflow !== "hidden", "Mobile should allow page scrolling", { viewport, state });
-    } else {
-      assertCheck(state.visible.sideNav && state.visible.navStack, "Desktop/tablet should keep side navigation visible", { viewport, state });
-    }
-
-    results.push({ ...viewport, evidence, state });
+    results.push({
+      ...viewport,
+      exploreEvidence: path.relative(root, exploreEvidence).replace(/\\/g, "/"),
+      projectEvidence: path.relative(root, projectEvidence).replace(/\\/g, "/"),
+      exploreState,
+      projectState
+    });
   }
 
   const result = {
@@ -291,9 +144,10 @@ try {
       width: item.width,
       height: item.height,
       name: item.name,
-      evidence: path.relative(root, item.evidence).replace(/\\/g, "/"),
-      visible: item.state.visible,
-      counts: item.state.counts
+      exploreEvidence: item.exploreEvidence,
+      projectEvidence: item.projectEvidence,
+      exploreVisible: item.exploreState.visible,
+      projectCount: item.projectState.counts.projects
     }))
   };
   await writeFile(path.join(qaDir, "responsive-check.json"), JSON.stringify(result, null, 2), "utf8");

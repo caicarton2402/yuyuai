@@ -3,126 +3,287 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>YUYU - AI Explore</title>
+    <meta
+      name="description"
+      content="YUYU AI video creation studio frontend demo with explore, projects, assets, team, account, and canvas workflows."
+    />
+    <title>YUYU - AI Video Studio</title>
     <link rel="icon" href="./public/assets/yuyu-favicon.png" type="image/png" />
     <link rel="stylesheet" href="./src/styles.css" />
   </head>
   <body>
-    <main class="explore-shell" aria-label="YUYU AI explore">
+    <main class="app-shell" aria-label="YUYU AI video studio">
       <div class="ambient-bg" aria-hidden="true"></div>
 
       <aside class="side-nav" aria-label="YUYU navigation">
-        <a class="mini-brand" href="./index.html" aria-label="YUYU home">
-          <img src="./public/assets/yuyu-logo.png" alt="" width="28" height="34" />
+        <a class="mini-brand active" href="#explore" data-route="explore" aria-label="YUYU home">
+          <img src="./public/assets/yuyu-logo.png" alt="YUYU" width="34" height="34" />
         </a>
+
         <nav class="nav-stack" aria-label="primary">
-          <button class="active" type="button" title="首页" data-nav="home">
+          <button class="active" type="button" title="首页" data-route="explore">
             <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 9.2 10 4l6.5 5.2v7.1H12v-4.6H8v4.6H3.5z" /></svg>
           </button>
-          <button type="button" title="项目" data-nav="projects">
+          <button type="button" title="项目" data-route="projects">
             <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.8 6.2h5l1.5 1.6h7.9v7.1a1.5 1.5 0 0 1-1.5 1.5H4.3a1.5 1.5 0 0 1-1.5-1.5zM2.8 5.7v-.8a1.5 1.5 0 0 1 1.5-1.5h3.2l1.8 2.3" /></svg>
           </button>
-          <button type="button" title="灵感" data-nav="ideas">
-            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10.3 3.4a6.1 6.1 0 0 0-3 11.4v1.7h5.4v-1.7A6.1 6.1 0 0 0 10.3 3.4ZM8.2 18h3.6M13.8 4.3l1.8-1.8M16.1 8h2.2M14.8 12.2l1.8 1.8" /></svg>
+          <button type="button" title="资产" data-route="assets">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.8 16 6v7.2l-6 4-6-4V6zM4 6l6 3.4L16 6M10 9.4v7.8" /></svg>
           </button>
-          <button type="button" title="团队" data-nav="team">
+          <button type="button" title="团队" data-route="team">
             <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8.3 10.2a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.4 17a4.9 4.9 0 0 1 9.8 0M14.2 6.4a2.4 2.4 0 0 1 0 4.8M14.8 13.1a4.1 4.1 0 0 1 2.8 3.9" /></svg>
           </button>
+          <button type="button" title="账户" data-route="account">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 10.2a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM4.7 17a5.3 5.3 0 0 1 10.6 0" /></svg>
+          </button>
         </nav>
+
         <div class="account-stack">
-          <div class="mascot">YUYU</div>
-          <div class="credit-pill"><strong>5083</strong><span>标准会员</span></div>
-          <button class="avatar-btn" type="button" title="账户"></button>
-          <button type="button" title="通知"><svg viewBox="0 0 20 20"><path d="M6 15.4h8M7.1 8.4a3 3 0 0 1 6 0c0 4 1.6 4.7 1.6 6H5.5c0-1.3 1.6-2 1.6-6ZM8.7 17a1.5 1.5 0 0 0 2.6 0" /></svg></button>
-          <button type="button" title="更多"><svg viewBox="0 0 20 20"><path d="M5 6h10M5 10h10M5 14h10" /></svg></button>
+          <button class="credit-pill" type="button" data-route="account">
+            <strong id="creditCount">5083</strong>
+            <span>标准会员</span>
+          </button>
+          <button class="avatar-btn" type="button" title="账户" data-route="account"></button>
+          <button type="button" title="通知" data-action="notifications">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 15.4h8M7.1 8.4a3 3 0 0 1 6 0c0 4 1.6 4.7 1.6 6H5.5c0-1.3 1.6-2 1.6-6ZM8.7 17a1.5 1.5 0 0 0 2.6 0" /></svg>
+          </button>
+          <button type="button" title="更多" data-action="more">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 6h10M5 10h10M5 14h10" /></svg>
+          </button>
         </div>
       </aside>
 
-      <button class="float-translator" type="button" data-action="translator" title="语言助手">
-        <span>译</span>
+      <button class="float-assistant" type="button" data-action="assistant" title="YUYU 助手">
+        <span>Y</span>
       </button>
 
-      <section class="hero" aria-labelledby="heroTitle">
-        <h1 id="heroTitle">有什么新的故事灵感?</h1>
+      <section class="view explore-view active" data-view="explore" aria-labelledby="heroTitle">
+        <div class="hero">
+          <h1 id="heroTitle">有什么新的故事灵感？</h1>
 
-        <section class="prompt-box" aria-label="story prompt composer">
-          <div class="prompt-textline">
-            <button class="prompt-prefix" type="button" id="promptPrefix">短剧漫剧 /</button>
-            <textarea id="promptInput" rows="2" placeholder="输入你的灵感，AI 会为你自动策划内容生成视频"></textarea>
-          </div>
+          <section class="prompt-box" aria-label="story prompt composer">
+            <div class="prompt-textline">
+              <button class="prompt-prefix" type="button" id="promptPrefix">出海短剧 /</button>
+              <textarea id="promptInput" rows="2" placeholder="输入你的灵感，YUYU 会自动策划内容并生成视频工作流"></textarea>
+            </div>
 
-          <div class="prompt-controls">
-            <div class="tool-cluster" role="toolbar" aria-label="prompt tools">
-              <button type="button" data-tool="upload" aria-pressed="false" title="上传素材">
-                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7.2 10.8 4.9-4.9a2.1 2.1 0 0 1 3 3l-6.4 6.4a3.4 3.4 0 0 1-4.8-4.8l6.8-6.8" /></svg>
+            <div class="prompt-controls">
+              <div class="tool-cluster" role="toolbar" aria-label="prompt tools">
+                <button type="button" data-tool="upload" aria-pressed="false" title="上传素材">
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m7.2 10.8 4.9-4.9a2.1 2.1 0 0 1 3 3l-6.4 6.4a3.4 3.4 0 0 1-4.8-4.8l6.8-6.8" /></svg>
+                </button>
+                <button type="button" data-tool="asset" aria-pressed="false" title="角色和场景资产">
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.8 16 6v7.2l-6 4-6-4V6zM4 6l6 3.4L16 6M10 9.4v7.8" /></svg>
+                </button>
+                <button type="button" data-tool="mention" aria-pressed="false" title="引用角色">
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13.4 8.7v2a3.4 3.4 0 1 1-1.2-2.6v3.2a2.1 2.1 0 0 0 4.2 0V10a6.4 6.4 0 1 0-2.3 4.9" /></svg>
+                </button>
+                <button type="button" data-tool="style" aria-pressed="false" title="风格控制">
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3.2a6.8 6.8 0 0 0 0 13.6h.7a1.5 1.5 0 0 0 .8-2.8 1.1 1.1 0 0 1 .7-2h1.2a3.4 3.4 0 0 0 0-6.8zM6.8 9.2h.1M9 6.8h.1M12.2 7.2h.1M5.9 12.2H6" /></svg>
+                </button>
+              </div>
+
+              <button class="model-pill" type="button" data-action="model">
+                YUYU Video 2.0 全能模式 <small>NEW</small>
               </button>
-              <button type="button" data-tool="asset" aria-pressed="false" title="角色和场景资产">
-                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.8 16 6v7.2l-6 4-6-4V6zM4 6l6 3.4L16 6M10 9.4v7.8" /></svg>
-              </button>
-              <button type="button" data-tool="mention" aria-pressed="false" title="引用角色">
-                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13.4 8.7v2a3.4 3.4 0 1 1-1.2-2.6v3.2a2.1 2.1 0 0 0 4.2 0V10a6.4 6.4 0 1 0-2.3 4.9" /></svg>
-              </button>
-              <button type="button" data-tool="style" aria-pressed="false" title="风格控制">
-                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3.2a6.8 6.8 0 0 0 0 13.6h.7a1.5 1.5 0 0 0 .8-2.8 1.1 1.1 0 0 1 .7-2h1.2a3.4 3.4 0 0 0 0-6.8zM6.8 9.2h.1M9 6.8h.1M12.2 7.2h.1M5.9 12.2H6" /></svg>
+
+              <label class="series-switch">
+                <span>多剧集</span>
+                <input type="checkbox" id="seriesToggle" />
+                <i aria-hidden="true"></i>
+              </label>
+
+              <button class="send-btn" id="sendBtn" type="button" title="开始生成">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 16V4M5.8 8.2 10 4l4.2 4.2" /></svg>
               </button>
             </div>
 
-            <button class="model-pill" type="button" data-action="model">
-              Seedance2.0 全能模式 <small>NEW</small>
+            <div class="tool-panel" id="toolPanel" hidden></div>
+          </section>
+
+          <nav class="category-tabs" aria-label="creation categories">
+            <button class="active" type="button" data-category="overseas"><span class="tab-icon lime">剧</span>出海短剧</button>
+            <button type="button" data-category="comic"><span class="tab-icon pink">漫</span>短剧漫剧</button>
+            <button type="button" data-category="mv"><span class="tab-icon purple">MV</span>音乐 MV <small>Beta</small></button>
+            <button type="button" data-category="knowledge"><span class="tab-icon cyan">知</span>知识分享</button>
+          </nav>
+
+          <div class="template-grid" id="templateGrid" aria-label="prompt templates"></div>
+        </div>
+
+        <section class="feature-section" aria-labelledby="featureTitle">
+          <h2 id="featureTitle">特色功能</h2>
+          <div class="feature-row">
+            <button class="feature-card blank" type="button" data-feature="blank">
+              <span class="plus">+</span>
+              <strong>空白画布</strong>
             </button>
-
-            <label class="series-switch">
-              <span>多剧集</span>
-              <input type="checkbox" id="seriesToggle" />
-              <i aria-hidden="true"></i>
-            </label>
-
-            <button class="send-btn" id="sendBtn" type="button" title="开始生成">
-              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 16V4M5.8 8.2 10 4l4.2 4.2" /></svg>
+            <button class="feature-card image-card" type="button" data-feature="effects">
+              <img src="./public/assets/explore/feature-effects.png" alt="" />
+              <em>New</em>
+              <strong>特效模板</strong>
+            </button>
+            <button class="feature-card image-card" type="button" data-feature="video">
+              <img src="./public/assets/explore/feature-seedance.png" alt="" />
+              <em>New</em>
+              <strong>YUYU 视频生成</strong>
+            </button>
+            <button class="feature-card image-card" type="button" data-feature="grid">
+              <img src="./public/assets/explore/feature-grid.png" alt="" />
+              <em>New</em>
+              <strong>九宫格图</strong>
+            </button>
+            <button class="feature-card image-card" type="button" data-feature="panorama">
+              <img src="./public/assets/explore/feature-panorama.png" alt="" />
+              <em>New</em>
+              <strong>720° 全景图</strong>
             </button>
           </div>
-
-          <div class="tool-panel" id="toolPanel" hidden></div>
         </section>
-
-        <nav class="category-tabs" aria-label="creation categories">
-          <button class="active" type="button" data-category="overseas"><span class="tab-icon lime">▣</span>出海短剧</button>
-          <button type="button" data-category="comic"><span class="tab-icon pink">♫</span>短剧漫剧</button>
-          <button type="button" data-category="mv"><span class="tab-icon purple">♪</span>音乐MV <small>Beta</small></button>
-          <button type="button" data-category="knowledge"><span class="tab-icon cyan">▤</span>知识分享</button>
-        </nav>
-
-        <div class="template-grid" id="templateGrid" aria-label="prompt templates"></div>
       </section>
 
-      <section class="feature-section" aria-labelledby="featureTitle">
-        <h2 id="featureTitle">特色功能</h2>
-        <div class="feature-row">
-          <button class="feature-card blank" type="button" data-feature="blank">
-            <span class="plus">+</span>
-            <strong>空白画布</strong>
-          </button>
-          <button class="feature-card image-card" type="button" data-feature="effects">
-            <img src="./public/assets/explore/feature-effects.png" alt="" />
-            <em>New</em>
-            <strong>特效模板</strong>
-          </button>
-          <button class="feature-card image-card" type="button" data-feature="seedance">
-            <img src="./public/assets/explore/feature-seedance.png" alt="" />
-            <em>New</em>
-            <strong>Seedance2.0 视频生成</strong>
-          </button>
-          <button class="feature-card image-card" type="button" data-feature="grid">
-            <img src="./public/assets/explore/feature-grid.png" alt="" />
-            <em>New</em>
-            <strong>九宫格图</strong>
-          </button>
-          <button class="feature-card image-card" type="button" data-feature="panorama">
-            <img src="./public/assets/explore/feature-panorama.png" alt="" />
-            <em>New</em>
-            <strong>720°全景图</strong>
-          </button>
+      <section class="view console-view" data-view="projects" aria-labelledby="projectsTitle">
+        <div class="view-head">
+          <span class="eyebrow">Project Center</span>
+          <h1 id="projectsTitle">项目中心</h1>
+          <p>管理短剧、MV、知识视频和全景项目，所有操作都在前端模拟状态中完成。</p>
         </div>
+        <div class="console-toolbar">
+          <label class="search-field">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m14.2 14.2 3.1 3.1M8.8 15.1a6.3 6.3 0 1 1 0-12.6 6.3 6.3 0 0 1 0 12.6Z" /></svg>
+            <input id="projectSearch" type="search" placeholder="搜索项目、角色、题材" />
+          </label>
+          <button class="secondary-action" type="button" data-action="new-project">新建项目</button>
+          <button class="primary-action compact" type="button" data-action="open-canvas">进入画布</button>
+        </div>
+        <div class="project-board" id="projectBoard"></div>
+      </section>
+
+      <section class="view console-view" data-view="assets" aria-labelledby="assetsTitle">
+        <div class="view-head">
+          <span class="eyebrow">Asset Center</span>
+          <h1 id="assetsTitle">资产中心</h1>
+          <p>集中管理角色、场景、道具、风格参考和上传素材。</p>
+        </div>
+        <nav class="asset-tabs" aria-label="asset tabs">
+          <button class="active" type="button" data-asset-tab="characters">角色</button>
+          <button type="button" data-asset-tab="scenes">场景</button>
+          <button type="button" data-asset-tab="props">道具</button>
+          <button type="button" data-asset-tab="styles">风格</button>
+        </nav>
+        <div class="asset-actions">
+          <button class="secondary-action" type="button" data-action="upload-modal">上传素材</button>
+          <button class="secondary-action" type="button" data-action="batch-import">批量导入</button>
+          <button class="primary-action compact" type="button" data-action="use-selected-asset">加入当前项目</button>
+        </div>
+        <div class="asset-grid" id="assetGrid"></div>
+      </section>
+
+      <section class="view console-view" data-view="team" aria-labelledby="teamTitle">
+        <div class="view-head">
+          <span class="eyebrow">Collaboration</span>
+          <h1 id="teamTitle">团队协作</h1>
+          <p>模拟邀请、权限、评论和审批流程，让前端操作形成完整闭环。</p>
+        </div>
+        <div class="team-layout">
+          <section class="panel-card">
+            <h2>成员</h2>
+            <div class="member-list" id="memberList"></div>
+            <button class="secondary-action full" type="button" data-action="invite">邀请成员</button>
+          </section>
+          <section class="panel-card">
+            <h2>评论流</h2>
+            <div class="comment-feed" id="commentFeed"></div>
+            <label class="comment-box">
+              <input id="commentInput" type="text" placeholder="给团队留一条反馈" />
+              <button type="button" data-action="add-comment">发送</button>
+            </label>
+          </section>
+          <section class="panel-card">
+            <h2>审批</h2>
+            <div class="approval-card">
+              <span>待审版本</span>
+              <strong>出海短剧 EP01 v3</strong>
+              <small>镜头 12 处已完成，等待导演确认。</small>
+            </div>
+            <button class="primary-action full" type="button" data-action="approve-version">批准版本</button>
+          </section>
+        </div>
+      </section>
+
+      <section class="view console-view" data-view="account" aria-labelledby="accountTitle">
+        <div class="view-head">
+          <span class="eyebrow">Account</span>
+          <h1 id="accountTitle">账户与会员</h1>
+          <p>展示积分、会员、用量和通知中心，并与全站功能联动。</p>
+        </div>
+        <div class="account-grid">
+          <section class="metric-card"><span>剩余积分</span><strong id="accountCredits">5083</strong><small>今日已使用 320 点</small></section>
+          <section class="metric-card"><span>会员等级</span><strong>标准会员</strong><small>支持高清预览和多剧集策划</small></section>
+          <section class="metric-card"><span>生成队列</span><strong id="queueCount">3</strong><small>2 个视频，1 个九宫格</small></section>
+          <section class="metric-card"><span>团队席位</span><strong>4 / 8</strong><small>可继续邀请 4 人</small></section>
+        </div>
+        <div class="ledger-panel">
+          <h2>用量记录</h2>
+          <div id="usageLedger" class="usage-ledger"></div>
+        </div>
+      </section>
+
+      <section class="canvas-studio" id="canvasStudio" hidden aria-label="YUYU canvas editor">
+        <header class="canvas-topbar">
+          <button type="button" data-action="close-canvas">返回</button>
+          <strong>YUYU 画布编辑器</strong>
+          <div class="canvas-actions">
+            <button type="button" data-canvas-action="add-node">添加节点</button>
+            <button type="button" data-canvas-action="auto-layout">自动布局</button>
+            <button type="button" data-canvas-action="zoom-out">-</button>
+            <span id="zoomLabel">100%</span>
+            <button type="button" data-canvas-action="zoom-in">+</button>
+            <button class="primary-action compact" type="button" data-canvas-action="preview">预览</button>
+            <button class="primary-action compact" type="button" data-canvas-action="export">导出</button>
+          </div>
+        </header>
+        <aside class="canvas-tools">
+          <button class="active" type="button" data-canvas-tool="select">选择</button>
+          <button type="button" data-canvas-tool="prompt">提示词</button>
+          <button type="button" data-canvas-tool="character">角色</button>
+          <button type="button" data-canvas-tool="scene">场景</button>
+          <button type="button" data-canvas-tool="video">视频</button>
+        </aside>
+        <div class="canvas-surface" id="canvasSurface">
+          <div class="canvas-plane" id="canvasPlane">
+            <svg class="canvas-lines" viewBox="0 0 1280 720" aria-hidden="true">
+              <path d="M326 180 C470 180 498 338 640 338" />
+              <path d="M326 420 C480 420 500 338 640 338" />
+              <path d="M848 338 C960 338 986 518 1098 518" />
+            </svg>
+            <article class="canvas-node prompt-node selected" data-node-id="prompt" style="--x:120px;--y:118px">
+              <span>故事提示词</span><strong>出海短剧第一集</strong><p>误入继承人争夺战，三场反转对话推进剧情。</p>
+            </article>
+            <article class="canvas-node character-node" data-node-id="character" style="--x:108px;--y:358px">
+              <span>角色资产</span><strong>女主 / 反派 / 导演</strong><p>保持人物设定和服装一致。</p>
+            </article>
+            <article class="canvas-node shot-node" data-node-id="shots" style="--x:640px;--y:276px">
+              <span>分镜脚本</span><strong>12 个镜头</strong><p>对白、景别、节奏、转场已生成。</p>
+            </article>
+            <article class="canvas-node video-node" data-node-id="video" style="--x:1098px;--y:458px">
+              <span>视频预览</span><strong>00:42</strong><p>可预览、重生成或导出。</p>
+            </article>
+          </div>
+        </div>
+        <aside class="inspector" id="inspector">
+          <span class="eyebrow">Inspector</span>
+          <h2>故事提示词</h2>
+          <label>节点名称<input id="nodeNameInput" value="出海短剧第一集" /></label>
+          <label>内容<textarea id="nodeCopyInput">误入继承人争夺战，三场反转对话推进剧情。</textarea></label>
+          <button class="primary-action full" type="button" data-canvas-action="apply-node">应用修改</button>
+        </aside>
+        <footer class="timeline">
+          <button type="button" data-shot="1">01 开场</button>
+          <button type="button" data-shot="2">02 冲突</button>
+          <button type="button" data-shot="3">03 反转</button>
+          <button type="button" data-shot="4">04 悬念</button>
+        </footer>
       </section>
 
       <aside class="workspace-panel" id="workspacePanel" hidden aria-live="polite">
@@ -130,14 +291,20 @@
         <span class="panel-kicker">YUYU 工作台</span>
         <h2 id="workspaceTitle">出海短剧项目已创建</h2>
         <p id="workspaceCopy">选择模板或输入灵感后，系统会拆解角色、场景、分镜与视频生成任务。</p>
-        <ol class="workflow-list">
-          <li class="done"><span>1</span><strong>故事策划</strong><small>题材、受众和冲突线</small></li>
-          <li><span>2</span><strong>角色资产</strong><small>主角、配角、服化道</small></li>
-          <li><span>3</span><strong>分镜生成</strong><small>镜头脚本和节奏</small></li>
-          <li><span>4</span><strong>视频成片</strong><small>Seedance 生成预览</small></li>
-        </ol>
+        <ol class="workflow-list" id="workflowList"></ol>
+        <div class="progress-track"><i id="workflowProgress"></i></div>
         <button class="primary-action" type="button" data-action="continue-workflow">进入画布</button>
       </aside>
+
+      <section class="modal-layer" id="modalLayer" hidden aria-live="polite">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+          <button class="modal-close" type="button" data-action="close-modal" title="关闭">×</button>
+          <span class="eyebrow" id="modalKicker">YUYU</span>
+          <h2 id="modalTitle">标题</h2>
+          <div id="modalBody"></div>
+          <div class="modal-actions" id="modalActions"></div>
+        </div>
+      </section>
 
       <div class="toast" id="toast" role="status" aria-live="polite"></div>
     </main>

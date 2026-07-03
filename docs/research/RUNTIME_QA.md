@@ -1,33 +1,11 @@
 # Runtime QA
 
-## Scope
+`scripts/runtime-check.mjs` launches a local static server and a clean headless Chrome profile. It verifies:
 
-This pass verifies the local clone is clean at runtime, not only visually correct in screenshots.
-
-## Command
-
-```powershell
-npm.cmd run qa:runtime
-```
-
-The script starts a local HTTP server, opens Chrome through CDP, and inspects both:
-
-- `/`
-- `/?interactive=1`
-
-## Assertions
-
-- No `console.error` events.
-- No JavaScript runtime exceptions.
-- No network loading failures.
-- No `4xx` or `5xx` HTTP responses.
-- Required images load with nonzero natural dimensions.
-- Canvas nodes initialize.
-- Connector paths initialize.
-
-## Latest Result
-
-- `ok`: `true`
-- Default page: `pixelOpacity` is `1`, three nodes, two connector paths.
-- Interactive page: `pixelOpacity` is `0`, three nodes, two connector paths.
-- Report: `.qa/runtime-check.json`
+- YUYU branding is present.
+- Original source-site branding is not visible in served HTML/CSS/JS runtime text.
+- Explore starts as the active view.
+- Route, prompt tool, category, template, feature, project, asset, team, and ledger modules render.
+- Canvas and modal layers start hidden.
+- Images load with nonzero dimensions.
+- Console errors, runtime exceptions, failed requests, and HTTP 400+ responses are absent.

@@ -1,170 +1,27 @@
-import { spawn } from "node:child_process";
 import { mkdir, rm, writeFile } from "node:fs/promises";
-import net from "node:net";
 import os from "node:os";
 import path from "node:path";
+import {
+  assertCheck,
+  delay,
+  evaluate,
+  findFreePort,
+  launchChrome,
+  removeWithRetry,
+  startStaticServer,
+  stopProcess,
+  waitForCondition
+} from "./browser-helpers.mjs";
 
 const root = process.cwd();
 const qaDir = path.join(root, ".qa");
-const chrome = process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const profileDir = path.join(os.tmpdir(), `yuyu-interactive-profile-${process.pid}`);
 
 await mkdir(qaDir, { recursive: true });
 await rm(profileDir, { recursive: true, force: true });
 
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function findFreePort(start) {
-  for (let port = start; port < start + 80; port += 1) {
-    const available = await new Promise(resolve => {
-      const server = net.createServer();
-      server.once("error", () => resolve(false));
-      server.once("listening", () => server.close(() => resolve(true)));
-      server.listen(port, "127.0.0.1");
-    });
-    if (available) return port;
-  }
-  throw new Error(`No free port found starting at ${start}`);
-}
-
-async function waitForHttp(url, timeoutMs = 10000) {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    try {
-      const response = await fetch(url);
-      if (response.ok) return response;
-    } catch {
-      await delay(200);
-    }
-  }
-  throw new Error(`Timed out waiting for ${url}`);
-}
-
-function spawnHidden(command, args, options = {}) {
-  return spawn(command, args, {
-    cwd: root,
-    stdio: ["ignore", "pipe", "pipe"],
-    windowsHide: true,
-    ...options
-  });
-}
-
-async function stopProcess(child) {
-  if (!child || child.exitCode !== null || child.signalCode !== null) return;
-  await new Promise(resolve => {
-    const timer = setTimeout(resolve, 3000);
-    child.once("exit", () => {
-      clearTimeout(timer);
-      resolve();
-    });
-    child.kill();
-  });
-}
-
-async function removeWithRetry(target) {
-  for (let attempt = 0; attempt < 8; attempt += 1) {
-    try {
-      await rm(target, { recursive: true, force: true });
-      return;
-    } catch {
-      await delay(250);
-    }
-  }
-}
-
-async function collectOutput(child) {
-  let stdout = "";
-  let stderr = "";
-  child.stdout?.on("data", chunk => { stdout += chunk.toString(); });
-  child.stderr?.on("data", chunk => { stderr += chunk.toString(); });
-  return () => ({ stdout, stderr });
-}
-
-class CdpClient {
-  constructor(webSocketUrl) {
-    this.nextId = 1;
-    this.pending = new Map();
-    this.ws = new WebSocket(webSocketUrl);
-  }
-
-  async open() {
-    await new Promise((resolve, reject) => {
-      this.ws.addEventListener("open", resolve, { once: true });
-      this.ws.addEventListener("error", reject, { once: true });
-    });
-    this.ws.addEventListener("message", event => {
-      const message = JSON.parse(event.data);
-      if (!message.id) return;
-      const pending = this.pending.get(message.id);
-      if (!pending) return;
-      this.pending.delete(message.id);
-      if (message.error) pending.reject(new Error(JSON.stringify(message.error)));
-      else pending.resolve(message.result);
-    });
-  }
-
-  send(method, params = {}) {
-    const id = this.nextId++;
-    this.ws.send(JSON.stringify({ id, method, params }));
-    return new Promise((resolve, reject) => {
-      this.pending.set(id, { resolve, reject });
-    });
-  }
-
-  close() {
-    this.ws.close();
-  }
-}
-
-async function getPageWebSocket(debugPort) {
-  const deadline = Date.now() + 10000;
-  while (Date.now() < deadline) {
-    try {
-      const targets = await fetch(`http://127.0.0.1:${debugPort}/json/list`).then(response => response.json());
-      const page = targets.find(target => target.type === "page");
-      if (page?.webSocketDebuggerUrl) return page.webSocketDebuggerUrl;
-    } catch {
-      await delay(200);
-    }
-  }
-  throw new Error("Could not find Chrome page target");
-}
-
-async function evaluate(cdp, expression) {
-  const result = await cdp.send("Runtime.evaluate", {
-    expression,
-    returnByValue: true,
-    awaitPromise: true
-  });
-  if (result.exceptionDetails) {
-    throw new Error(`Runtime.evaluate failed: ${JSON.stringify(result.exceptionDetails)}`);
-  }
-  return result.result.value;
-}
-
-async function waitForCondition(cdp, expression, timeoutMs = 8000) {
-  const deadline = Date.now() + timeoutMs;
-  let lastValue;
-  while (Date.now() < deadline) {
-    lastValue = await evaluate(cdp, expression);
-    if (lastValue) return;
-    await delay(80);
-  }
-  throw new Error(`Timed out waiting for condition: ${expression}; last value: ${JSON.stringify(lastValue)}`);
-}
-
-function assertCheck(condition, message, details = {}) {
-  if (!condition) {
-    const error = new Error(message);
-    error.details = details;
-    throw error;
-  }
-}
-
 const snapshotExpression = `(() => ({
-  readyState: document.readyState,
+  activeView: document.querySelector(".view.active")?.dataset.view || "",
   activeTool: document.querySelector("[data-tool][aria-pressed='true']")?.dataset.tool || "",
   toolPanelHidden: document.querySelector("#toolPanel")?.hidden,
   toolPanelText: document.querySelector("#toolPanel")?.innerText || "",
@@ -176,42 +33,61 @@ const snapshotExpression = `(() => ({
   workspaceHidden: document.querySelector("#workspacePanel")?.hidden,
   workspaceTitle: document.querySelector("#workspaceTitle")?.textContent || "",
   workspaceCopy: document.querySelector("#workspaceCopy")?.textContent || "",
+  modalHidden: document.querySelector("#modalLayer")?.hidden,
+  modalTitle: document.querySelector("#modalTitle")?.textContent || "",
+  projectCount: document.querySelectorAll(".project-card").length,
+  assetTab: document.querySelector("[data-asset-tab].active")?.dataset.assetTab || "",
+  selectedAsset: document.querySelector(".asset-card.selected")?.dataset.asset || "",
+  commentText: document.querySelector("#commentFeed")?.innerText || "",
+  credits: Number(document.querySelector("#creditCount")?.textContent || 0),
+  canvasHidden: document.querySelector("#canvasStudio")?.hidden,
+  canvasNodes: document.querySelectorAll(".canvas-node").length,
+  selectedNodeTitle: document.querySelector(".canvas-node.selected strong")?.textContent || "",
+  zoomLabel: document.querySelector("#zoomLabel")?.textContent || "",
   toastVisible: document.querySelector("#toast")?.classList.contains("show") || false
 }))()`;
+
+async function click(cdp, selector) {
+  await evaluate(cdp, `document.querySelector(${JSON.stringify(selector)}).click()`);
+  await delay(120);
+}
+
+async function typeValue(cdp, selector, value) {
+  await evaluate(cdp, `(() => {
+    const el = document.querySelector(${JSON.stringify(selector)});
+    el.value = ${JSON.stringify(value)};
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  })()`);
+  await delay(80);
+}
+
+async function dragSelectedNode(cdp) {
+  const rect = await evaluate(cdp, `(() => {
+    const node = document.querySelector(".canvas-node.selected");
+    const r = node.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2, before: node.style.getPropertyValue("--x") };
+  })()`);
+  await cdp.send("Input.dispatchMouseEvent", { type: "mousePressed", x: rect.x, y: rect.y, button: "left", clickCount: 1 });
+  await cdp.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: rect.x + 64, y: rect.y + 34, button: "left" });
+  await cdp.send("Input.dispatchMouseEvent", { type: "mouseReleased", x: rect.x + 64, y: rect.y + 34, button: "left", clickCount: 1 });
+  await delay(140);
+  const after = await evaluate(cdp, `document.querySelector(".canvas-node.selected").style.getPropertyValue("--x")`);
+  return { before: rect.before, after };
+}
 
 const serverPort = Number(process.env.YUYU_INTERACTIVE_QA_PORT || await findFreePort(5190));
 const debugPort = Number(process.env.YUYU_CDP_PORT || await findFreePort(9290));
 const url = `http://127.0.0.1:${serverPort}/`;
 
-const server = spawnHidden("python", ["-m", "http.server", String(serverPort), "--bind", "127.0.0.1"]);
-const readServerOutput = await collectOutput(server);
+let server;
+let readServerOutput = () => ({ stdout: "", stderr: "" });
 let chromeProcess;
 let readChromeOutput = () => ({ stdout: "", stderr: "" });
 let cdp;
 
 try {
-  await waitForHttp(url);
-
-  chromeProcess = spawnHidden(chrome, [
-    "--headless=new",
-    "--disable-gpu",
-    "--no-first-run",
-    "--no-default-browser-check",
-    "--hide-scrollbars",
-    `--user-data-dir=${profileDir}`,
-    `--remote-debugging-port=${debugPort}`,
-    "--window-size=1920,863",
-    "about:blank"
-  ]);
-  readChromeOutput = await collectOutput(chromeProcess);
-
-  await waitForHttp(`http://127.0.0.1:${debugPort}/json/version`);
-  const webSocketUrl = await getPageWebSocket(debugPort);
-  cdp = new CdpClient(webSocketUrl);
-  await cdp.open();
-  await cdp.send("Runtime.enable");
-  await cdp.send("Page.enable");
-  await cdp.send("DOM.enable");
+  ({ server, readServerOutput } = await startStaticServer(serverPort));
+  ({ chromeProcess, readChromeOutput, cdp } = await launchChrome(debugPort, profileDir, "1920,863"));
   await cdp.send("Emulation.setDeviceMetricsOverride", {
     width: 1920,
     height: 863,
@@ -220,73 +96,125 @@ try {
   });
   await cdp.send("Page.navigate", { url });
   await waitForCondition(cdp, `document.readyState === "complete"`);
-  await waitForCondition(cdp, `!!document.querySelector(".prompt-box")`);
   await waitForCondition(cdp, `[...document.images].every(img => img.complete && img.naturalWidth > 0)`);
 
   const initial = await evaluate(cdp, snapshotExpression);
-  assertCheck(initial.activeCategory === "overseas", "Expected overseas category active by default", initial);
-  assertCheck(initial.promptPrefix.includes("出海短剧"), "Default prompt prefix should be overseas short drama", initial);
-  assertCheck(initial.templateCount === 2, "Expected two prompt template cards", initial);
-  assertCheck(initial.workspaceHidden === true, "Workspace should be hidden on initial load", initial);
+  assertCheck(initial.activeView === "explore", "Expected explore view by default", initial);
+  assertCheck(initial.activeCategory === "overseas" && initial.templateCount === 2, "Default category/template state is wrong", initial);
 
-  await evaluate(cdp, `document.querySelector("[data-tool='upload']").click()`);
-  await delay(120);
-  const afterUploadTool = await evaluate(cdp, snapshotExpression);
-  assertCheck(afterUploadTool.activeTool === "upload", "Upload tool did not activate", afterUploadTool);
-  assertCheck(afterUploadTool.toolPanelHidden === false && afterUploadTool.toolPanelText.includes("上传参考素材"), "Upload tool panel did not open", afterUploadTool);
+  await click(cdp, "[data-tool='upload']");
+  const afterUpload = await evaluate(cdp, snapshotExpression);
+  assertCheck(afterUpload.activeTool === "upload" && afterUpload.toolPanelHidden === false, "Upload panel did not open", afterUpload);
 
-  await evaluate(cdp, `document.querySelector("[data-chip='上传图片']").click()`);
-  await delay(120);
+  await click(cdp, "[data-chip='上传图片']");
   const afterChip = await evaluate(cdp, snapshotExpression);
-  assertCheck(afterChip.promptValue.includes("上传图片"), "Tool chip did not append to prompt", afterChip);
+  assertCheck(afterChip.promptValue.includes("上传图片"), "Chip did not append to prompt", afterChip);
 
-  await evaluate(cdp, `document.querySelector("[data-category='comic']").click()`);
-  await delay(120);
-  const afterCategory = await evaluate(cdp, snapshotExpression);
-  assertCheck(afterCategory.activeCategory === "comic", "Comic category did not activate", afterCategory);
-  assertCheck(afterCategory.promptPrefix.includes("短剧漫剧"), "Prompt prefix did not update for comic category", afterCategory);
-  assertCheck(afterCategory.templateCount === 2, "Template list did not rerender after category switch", afterCategory);
+  await click(cdp, "[data-action='model']");
+  let state = await evaluate(cdp, snapshotExpression);
+  assertCheck(!state.modalHidden && state.modalTitle.includes("模型"), "Model modal did not open", state);
+  await click(cdp, "[data-action='close-modal']");
 
-  await evaluate(cdp, `document.querySelector("[data-template]").click()`);
-  await delay(160);
-  const afterTemplate = await evaluate(cdp, snapshotExpression);
-  assertCheck(afterTemplate.selectedTemplate !== "", "Template did not become selected", afterTemplate);
-  assertCheck(afterTemplate.promptValue.length > 10, "Template did not populate prompt", afterTemplate);
-  assertCheck(afterTemplate.workspaceHidden === false, "Template click did not open workspace panel", afterTemplate);
+  await click(cdp, "[data-category='comic']");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(state.activeCategory === "comic" && state.promptPrefix.includes("漫剧"), "Category switch failed", state);
+  await click(cdp, "[data-template]");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(state.selectedTemplate && state.workspaceHidden === false && state.promptValue.length > 10, "Template selection failed", state);
 
-  await evaluate(cdp, `document.querySelector("[data-feature='seedance']").click()`);
-  await delay(160);
-  const afterFeature = await evaluate(cdp, snapshotExpression);
-  assertCheck(afterFeature.workspaceTitle.includes("Seedance2.0"), "Seedance feature did not update workspace", afterFeature);
-  assertCheck(afterFeature.workspaceCopy.includes("视频生成"), "Seedance feature copy missing", afterFeature);
+  const creditsBeforeGenerate = state.credits;
+  await click(cdp, "#sendBtn");
+  await delay(1900);
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(state.workspaceHidden === false && state.credits === creditsBeforeGenerate - 80, "Generation workflow did not complete", state);
 
-  await evaluate(cdp, `document.querySelector("#sendBtn").click()`);
-  await delay(160);
-  const afterSend = await evaluate(cdp, snapshotExpression);
-  assertCheck(afterSend.workspaceHidden === false, "Send button did not keep workspace open", afterSend);
-  assertCheck(afterSend.workspaceTitle.length > 0, "Workspace title missing after send", afterSend);
+  await click(cdp, "[data-route='projects']");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(state.activeView === "projects" && state.projectCount >= 4, "Projects route did not render", state);
+  await click(cdp, "[data-action='new-project']");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(state.projectCount >= 5, "New project action failed", state);
+  await typeValue(cdp, "#projectSearch", "MV");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(state.projectCount >= 1, "Project search removed all expected projects", state);
+  await click(cdp, "[data-project-action='export']");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(!state.modalHidden && state.modalTitle.includes("导出"), "Project export modal did not open", state);
+  await click(cdp, "[data-action='close-modal']");
+
+  await click(cdp, "[data-route='assets']");
+  await click(cdp, "[data-asset-tab='scenes']");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(state.activeView === "assets" && state.assetTab === "scenes" && state.selectedAsset, "Asset tab switch failed", state);
+  await click(cdp, ".asset-card:nth-child(2)");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(state.selectedAsset.length > 0, "Asset selection failed", state);
+  await click(cdp, "[data-action='use-selected-asset']");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(state.workspaceHidden === false && state.workspaceTitle.includes("资产"), "Add asset to project failed", state);
+
+  await click(cdp, "[data-route='team']");
+  await typeValue(cdp, "#commentInput", "测试评论");
+  await click(cdp, "[data-action='add-comment']");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(state.activeView === "team" && state.commentText.includes("测试评论"), "Team comment failed", state);
+  await click(cdp, "[data-action='invite']");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(!state.modalHidden && state.modalTitle.includes("邀请"), "Invite modal failed", state);
+  await click(cdp, "[data-action='close-modal']");
+
+  await click(cdp, "[data-route='account']");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(state.activeView === "account" && state.credits > 0, "Account route failed", state);
+
+  await click(cdp, "[data-route='projects']");
+  await click(cdp, "[data-action='open-canvas']");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(state.canvasHidden === false && state.canvasNodes === 4, "Canvas did not open", state);
+
+  await click(cdp, "[data-canvas-action='add-node']");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(state.canvasNodes === 5 && state.selectedNodeTitle.includes("创作节点"), "Add canvas node failed", state);
+
+  const dragState = await dragSelectedNode(cdp);
+  assertCheck(dragState.before !== dragState.after, "Canvas node drag did not change x position", dragState);
+
+  await click(cdp, "[data-canvas-action='zoom-in']");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(state.zoomLabel === "110%", "Canvas zoom did not update", state);
+
+  await typeValue(cdp, "#nodeNameInput", "测试节点");
+  await click(cdp, "[data-canvas-action='apply-node']");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(state.selectedNodeTitle === "测试节点", "Inspector did not apply node title", state);
+
+  await click(cdp, "[data-canvas-action='preview']");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(!state.modalHidden && state.modalTitle.includes("预览"), "Preview modal failed", state);
+  await click(cdp, "[data-action='close-modal']");
+
+  const creditsBeforeExport = state.credits;
+  await click(cdp, "[data-canvas-action='export']");
+  await click(cdp, "[data-modal-action='export-confirm']");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(state.modalHidden && state.credits === creditsBeforeExport - 20, "Export confirmation did not update credits", state);
 
   const result = {
     ok: true,
     url,
     checks: {
-      defaultOverseasCategory: true,
-      uploadToolOpensPanel: true,
-      chipAppendsPrompt: true,
-      categorySwitchRerendersTemplates: true,
-      templatePopulatesPrompt: true,
-      featureUpdatesWorkspace: true,
-      sendCreatesWorkspace: true
+      exploreTools: true,
+      modelModal: true,
+      categoryAndTemplate: true,
+      generationWorkflow: true,
+      projects: true,
+      assets: true,
+      team: true,
+      account: true,
+      canvasAddDragZoomEditPreviewExport: true
     },
-    states: {
-      initial,
-      afterUploadTool,
-      afterChip,
-      afterCategory,
-      afterTemplate,
-      afterFeature,
-      afterSend
-    }
+    dragState,
+    finalState: state
   };
   await writeFile(path.join(qaDir, "interactive-dom-check.json"), JSON.stringify(result, null, 2), "utf8");
   console.log(JSON.stringify(result, null, 2));

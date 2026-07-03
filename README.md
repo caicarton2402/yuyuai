@@ -1,8 +1,30 @@
-# YUYU AI Video Canvas
+# YUYU AI Video Studio
 
-Local static AI video canvas demo branded as YUYU.
+YUYU is a static frontend demo for an AI video creation product. It runs directly from GitHub Pages and includes the main product flows as local browser interactions.
 
-## Open
+## Live Page
+
+GitHub Pages:
+
+```text
+https://caicarton2402.github.io/yuyuai/
+```
+
+## Included Frontend Flows
+
+- Explore home with prompt composer, model selector, multi-episode switch, category tabs, templates, and feature cards.
+- Project center with search, create, duplicate, continue, and export actions.
+- Asset center with character, scene, prop, and style tabs plus upload/import modal.
+- Team collaboration with member list, invite modal, comments, and approval action.
+- Account and membership dashboard with credits, queue, seat count, and usage ledger.
+- Node canvas editor with add node, drag, zoom, auto layout, inspector edits, preview, and export.
+- Global modal system, toast feedback, responsive desktop/tablet/mobile layout, and YUYU logo/branding.
+
+## Boundary
+
+This repository is a deployable static frontend. Authentication, billing, storage, real video generation, private model APIs, and production downloads are mocked in the browser so the page can run on GitHub Pages.
+
+## Local Run
 
 Open `index.html` directly in a browser, or run:
 
@@ -10,12 +32,10 @@ Open `index.html` directly in a browser, or run:
 npm.cmd run serve
 ```
 
-Then visit `http://127.0.0.1:5180/`.
-
-To open the rebuilt DOM interaction layer directly, use:
+Then visit:
 
 ```text
-index.html?interactive=1
+http://127.0.0.1:5180/
 ```
 
 ## QA
@@ -26,51 +46,20 @@ Run the complete repeatable check:
 npm.cmd run qa
 ```
 
-This performs:
+The QA suite validates:
 
-- Static file/content validation.
-- Local HTTP resource checks.
-- Runtime checks for console errors, JavaScript exceptions, network failures, and bad HTTP responses.
-- Chrome headless screenshot at `1936x951`, cropped to the captured `1920x863` reference region.
-- Pixel diff against `reference/yuyu-1920x863-top.png`.
-- Interactive-layer screenshot and nonblank/different-from-default checks.
-- Browser-level DOM interaction regression checks for zoom, mode switch, add node, drag, pan, and auto layout reset.
-- Responsive runtime checks and screenshots at `1920x1000`, `1440x1000`, `1024x1000`, `768x1000`, and `375x812`.
+- Static file and branding checks.
+- Local HTTP resources.
+- Runtime console/network/image health in Chrome.
+- Full interaction flow across explore, projects, assets, team, account, and canvas.
+- Headless render screenshot at `1920x863`.
+- Responsive screenshots at `1920x1000`, `1440x1000`, `1024x1000`, `768x1000`, and `375x812`.
 
-Expected default-state diff:
-
-- `changedPixels`: `0`
-- `changedRatio`: `0.0`
-- `maxChannelDelta`: `7`
-
-Expected interactive-layer check:
-
-- `size`: `1920x863`
-- `nonDarkPixels`: greater than `100000`
-- `changedFromDefaultPixels`: greater than `10000`
-
-Expected DOM interaction check:
-
-- `queryActivatesInteractiveLayer`: `true`
-- `zoomInUpdatesLabel`: `true`
-- `modeSwitchUpdatesState`: `true`
-- `addToolCreatesPromptNode`: `true`
-- `nodeDragMovesCard`: `true`
-- `canvasPanUpdatesTransform`: `true`
-- `autoLayoutRestoresCapturedState`: `true`
-
-Responsive evidence is written to:
+Evidence is written to:
 
 ```text
+.qa/
+replica/
 replica/responsive/
+diff/report.json
 ```
-
-Runtime evidence is written to:
-
-```text
-.qa/runtime-check.json
-```
-
-## Interaction Model
-
-The page initially displays a captured pixel layer for exact visual parity. On first click, drag, zoom, or toolbar action, it fades into the rebuilt interactive canvas layer with draggable nodes, zoom controls, auto layout, and add-node behavior. `?interactive=1` starts directly in that rebuilt layer for QA.

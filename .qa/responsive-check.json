@@ -6,106 +6,91 @@
       "width": 1920,
       "height": 1000,
       "name": "desktop-wide",
-      "evidence": "replica/responsive/yuyu-explore-1920x1000-desktop-wide.png",
-      "visible": {
+      "exploreEvidence": "replica/responsive/yuyu-fullsite-1920x1000-desktop-wide-explore.png",
+      "projectEvidence": "replica/responsive/yuyu-fullsite-1920x1000-desktop-wide-projects.png",
+      "exploreVisible": {
         "hero": true,
         "promptBox": true,
         "categories": true,
         "templates": true,
         "features": true,
         "sideNav": true,
-        "navStack": true
+        "navStack": true,
+        "projectBoard": false
       },
-      "counts": {
-        "tools": 4,
-        "categories": 4,
-        "templates": 2,
-        "features": 5
-      }
+      "projectCount": 4
     },
     {
       "width": 1440,
       "height": 1000,
       "name": "desktop",
-      "evidence": "replica/responsive/yuyu-explore-1440x1000-desktop.png",
-      "visible": {
+      "exploreEvidence": "replica/responsive/yuyu-fullsite-1440x1000-desktop-explore.png",
+      "projectEvidence": "replica/responsive/yuyu-fullsite-1440x1000-desktop-projects.png",
+      "exploreVisible": {
         "hero": true,
         "promptBox": true,
         "categories": true,
         "templates": true,
         "features": true,
         "sideNav": true,
-        "navStack": true
+        "navStack": true,
+        "projectBoard": false
       },
-      "counts": {
-        "tools": 4,
-        "categories": 4,
-        "templates": 2,
-        "features": 5
-      }
+      "projectCount": 4
     },
     {
       "width": 1024,
       "height": 1000,
       "name": "tablet-landscape",
-      "evidence": "replica/responsive/yuyu-explore-1024x1000-tablet-landscape.png",
-      "visible": {
+      "exploreEvidence": "replica/responsive/yuyu-fullsite-1024x1000-tablet-landscape-explore.png",
+      "projectEvidence": "replica/responsive/yuyu-fullsite-1024x1000-tablet-landscape-projects.png",
+      "exploreVisible": {
         "hero": true,
         "promptBox": true,
         "categories": true,
         "templates": true,
         "features": true,
         "sideNav": true,
-        "navStack": true
+        "navStack": true,
+        "projectBoard": false
       },
-      "counts": {
-        "tools": 4,
-        "categories": 4,
-        "templates": 2,
-        "features": 5
-      }
+      "projectCount": 4
     },
     {
       "width": 768,
       "height": 1000,
       "name": "tablet",
-      "evidence": "replica/responsive/yuyu-explore-768x1000-tablet.png",
-      "visible": {
+      "exploreEvidence": "replica/responsive/yuyu-fullsite-768x1000-tablet-explore.png",
+      "projectEvidence": "replica/responsive/yuyu-fullsite-768x1000-tablet-projects.png",
+      "exploreVisible": {
         "hero": true,
         "promptBox": true,
         "categories": true,
         "templates": true,
         "features": true,
         "sideNav": true,
-        "navStack": true
+        "navStack": true,
+        "projectBoard": false
       },
-      "counts": {
-        "tools": 4,
-        "categories": 4,
-        "templates": 2,
-        "features": 5
-      }
+      "projectCount": 4
     },
     {
       "width": 375,
       "height": 812,
       "name": "mobile",
-      "evidence": "replica/responsive/yuyu-explore-375x812-mobile.png",
-      "visible": {
+      "exploreEvidence": "replica/responsive/yuyu-fullsite-375x812-mobile-explore.png",
+      "projectEvidence": "replica/responsive/yuyu-fullsite-375x812-mobile-projects.png",
+      "exploreVisible": {
         "hero": true,
         "promptBox": true,
         "categories": true,
         "templates": true,
         "features": true,
         "sideNav": true,
-        "navStack": false
+        "navStack": true,
+        "projectBoard": false
       },
-      "counts": {
-        "tools": 4,
-        "categories": 4,
-        "templates": 2,
-        "features": 5
-      }
+      "projectCount": 4
     }
   ]
 }

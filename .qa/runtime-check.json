@@ -2,23 +2,31 @@
   "ok": true,
   "baseUrl": "http://127.0.0.1:5210/",
   "checks": {
+    "noOriginalBranding": true,
     "noConsoleErrors": true,
     "noRuntimeExceptions": true,
     "noNetworkFailures": true,
-    "noBadHttpResponses": true,
     "imagesLoaded": true,
-    "exploreInitialized": true
+    "fullSiteInitialized": true
   },
   "state": {
-    "title": "YUYU - AI Explore",
+    "title": "YUYU - AI Video Studio",
     "readyState": "complete",
-    "promptBox": true,
+    "yuyu": true,
+    "originalBrandVisible": false,
+    "routeCount": 8,
+    "viewCount": 5,
+    "activeView": "explore",
     "promptTools": 4,
     "categories": 4,
     "templates": 2,
     "features": 5,
-    "workspaceHidden": true,
-    "activeCategory": "overseas",
+    "projects": 4,
+    "assets": 3,
+    "members": 4,
+    "ledgerRows": 4,
+    "canvasHidden": true,
+    "modalHidden": true,
     "images": [
       {
         "src": "./public/assets/yuyu-logo.png",

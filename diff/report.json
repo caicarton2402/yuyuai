@@ -1,17 +1,16 @@
 {
   "ok": true,
-  "kind": "explore-render",
-  "screenshot": "replica/yuyu-explore-1920x863-top.png",
-  "reference": "docs/design-references/live-explore/explore-current-viewport.png",
-  "note": "Reference is the logged-in source page; local render intentionally replaces original branding with YUYU and implements interactive controls.",
+  "kind": "full-site-render",
+  "screenshot": "replica/yuyu-fullsite-1920x863-top.png",
+  "note": "Static YUYU frontend render. Original brand assets and names are intentionally replaced.",
   "stats": {
-    "path": "replica/yuyu-explore-1920x863-top.png",
+    "path": "replica/yuyu-fullsite-1920x863-top.png",
     "size": [
       1920,
       863
     ],
-    "nonDarkPixels": 916875,
-    "brightPixels": 169215,
+    "nonDarkPixels": 903103,
+    "brightPixels": 140209,
     "ok": true
   }
 }
