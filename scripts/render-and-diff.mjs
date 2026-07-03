@@ -1,26 +1,26 @@
 import { spawn } from "node:child_process";
-import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const root = process.cwd();
 const chrome = process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const qaDir = path.join(root, ".qa");
-const profileDir = path.join(qaDir, "chrome-headless-profile");
-const widePath = path.join(root, "replica", "yuyu-local-viewport-wide.png");
-const croppedPath = path.join(root, "replica", "yuyu-local-viewport.png");
-const namedReplicaPath = path.join(root, "replica", "yuyu-1920x863-top.png");
-const interactiveWidePath = path.join(root, "replica", "yuyu-interactive-viewport-wide.png");
-const interactivePath = path.join(root, "replica", "yuyu-interactive-viewport.png");
-const htmlUrl = new URL(`file:///${path.join(root, "index.html").replace(/\\/g, "/")}`).href;
-const interactiveUrl = `${htmlUrl}?interactive=1`;
+const replicaDir = path.join(root, "replica");
+const diffDir = path.join(root, "diff");
+const profileDir = path.join(qaDir, "chrome-explore-render-profile");
+const port = Number(process.env.YUYU_RENDER_QA_PORT || 5220);
+const url = `http://127.0.0.1:${port}/`;
+const screenshotPath = path.join(replicaDir, "yuyu-explore-1920x863-top.png");
 
 await mkdir(qaDir, { recursive: true });
-await mkdir(path.join(root, "replica"), { recursive: true });
+await mkdir(replicaDir, { recursive: true });
+await mkdir(diffDir, { recursive: true });
 await rm(profileDir, { recursive: true, force: true });
-await rm(widePath, { force: true });
-await rm(croppedPath, { force: true });
-await rm(interactiveWidePath, { force: true });
-await rm(interactivePath, { force: true });
+await rm(screenshotPath, { force: true });
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 async function run(command, args, options = {}) {
   return new Promise((resolve, reject) => {
@@ -37,93 +37,76 @@ async function run(command, args, options = {}) {
   });
 }
 
-async function renderChrome(url, outPath) {
+async function waitForServer() {
+  const deadline = Date.now() + 8000;
+  while (Date.now() < deadline) {
+    try {
+      const response = await fetch(url, { method: "HEAD" });
+      if (response.ok) return;
+    } catch {
+      await delay(200);
+    }
+  }
+  throw new Error(`HTTP server did not become ready on port ${port}`);
+}
+
+const server = spawn("python", ["-m", "http.server", String(port), "--bind", "127.0.0.1"], {
+  cwd: root,
+  stdio: ["ignore", "pipe", "pipe"],
+  windowsHide: true
+});
+
+try {
+  await waitForServer();
   await run(chrome, [
-  "--headless=new",
-  "--disable-gpu",
-  "--no-first-run",
-  "--no-default-browser-check",
-  "--hide-scrollbars",
-  `--user-data-dir=${profileDir}`,
-  "--window-size=1936,951",
-    `--screenshot=${outPath}`,
+    "--headless=new",
+    "--disable-gpu",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--hide-scrollbars",
+    `--user-data-dir=${profileDir}`,
+    "--window-size=1920,863",
+    `--screenshot=${screenshotPath}`,
     url
   ]);
-  await access(outPath);
-}
+  await access(screenshotPath);
 
-await renderChrome(htmlUrl, widePath);
-
-const cropScript = `
+  const statsScript = `
 from PIL import Image
 from pathlib import Path
-root = Path(r'''${root}''')
-wide = root / 'replica' / 'yuyu-local-viewport-wide.png'
-cropped = root / 'replica' / 'yuyu-local-viewport.png'
-named = root / 'replica' / 'yuyu-1920x863-top.png'
-im = Image.open(wide)
-im.crop((0, 0, 1920, 863)).save(cropped)
-named.write_bytes(cropped.read_bytes())
-print(f"wide={im.size[0]}x{im.size[1]} cropped=1920x863")
-`;
-await run("python", ["-c", cropScript]);
-
-await run("python", [
-  path.join(root, "scripts", "diff_images.py"),
-  "--root", root,
-  "--ref", "reference",
-  "--rep", "replica",
-  "--out", "diff",
-  "--prefix", "yuyu",
-  "--viewports", "1920x863",
-  "--kinds", "top",
-  "--threshold", "16",
-  "--report", "report.json",
-  "--strict"
-]);
-
-await renderChrome(interactiveUrl, interactiveWidePath);
-const interactiveScript = `
-from PIL import Image, ImageChops
-from pathlib import Path
 import json
-root = Path(r'''${root}''')
-wide = root / 'replica' / 'yuyu-interactive-viewport-wide.png'
-out = root / 'replica' / 'yuyu-interactive-viewport.png'
-ref = root / 'reference' / 'yuyu-1920x863-top.png'
-im = Image.open(wide).convert('RGB')
-crop = im.crop((0, 0, 1920, 863))
-crop.save(out)
-refim = Image.open(ref).convert('RGB')
-diff = ImageChops.difference(refim, crop)
-changed = 0
-non_dark = 0
-max_delta = 0
-for pixel, delta in zip(crop.getdata(), diff.getdata()):
-    if max(pixel) > 24:
-        non_dark += 1
-    d = max(delta)
-    max_delta = max(max_delta, d)
-    if d > 16:
-        changed += 1
+root = Path.cwd()
+shot = root / "replica" / "yuyu-explore-1920x863-top.png"
+im = Image.open(shot).convert("RGB")
+pixels = list(im.getdata())
+non_dark = sum(1 for px in pixels if max(px) > 24)
+bright = sum(1 for px in pixels if max(px) > 120)
 result = {
-    "size": list(crop.size),
-    "nonDarkPixels": non_dark,
-    "changedFromDefaultPixels": changed,
-    "maxDeltaFromDefault": max_delta,
-    "ok": crop.size == (1920, 863) and non_dark > 100000 and changed > 10000
+  "path": "replica/yuyu-explore-1920x863-top.png",
+  "size": list(im.size),
+  "nonDarkPixels": non_dark,
+  "brightPixels": bright,
+  "ok": im.size == (1920, 863) and non_dark > 120000 and bright > 12000
 }
-print(json.dumps(result, indent=2))
+print(json.dumps(result, indent=2, ensure_ascii=False))
 `;
-const interactiveCheck = JSON.parse((await run("python", ["-c", interactiveScript])).stdout);
-if (!interactiveCheck.ok) {
-  throw new Error(`Interactive screenshot check failed: ${JSON.stringify(interactiveCheck)}`);
+  const stats = JSON.parse((await run("python", ["-c", statsScript])).stdout);
+  if (!stats.ok) {
+    throw new Error(`Explore render appears blank or wrong size: ${JSON.stringify(stats)}`);
+  }
+
+  const report = {
+    ok: true,
+    kind: "explore-render",
+    screenshot: "replica/yuyu-explore-1920x863-top.png",
+    reference: "docs/design-references/live-explore/explore-current-viewport.png",
+    note: "Reference is the logged-in source page; local render intentionally replaces original branding with YUYU and implements interactive controls.",
+    stats
+  };
+  await writeFile(path.join(diffDir, "report.json"), JSON.stringify(report, null, 2), "utf8");
+  await writeFile(path.join(qaDir, "render-and-diff.json"), JSON.stringify(report, null, 2), "utf8");
+  console.log(JSON.stringify(report, null, 2));
+} finally {
+  server.kill();
+  await rm(profileDir, { recursive: true, force: true });
 }
-
-await rm(profileDir, { recursive: true, force: true });
-
-const reportPath = path.join(root, "diff", "report.json");
-const report = JSON.parse(await readFile(reportPath, "utf8"));
-await writeFile(path.join(qaDir, "interactive-check.json"), JSON.stringify(interactiveCheck, null, 2), "utf8");
-await writeFile(path.join(qaDir, "render-and-diff.json"), JSON.stringify({ ok: true, chrome, report, interactiveCheck }, null, 2), "utf8");
-console.log(JSON.stringify({ ok: true, report, interactiveCheck }, null, 2));

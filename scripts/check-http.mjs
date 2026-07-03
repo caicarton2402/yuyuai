@@ -10,7 +10,8 @@ await mkdir(qaDir, { recursive: true });
 
 const server = spawn("python", ["-m", "http.server", String(port), "--bind", "127.0.0.1"], {
   cwd: root,
-  stdio: ["ignore", "pipe", "pipe"]
+  stdio: ["ignore", "pipe", "pipe"],
+  windowsHide: true
 });
 
 let stdout = "";
@@ -22,14 +23,19 @@ const urls = [
   "/",
   "/src/styles.css",
   "/src/app.js",
-  "/public/assets/yuyu-captured-state.png",
   "/public/assets/yuyu-logo.png",
   "/public/assets/yuyu-favicon.png",
-  "/public/assets/node-character-snapshot.png",
-  "/public/assets/node-location-snapshot.png",
-  "/public/assets/node-video-snapshot.png",
-  "/public/assets/favicon.svg"
+  "/public/assets/explore/template-dialog.png",
+  "/public/assets/explore/template-narration.png",
+  "/public/assets/explore/feature-effects.png",
+  "/public/assets/explore/feature-seedance.png",
+  "/public/assets/explore/feature-grid.png",
+  "/public/assets/explore/feature-panorama.png"
 ].map(url => `http://127.0.0.1:${port}${url}`);
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 async function waitForServer() {
   const deadline = Date.now() + 8000;
@@ -38,7 +44,7 @@ async function waitForServer() {
       const response = await fetch(`http://127.0.0.1:${port}/`, { method: "HEAD" });
       if (response.ok) return;
     } catch {
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await delay(200);
     }
   }
   throw new Error(`HTTP server did not become ready on port ${port}`);

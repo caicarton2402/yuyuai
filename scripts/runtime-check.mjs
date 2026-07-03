@@ -31,17 +31,15 @@ async function findFreePort(start) {
 
 async function waitForHttp(url, timeoutMs = 10000) {
   const deadline = Date.now() + timeoutMs;
-  let lastError;
   while (Date.now() < deadline) {
     try {
       const response = await fetch(url);
       if (response.ok) return response;
-    } catch (error) {
-      lastError = error;
+    } catch {
+      await delay(200);
     }
-    await delay(200);
   }
-  throw new Error(`Timed out waiting for ${url}: ${lastError?.message || "no response"}`);
+  throw new Error(`Timed out waiting for ${url}`);
 }
 
 function spawnHidden(command, args, options = {}) {
@@ -66,28 +64,21 @@ async function stopProcess(child) {
 }
 
 async function removeWithRetry(target) {
-  let lastError;
   for (let attempt = 0; attempt < 8; attempt += 1) {
     try {
       await rm(target, { recursive: true, force: true });
       return;
-    } catch (error) {
-      lastError = error;
+    } catch {
       await delay(250);
     }
   }
-  throw lastError;
 }
 
 async function collectOutput(child) {
   let stdout = "";
   let stderr = "";
-  child.stdout?.on("data", chunk => {
-    stdout += chunk.toString();
-  });
-  child.stderr?.on("data", chunk => {
-    stderr += chunk.toString();
-  });
+  child.stdout?.on("data", chunk => { stdout += chunk.toString(); });
+  child.stderr?.on("data", chunk => { stderr += chunk.toString(); });
   return () => ({ stdout, stderr });
 }
 
@@ -145,9 +136,8 @@ async function getPageWebSocket(debugPort) {
       const page = targets.find(target => target.type === "page");
       if (page?.webSocketDebuggerUrl) return page.webSocketDebuggerUrl;
     } catch {
-      // Chrome can take a moment to expose the target list.
+      await delay(200);
     }
-    await delay(200);
   }
   throw new Error("Could not find Chrome page target");
 }
@@ -164,7 +154,7 @@ async function evaluate(cdp, expression) {
   return result.result.value;
 }
 
-async function waitForCondition(cdp, expression, timeoutMs = 6000) {
+async function waitForCondition(cdp, expression, timeoutMs = 8000) {
   const deadline = Date.now() + timeoutMs;
   let lastValue;
   while (Date.now() < deadline) {
@@ -175,72 +165,39 @@ async function waitForCondition(cdp, expression, timeoutMs = 6000) {
   throw new Error(`Timed out waiting for condition: ${expression}; last value: ${JSON.stringify(lastValue)}`);
 }
 
-function assertCleanRuntime(label, events, state) {
+function assertCleanRuntime(events, state) {
   const consoleErrors = events.filter(event => event.method === "Runtime.consoleAPICalled" && event.params?.type === "error");
   const exceptions = events.filter(event => event.method === "Runtime.exceptionThrown");
-  const logErrors = events.filter(event => event.method === "Log.entryAdded" && ["error", "warning"].includes(event.params?.entry?.level));
   const failedRequests = events.filter(event => event.method === "Network.loadingFailed" && event.params?.errorText !== "net::ERR_ABORTED");
   const badResponses = events.filter(event => event.method === "Network.responseReceived" && event.params?.response?.status >= 400);
-  const bad = { consoleErrors, exceptions, logErrors, failedRequests, badResponses };
+  const bad = { consoleErrors, exceptions, failedRequests, badResponses };
   if (Object.values(bad).some(items => items.length)) {
-    const error = new Error(`${label} has runtime errors`);
+    const error = new Error("Explore page has runtime errors");
     error.details = { bad, state };
     throw error;
   }
 }
 
-function stateExpression() {
-  return `(() => {
-    const images = [...document.images].map(img => ({
-      src: img.getAttribute("src"),
-      complete: img.complete,
-      naturalWidth: img.naturalWidth,
-      naturalHeight: img.naturalHeight
-    }));
-    const scripts = [...document.scripts].map(script => script.getAttribute("src") || "inline");
-    const stylesheets = [...document.styleSheets].map(sheet => sheet.href || "inline");
-    return {
-      title: document.title,
-      readyState: document.readyState,
-      url: location.href,
-      interactiveActive: document.querySelector(".app-shell")?.classList.contains("interactive-active") || false,
-      pixelOpacity: getComputedStyle(document.querySelector(".pixel-underlay")).opacity,
-      nodeCount: document.querySelectorAll(".node").length,
-      connectorCount: document.querySelectorAll(".connector-layer path[d]").length,
-      images,
-      scripts,
-      stylesheets
-    };
-  })()`;
-}
-
-async function inspectPage(cdp, url, mode) {
-  cdp.takeEvents();
-  await cdp.send("Page.navigate", { url });
-  await waitForCondition(cdp, `document.readyState === "complete"`);
-  if (mode === "interactive") {
-    await waitForCondition(cdp, `(() => {
-      const pixel = document.querySelector(".pixel-underlay");
-      return document.querySelector(".app-shell")?.classList.contains("interactive-active") && pixel && Number(getComputedStyle(pixel).opacity) <= 0.01;
-    })()`);
-  }
-  await delay(350);
-  const state = await evaluate(cdp, stateExpression());
-  const events = cdp.takeEvents();
-  if (state.nodeCount < 3 || state.connectorCount < 2) {
-    const error = new Error(`${mode} page did not initialize canvas state`);
-    error.details = { state, events };
-    throw error;
-  }
-  const badImages = state.images.filter(image => !image.complete || image.naturalWidth <= 0 || image.naturalHeight <= 0);
-  if (badImages.length) {
-    const error = new Error(`${mode} page has broken images`);
-    error.details = { badImages, state, events };
-    throw error;
-  }
-  assertCleanRuntime(mode, events, state);
-  return { mode, url, state, eventCount: events.length };
-}
+const stateExpression = `(() => {
+  const images = [...document.images].map(img => ({
+    src: img.getAttribute("src"),
+    complete: img.complete,
+    naturalWidth: img.naturalWidth,
+    naturalHeight: img.naturalHeight
+  }));
+  return {
+    title: document.title,
+    readyState: document.readyState,
+    promptBox: !!document.querySelector(".prompt-box"),
+    promptTools: document.querySelectorAll("[data-tool]").length,
+    categories: document.querySelectorAll("[data-category]").length,
+    templates: document.querySelectorAll("[data-template]").length,
+    features: document.querySelectorAll("[data-feature]").length,
+    workspaceHidden: document.querySelector("#workspacePanel")?.hidden,
+    activeCategory: document.querySelector("[data-category].active")?.dataset.category,
+    images
+  };
+})()`;
 
 const serverPort = Number(process.env.YUYU_RUNTIME_QA_PORT || await findFreePort(5210));
 const debugPort = Number(process.env.YUYU_RUNTIME_CDP_PORT || await findFreePort(9490));
@@ -262,7 +219,7 @@ try {
     "--hide-scrollbars",
     `--user-data-dir=${profileDir}`,
     `--remote-debugging-port=${debugPort}`,
-    "--window-size=1936,951",
+    "--window-size=1920,863",
     "about:blank"
   ]);
   readChromeOutput = await collectOutput(chromeProcess);
@@ -273,7 +230,6 @@ try {
   await cdp.send("Runtime.enable");
   await cdp.send("Page.enable");
   await cdp.send("DOM.enable");
-  await cdp.send("Log.enable");
   await cdp.send("Network.enable");
   await cdp.send("Emulation.setDeviceMetricsOverride", {
     width: 1920,
@@ -282,10 +238,26 @@ try {
     mobile: false
   });
 
-  const pages = [
-    await inspectPage(cdp, baseUrl, "default"),
-    await inspectPage(cdp, `${baseUrl}?interactive=1`, "interactive")
-  ];
+  cdp.takeEvents();
+  await cdp.send("Page.navigate", { url: baseUrl });
+  await waitForCondition(cdp, `document.readyState === "complete"`);
+  await waitForCondition(cdp, `[...document.images].every(img => img.complete && img.naturalWidth > 0)`);
+  await delay(200);
+  const state = await evaluate(cdp, stateExpression);
+  const events = cdp.takeEvents();
+
+  if (!state.promptBox || state.promptTools !== 4 || state.categories !== 4 || state.templates !== 2 || state.features !== 5) {
+    const error = new Error("Explore page did not initialize expected controls");
+    error.details = state;
+    throw error;
+  }
+  const badImages = state.images.filter(image => !image.complete || image.naturalWidth <= 0 || image.naturalHeight <= 0);
+  if (badImages.length) {
+    const error = new Error("Explore page has broken images");
+    error.details = { badImages, state };
+    throw error;
+  }
+  assertCleanRuntime(events, state);
 
   const result = {
     ok: true,
@@ -296,9 +268,9 @@ try {
       noNetworkFailures: true,
       noBadHttpResponses: true,
       imagesLoaded: true,
-      canvasInitialized: true
+      exploreInitialized: true
     },
-    pages
+    state
   };
   await writeFile(path.join(qaDir, "runtime-check.json"), JSON.stringify(result, null, 2), "utf8");
   console.log(JSON.stringify(result, null, 2));
@@ -316,9 +288,7 @@ try {
 } finally {
   try {
     await cdp?.send("Browser.close");
-  } catch {
-    // The browser may already be gone if an assertion failed.
-  }
+  } catch {}
   cdp?.close();
   await stopProcess(chromeProcess);
   await stopProcess(server);

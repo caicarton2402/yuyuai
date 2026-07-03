@@ -1,36 +1,17 @@
-[
-  {
-    "refSize": [
+{
+  "ok": true,
+  "kind": "explore-render",
+  "screenshot": "replica/yuyu-explore-1920x863-top.png",
+  "reference": "docs/design-references/live-explore/explore-current-viewport.png",
+  "note": "Reference is the logged-in source page; local render intentionally replaces original branding with YUYU and implements interactive controls.",
+  "stats": {
+    "path": "replica/yuyu-explore-1920x863-top.png",
+    "size": [
       1920,
       863
     ],
-    "repSize": [
-      1920,
-      863
-    ],
-    "comparedSize": [
-      1920,
-      863
-    ],
-    "sizeMismatch": false,
-    "changedPixels": 0,
-    "totalPixels": 1656960,
-    "changedRatio": 0.0,
-    "avgChannelDelta": 0.05302,
-    "maxChannelDelta": 7,
-    "bbox": [
-      0,
-      856,
-      1920,
-      863
-    ],
-    "diff": "diff/yuyu-1920x863-top-diff.png",
-    "viewport": [
-      1920,
-      863
-    ],
-    "kind": "top",
-    "ref": "reference/yuyu-1920x863-top.png",
-    "rep": "replica/yuyu-1920x863-top.png"
+    "nonDarkPixels": 916875,
+    "brightPixels": 169215,
+    "ok": true
   }
-]
+}

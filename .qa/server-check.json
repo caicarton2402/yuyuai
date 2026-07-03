@@ -3,25 +3,19 @@
     "url": "http://127.0.0.1:5180/",
     "status": 200,
     "type": "text/html",
-    "length": "5412"
+    "length": "8291"
   },
   {
     "url": "http://127.0.0.1:5180/src/styles.css",
     "status": 200,
     "type": "text/css",
-    "length": "9559"
+    "length": "15507"
   },
   {
     "url": "http://127.0.0.1:5180/src/app.js",
     "status": 200,
     "type": "text/javascript",
-    "length": "7197"
-  },
-  {
-    "url": "http://127.0.0.1:5180/public/assets/yuyu-captured-state.png",
-    "status": 200,
-    "type": "image/png",
-    "length": "488679"
+    "length": "9005"
   },
   {
     "url": "http://127.0.0.1:5180/public/assets/yuyu-logo.png",
@@ -36,27 +30,39 @@
     "length": "8232"
   },
   {
-    "url": "http://127.0.0.1:5180/public/assets/node-character-snapshot.png",
+    "url": "http://127.0.0.1:5180/public/assets/explore/template-dialog.png",
     "status": 200,
     "type": "image/png",
-    "length": "147091"
+    "length": "21240"
   },
   {
-    "url": "http://127.0.0.1:5180/public/assets/node-location-snapshot.png",
+    "url": "http://127.0.0.1:5180/public/assets/explore/template-narration.png",
     "status": 200,
     "type": "image/png",
-    "length": "83485"
+    "length": "25447"
   },
   {
-    "url": "http://127.0.0.1:5180/public/assets/node-video-snapshot.png",
+    "url": "http://127.0.0.1:5180/public/assets/explore/feature-effects.png",
     "status": 200,
     "type": "image/png",
-    "length": "15185"
+    "length": "113778"
   },
   {
-    "url": "http://127.0.0.1:5180/public/assets/favicon.svg",
+    "url": "http://127.0.0.1:5180/public/assets/explore/feature-seedance.png",
     "status": 200,
-    "type": "image/svg+xml",
-    "length": "221"
+    "type": "image/png",
+    "length": "113347"
+  },
+  {
+    "url": "http://127.0.0.1:5180/public/assets/explore/feature-grid.png",
+    "status": 200,
+    "type": "image/png",
+    "length": "128455"
+  },
+  {
+    "url": "http://127.0.0.1:5180/public/assets/explore/feature-panorama.png",
+    "status": 200,
+    "type": "image/png",
+    "length": "81632"
   }
 ]

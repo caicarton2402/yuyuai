@@ -7,112 +7,49 @@
     "noNetworkFailures": true,
     "noBadHttpResponses": true,
     "imagesLoaded": true,
-    "canvasInitialized": true
+    "exploreInitialized": true
   },
-  "pages": [
-    {
-      "mode": "default",
-      "url": "http://127.0.0.1:5210/",
-      "state": {
-        "title": "YUYU - AI Video Canvas",
-        "readyState": "complete",
-        "url": "http://127.0.0.1:5210/",
-        "interactiveActive": false,
-        "pixelOpacity": "1",
-        "nodeCount": 3,
-        "connectorCount": 2,
-        "images": [
-          {
-            "src": "./public/assets/yuyu-captured-state.png",
-            "complete": true,
-            "naturalWidth": 1920,
-            "naturalHeight": 863
-          },
-          {
-            "src": "./public/assets/node-character-snapshot.png",
-            "complete": true,
-            "naturalWidth": 289,
-            "naturalHeight": 450
-          },
-          {
-            "src": "./public/assets/node-location-snapshot.png",
-            "complete": true,
-            "naturalWidth": 509,
-            "naturalHeight": 305
-          },
-          {
-            "src": "./public/assets/node-video-snapshot.png",
-            "complete": true,
-            "naturalWidth": 506,
-            "naturalHeight": 303
-          },
-          {
-            "src": "./public/assets/yuyu-logo.png",
-            "complete": true,
-            "naturalWidth": 139,
-            "naturalHeight": 256
-          }
-        ],
-        "scripts": [
-          "./src/app.js"
-        ],
-        "stylesheets": [
-          "http://127.0.0.1:5210/src/styles.css"
-        ]
+  "state": {
+    "title": "YUYU - AI Explore",
+    "readyState": "complete",
+    "promptBox": true,
+    "promptTools": 4,
+    "categories": 4,
+    "templates": 2,
+    "features": 5,
+    "workspaceHidden": true,
+    "activeCategory": "overseas",
+    "images": [
+      {
+        "src": "./public/assets/yuyu-logo.png",
+        "complete": true,
+        "naturalWidth": 139,
+        "naturalHeight": 256
       },
-      "eventCount": 85
-    },
-    {
-      "mode": "interactive",
-      "url": "http://127.0.0.1:5210/?interactive=1",
-      "state": {
-        "title": "YUYU - AI Video Canvas",
-        "readyState": "complete",
-        "url": "http://127.0.0.1:5210/?interactive=1",
-        "interactiveActive": true,
-        "pixelOpacity": "0",
-        "nodeCount": 3,
-        "connectorCount": 2,
-        "images": [
-          {
-            "src": "./public/assets/yuyu-captured-state.png",
-            "complete": true,
-            "naturalWidth": 1920,
-            "naturalHeight": 863
-          },
-          {
-            "src": "./public/assets/node-character-snapshot.png",
-            "complete": true,
-            "naturalWidth": 289,
-            "naturalHeight": 450
-          },
-          {
-            "src": "./public/assets/node-location-snapshot.png",
-            "complete": true,
-            "naturalWidth": 509,
-            "naturalHeight": 305
-          },
-          {
-            "src": "./public/assets/node-video-snapshot.png",
-            "complete": true,
-            "naturalWidth": 506,
-            "naturalHeight": 303
-          },
-          {
-            "src": "./public/assets/yuyu-logo.png",
-            "complete": true,
-            "naturalWidth": 139,
-            "naturalHeight": 256
-          }
-        ],
-        "scripts": [
-          "./src/app.js"
-        ],
-        "stylesheets": [
-          "http://127.0.0.1:5210/src/styles.css"
-        ]
+      {
+        "src": "./public/assets/explore/feature-effects.png",
+        "complete": true,
+        "naturalWidth": 343,
+        "naturalHeight": 169
       },
-      "eventCount": 53
-    }
-  ]
+      {
+        "src": "./public/assets/explore/feature-seedance.png",
+        "complete": true,
+        "naturalWidth": 343,
+        "naturalHeight": 169
+      },
+      {
+        "src": "./public/assets/explore/feature-grid.png",
+        "complete": true,
+        "naturalWidth": 342,
+        "naturalHeight": 169
+      },
+      {
+        "src": "./public/assets/explore/feature-panorama.png",
+        "complete": true,
+        "naturalWidth": 343,
+        "naturalHeight": 169
+      }
+    ]
+  }
 }

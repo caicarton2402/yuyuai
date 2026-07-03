@@ -21,9 +21,7 @@ async function findFreePort(start) {
     const available = await new Promise(resolve => {
       const server = net.createServer();
       server.once("error", () => resolve(false));
-      server.once("listening", () => {
-        server.close(() => resolve(true));
-      });
+      server.once("listening", () => server.close(() => resolve(true)));
       server.listen(port, "127.0.0.1");
     });
     if (available) return port;
@@ -33,17 +31,15 @@ async function findFreePort(start) {
 
 async function waitForHttp(url, timeoutMs = 10000) {
   const deadline = Date.now() + timeoutMs;
-  let lastError;
   while (Date.now() < deadline) {
     try {
-      const response = await fetch(url, { method: "GET" });
+      const response = await fetch(url);
       if (response.ok) return response;
-    } catch (error) {
-      lastError = error;
+    } catch {
+      await delay(200);
     }
-    await delay(200);
   }
-  throw new Error(`Timed out waiting for ${url}: ${lastError?.message || "no response"}`);
+  throw new Error(`Timed out waiting for ${url}`);
 }
 
 function spawnHidden(command, args, options = {}) {
@@ -68,34 +64,26 @@ async function stopProcess(child) {
 }
 
 async function removeWithRetry(target) {
-  let lastError;
   for (let attempt = 0; attempt < 8; attempt += 1) {
     try {
       await rm(target, { recursive: true, force: true });
       return;
-    } catch (error) {
-      lastError = error;
+    } catch {
       await delay(250);
     }
   }
-  throw lastError;
 }
 
 async function collectOutput(child) {
   let stdout = "";
   let stderr = "";
-  child.stdout?.on("data", chunk => {
-    stdout += chunk.toString();
-  });
-  child.stderr?.on("data", chunk => {
-    stderr += chunk.toString();
-  });
+  child.stdout?.on("data", chunk => { stdout += chunk.toString(); });
+  child.stderr?.on("data", chunk => { stderr += chunk.toString(); });
   return () => ({ stdout, stderr });
 }
 
 class CdpClient {
   constructor(webSocketUrl) {
-    this.webSocketUrl = webSocketUrl;
     this.nextId = 1;
     this.pending = new Map();
     this.ws = new WebSocket(webSocketUrl);
@@ -130,19 +118,18 @@ class CdpClient {
   }
 }
 
-async function getPageWebSocket(debugPort, expectedUrl) {
+async function getPageWebSocket(debugPort) {
   const deadline = Date.now() + 10000;
   while (Date.now() < deadline) {
     try {
       const targets = await fetch(`http://127.0.0.1:${debugPort}/json/list`).then(response => response.json());
-      const page = targets.find(target => target.type === "page" && target.url.startsWith(expectedUrl));
+      const page = targets.find(target => target.type === "page");
       if (page?.webSocketDebuggerUrl) return page.webSocketDebuggerUrl;
     } catch {
-      // Chrome can take a moment to expose the target list.
+      await delay(200);
     }
-    await delay(200);
   }
-  throw new Error(`Could not find Chrome page target for ${expectedUrl}`);
+  throw new Error("Could not find Chrome page target");
 }
 
 async function evaluate(cdp, expression) {
@@ -157,7 +144,7 @@ async function evaluate(cdp, expression) {
   return result.result.value;
 }
 
-async function waitForCondition(cdp, expression, timeoutMs = 5000) {
+async function waitForCondition(cdp, expression, timeoutMs = 8000) {
   const deadline = Date.now() + timeoutMs;
   let lastValue;
   while (Date.now() < deadline) {
@@ -168,32 +155,6 @@ async function waitForCondition(cdp, expression, timeoutMs = 5000) {
   throw new Error(`Timed out waiting for condition: ${expression}; last value: ${JSON.stringify(lastValue)}`);
 }
 
-async function mouseDrag(cdp, from, to) {
-  await cdp.send("Input.dispatchMouseEvent", {
-    type: "mousePressed",
-    x: from.x,
-    y: from.y,
-    button: "left",
-    buttons: 1,
-    clickCount: 1
-  });
-  await cdp.send("Input.dispatchMouseEvent", {
-    type: "mouseMoved",
-    x: to.x,
-    y: to.y,
-    button: "left",
-    buttons: 1
-  });
-  await cdp.send("Input.dispatchMouseEvent", {
-    type: "mouseReleased",
-    x: to.x,
-    y: to.y,
-    button: "left",
-    buttons: 0,
-    clickCount: 1
-  });
-}
-
 function assertCheck(condition, message, details = {}) {
   if (!condition) {
     const error = new Error(message);
@@ -202,43 +163,25 @@ function assertCheck(condition, message, details = {}) {
   }
 }
 
-function snapshotExpression() {
-  return `(() => {
-    const $ = selector => document.querySelector(selector);
-    const nodes = [...document.querySelectorAll(".node")].map(node => ({
-      id: node.dataset.node,
-      x: node.style.getPropertyValue("--x"),
-      y: node.style.getPropertyValue("--y")
-    }));
-    const paths = [...document.querySelectorAll(".connector-layer path")].map(path => path.getAttribute("d") || "");
-    const images = [...document.images].map(img => ({
-      src: img.getAttribute("src"),
-      complete: img.complete,
-      width: img.naturalWidth,
-      height: img.naturalHeight
-    }));
-    return {
-      readyState: document.readyState,
-      interactiveActive: $(".app-shell")?.classList.contains("interactive-active") || false,
-      pixelOpacity: getComputedStyle($(".pixel-underlay")).opacity,
-      zoomText: $("#zoomValue")?.textContent.trim() || "",
-      rootZoom: getComputedStyle(document.documentElement).getPropertyValue("--zoom").trim(),
-      panX: getComputedStyle(document.documentElement).getPropertyValue("--pan-x").trim(),
-      panY: getComputedStyle(document.documentElement).getPropertyValue("--pan-y").trim(),
-      activeMode: $(".mode-switch button.active")?.dataset.mode || "",
-      ariaSelectedEditor: $("[data-mode='editor']")?.getAttribute("aria-selected") || "",
-      nodeCount: nodes.length,
-      nodes,
-      connectorPaths: paths,
-      images,
-      toastVisible: $("#toast")?.classList.contains("show") || false
-    };
-  })()`;
-}
+const snapshotExpression = `(() => ({
+  readyState: document.readyState,
+  activeTool: document.querySelector("[data-tool][aria-pressed='true']")?.dataset.tool || "",
+  toolPanelHidden: document.querySelector("#toolPanel")?.hidden,
+  toolPanelText: document.querySelector("#toolPanel")?.innerText || "",
+  activeCategory: document.querySelector("[data-category].active")?.dataset.category || "",
+  promptPrefix: document.querySelector("#promptPrefix")?.textContent || "",
+  promptValue: document.querySelector("#promptInput")?.value || "",
+  templateCount: document.querySelectorAll("[data-template]").length,
+  selectedTemplate: document.querySelector("[data-template].selected")?.dataset.template || "",
+  workspaceHidden: document.querySelector("#workspacePanel")?.hidden,
+  workspaceTitle: document.querySelector("#workspaceTitle")?.textContent || "",
+  workspaceCopy: document.querySelector("#workspaceCopy")?.textContent || "",
+  toastVisible: document.querySelector("#toast")?.classList.contains("show") || false
+}))()`;
 
 const serverPort = Number(process.env.YUYU_INTERACTIVE_QA_PORT || await findFreePort(5190));
 const debugPort = Number(process.env.YUYU_CDP_PORT || await findFreePort(9290));
-const url = `http://127.0.0.1:${serverPort}/?interactive=1`;
+const url = `http://127.0.0.1:${serverPort}/`;
 
 const server = spawnHidden("python", ["-m", "http.server", String(serverPort), "--bind", "127.0.0.1"]);
 const readServerOutput = await collectOutput(server);
@@ -247,7 +190,7 @@ let readChromeOutput = () => ({ stdout: "", stderr: "" });
 let cdp;
 
 try {
-  await waitForHttp(`http://127.0.0.1:${serverPort}/`);
+  await waitForHttp(url);
 
   chromeProcess = spawnHidden(chrome, [
     "--headless=new",
@@ -257,13 +200,13 @@ try {
     "--hide-scrollbars",
     `--user-data-dir=${profileDir}`,
     `--remote-debugging-port=${debugPort}`,
-    "--window-size=1936,951",
-    url
+    "--window-size=1920,863",
+    "about:blank"
   ]);
   readChromeOutput = await collectOutput(chromeProcess);
 
   await waitForHttp(`http://127.0.0.1:${debugPort}/json/version`);
-  const webSocketUrl = await getPageWebSocket(debugPort, url);
+  const webSocketUrl = await getPageWebSocket(debugPort);
   cdp = new CdpClient(webSocketUrl);
   await cdp.open();
   await cdp.send("Runtime.enable");
@@ -275,87 +218,74 @@ try {
     deviceScaleFactor: 1,
     mobile: false
   });
-  await waitForCondition(cdp, `document.readyState === "complete"`, 15000);
-  await waitForCondition(cdp, `(() => {
-    const pixel = document.querySelector(".pixel-underlay");
-    return pixel && Number(getComputedStyle(pixel).opacity) <= 0.01;
-  })()`, 15000);
-  await waitForCondition(cdp, `(() => {
-    const images = [...document.images];
-    return images.length > 0 && images.every(img => img.complete && img.naturalWidth > 0 && img.naturalHeight > 0);
-  })()`, 15000);
+  await cdp.send("Page.navigate", { url });
+  await waitForCondition(cdp, `document.readyState === "complete"`);
+  await waitForCondition(cdp, `!!document.querySelector(".prompt-box")`);
+  await waitForCondition(cdp, `[...document.images].every(img => img.complete && img.naturalWidth > 0)`);
 
-  const initial = await evaluate(cdp, snapshotExpression());
-  assertCheck(initial.readyState === "complete", "Page did not finish loading", initial);
-  assertCheck(initial.interactiveActive, "Interactive mode did not activate from query string", initial);
-  assertCheck(Number(initial.pixelOpacity) <= 0.01, "Captured pixel layer should be hidden in interactive mode", initial);
-  assertCheck(initial.nodeCount === 3, "Expected the three captured canvas nodes", initial);
-  assertCheck(initial.zoomText === "78%", "Expected initial zoom label to match captured state", initial);
-  assertCheck(initial.connectorPaths.every(value => value.startsWith("M ")), "Connector paths were not generated", initial);
-  assertCheck(initial.images.every(image => image.complete && image.width > 0 && image.height > 0), "One or more images failed to load", initial);
+  const initial = await evaluate(cdp, snapshotExpression);
+  assertCheck(initial.activeCategory === "overseas", "Expected overseas category active by default", initial);
+  assertCheck(initial.promptPrefix.includes("出海短剧"), "Default prompt prefix should be overseas short drama", initial);
+  assertCheck(initial.templateCount === 2, "Expected two prompt template cards", initial);
+  assertCheck(initial.workspaceHidden === true, "Workspace should be hidden on initial load", initial);
 
-  await evaluate(cdp, `document.querySelector("#zoomIn").click()`);
+  await evaluate(cdp, `document.querySelector("[data-tool='upload']").click()`);
   await delay(120);
-  const afterZoom = await evaluate(cdp, snapshotExpression());
-  assertCheck(afterZoom.zoomText === "86%", "Zoom-in control did not update the zoom label", afterZoom);
+  const afterUploadTool = await evaluate(cdp, snapshotExpression);
+  assertCheck(afterUploadTool.activeTool === "upload", "Upload tool did not activate", afterUploadTool);
+  assertCheck(afterUploadTool.toolPanelHidden === false && afterUploadTool.toolPanelText.includes("上传参考素材"), "Upload tool panel did not open", afterUploadTool);
 
-  await evaluate(cdp, `document.querySelector("[data-mode='editor']").click()`);
+  await evaluate(cdp, `document.querySelector("[data-chip='上传图片']").click()`);
   await delay(120);
-  const afterMode = await evaluate(cdp, snapshotExpression());
-  assertCheck(afterMode.activeMode === "editor" && afterMode.ariaSelectedEditor === "true", "Mode switch did not update selected state", afterMode);
+  const afterChip = await evaluate(cdp, snapshotExpression);
+  assertCheck(afterChip.promptValue.includes("上传图片"), "Tool chip did not append to prompt", afterChip);
 
-  await evaluate(cdp, `document.querySelector(".tool-add").click()`);
+  await evaluate(cdp, `document.querySelector("[data-category='comic']").click()`);
   await delay(120);
-  const afterAdd = await evaluate(cdp, snapshotExpression());
-  assertCheck(afterAdd.nodeCount === 4, "Add tool did not create a prompt node", afterAdd);
-  assertCheck(afterAdd.nodes.some(node => node.id?.startsWith("prompt-")), "Prompt node missing after add action", afterAdd);
+  const afterCategory = await evaluate(cdp, snapshotExpression);
+  assertCheck(afterCategory.activeCategory === "comic", "Comic category did not activate", afterCategory);
+  assertCheck(afterCategory.promptPrefix.includes("短剧漫剧"), "Prompt prefix did not update for comic category", afterCategory);
+  assertCheck(afterCategory.templateCount === 2, "Template list did not rerender after category switch", afterCategory);
 
-  const characterRect = await evaluate(cdp, `(() => {
-    const rect = document.querySelector("[data-node='character']").getBoundingClientRect();
-    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-  })()`);
-  await mouseDrag(cdp, characterRect, { x: characterRect.x + 90, y: characterRect.y + 44 });
+  await evaluate(cdp, `document.querySelector("[data-template]").click()`);
   await delay(160);
-  const afterDrag = await evaluate(cdp, snapshotExpression());
-  const draggedCharacter = afterDrag.nodes.find(node => node.id === "character");
-  assertCheck(draggedCharacter.x !== "508px" || draggedCharacter.y !== "52px", "Character node did not move after drag", afterDrag);
+  const afterTemplate = await evaluate(cdp, snapshotExpression);
+  assertCheck(afterTemplate.selectedTemplate !== "", "Template did not become selected", afterTemplate);
+  assertCheck(afterTemplate.promptValue.length > 10, "Template did not populate prompt", afterTemplate);
+  assertCheck(afterTemplate.workspaceHidden === false, "Template click did not open workspace panel", afterTemplate);
 
-  await mouseDrag(cdp, { x: 1810, y: 760 }, { x: 1730, y: 716 });
+  await evaluate(cdp, `document.querySelector("[data-feature='seedance']").click()`);
   await delay(160);
-  const afterPan = await evaluate(cdp, snapshotExpression());
-  assertCheck(afterPan.panX !== "0px" || afterPan.panY !== "0px", "Canvas pan did not update root pan variables", afterPan);
+  const afterFeature = await evaluate(cdp, snapshotExpression);
+  assertCheck(afterFeature.workspaceTitle.includes("Seedance2.0"), "Seedance feature did not update workspace", afterFeature);
+  assertCheck(afterFeature.workspaceCopy.includes("视频生成"), "Seedance feature copy missing", afterFeature);
 
-  await evaluate(cdp, `document.querySelector("#autoLayout").click()`);
+  await evaluate(cdp, `document.querySelector("#sendBtn").click()`);
   await delay(160);
-  const afterReset = await evaluate(cdp, snapshotExpression());
-  const resetCharacter = afterReset.nodes.find(node => node.id === "character");
-  assertCheck(afterReset.zoomText === "78%", "Auto layout did not restore zoom", afterReset);
-  assertCheck(afterReset.panX === "0px" && afterReset.panY === "0px", "Auto layout did not reset pan", afterReset);
-  assertCheck(resetCharacter.x === "508px" && resetCharacter.y === "52px", "Auto layout did not restore character node position", afterReset);
+  const afterSend = await evaluate(cdp, snapshotExpression);
+  assertCheck(afterSend.workspaceHidden === false, "Send button did not keep workspace open", afterSend);
+  assertCheck(afterSend.workspaceTitle.length > 0, "Workspace title missing after send", afterSend);
 
   const result = {
     ok: true,
     url,
     checks: {
-      loaded: true,
-      queryActivatesInteractiveLayer: true,
-      imagesLoaded: true,
-      connectorPathsGenerated: true,
-      zoomInUpdatesLabel: true,
-      modeSwitchUpdatesState: true,
-      addToolCreatesPromptNode: true,
-      nodeDragMovesCard: true,
-      canvasPanUpdatesTransform: true,
-      autoLayoutRestoresCapturedState: true
+      defaultOverseasCategory: true,
+      uploadToolOpensPanel: true,
+      chipAppendsPrompt: true,
+      categorySwitchRerendersTemplates: true,
+      templatePopulatesPrompt: true,
+      featureUpdatesWorkspace: true,
+      sendCreatesWorkspace: true
     },
     states: {
       initial,
-      afterZoom,
-      afterMode,
-      afterAdd,
-      afterDrag,
-      afterPan,
-      afterReset
+      afterUploadTool,
+      afterChip,
+      afterCategory,
+      afterTemplate,
+      afterFeature,
+      afterSend
     }
   };
   await writeFile(path.join(qaDir, "interactive-dom-check.json"), JSON.stringify(result, null, 2), "utf8");
@@ -374,9 +304,7 @@ try {
 } finally {
   try {
     await cdp?.send("Browser.close");
-  } catch {
-    // The browser may already be gone if an earlier assertion failed.
-  }
+  } catch {}
   cdp?.close();
   await stopProcess(chromeProcess);
   await stopProcess(server);

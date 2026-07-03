@@ -1,499 +1,119 @@
 {
   "ok": true,
-  "url": "http://127.0.0.1:5190/?interactive=1",
+  "url": "http://127.0.0.1:5190/",
   "checks": {
-    "loaded": true,
-    "queryActivatesInteractiveLayer": true,
-    "imagesLoaded": true,
-    "connectorPathsGenerated": true,
-    "zoomInUpdatesLabel": true,
-    "modeSwitchUpdatesState": true,
-    "addToolCreatesPromptNode": true,
-    "nodeDragMovesCard": true,
-    "canvasPanUpdatesTransform": true,
-    "autoLayoutRestoresCapturedState": true
+    "defaultOverseasCategory": true,
+    "uploadToolOpensPanel": true,
+    "chipAppendsPrompt": true,
+    "categorySwitchRerendersTemplates": true,
+    "templatePopulatesPrompt": true,
+    "featureUpdatesWorkspace": true,
+    "sendCreatesWorkspace": true
   },
   "states": {
     "initial": {
       "readyState": "complete",
-      "interactiveActive": true,
-      "pixelOpacity": "0",
-      "zoomText": "78%",
-      "rootZoom": "0.780",
-      "panX": "0px",
-      "panY": "0px",
-      "activeMode": "canvas",
-      "ariaSelectedEditor": "false",
-      "nodeCount": 3,
-      "nodes": [
-        {
-          "id": "character",
-          "x": "508px",
-          "y": "52px"
-        },
-        {
-          "id": "location",
-          "x": "397px",
-          "y": "538px"
-        },
-        {
-          "id": "video",
-          "x": "1018px",
-          "y": "333px"
-        }
-      ],
-      "connectorPaths": [
-        "M 797 290 C 911.92 256, 911.92 531, 1018 497",
-        "M 906 696 C 964.24 732, 964.24 461, 1018 497"
-      ],
-      "images": [
-        {
-          "src": "./public/assets/yuyu-captured-state.png",
-          "complete": true,
-          "width": 1920,
-          "height": 863
-        },
-        {
-          "src": "./public/assets/node-character-snapshot.png",
-          "complete": true,
-          "width": 289,
-          "height": 450
-        },
-        {
-          "src": "./public/assets/node-location-snapshot.png",
-          "complete": true,
-          "width": 509,
-          "height": 305
-        },
-        {
-          "src": "./public/assets/node-video-snapshot.png",
-          "complete": true,
-          "width": 506,
-          "height": 303
-        },
-        {
-          "src": "./public/assets/yuyu-logo.png",
-          "complete": true,
-          "width": 139,
-          "height": 256
-        }
-      ],
+      "activeTool": "",
+      "toolPanelHidden": true,
+      "toolPanelText": "",
+      "activeCategory": "overseas",
+      "promptPrefix": "出海短剧 /",
+      "promptValue": "",
+      "templateCount": 2,
+      "selectedTemplate": "",
+      "workspaceHidden": true,
+      "workspaceTitle": "出海短剧项目已创建",
+      "workspaceCopy": "选择模板或输入灵感后，系统会拆解角色、场景、分镜与视频生成任务。",
       "toastVisible": false
     },
-    "afterZoom": {
+    "afterUploadTool": {
       "readyState": "complete",
-      "interactiveActive": true,
-      "pixelOpacity": "0",
-      "zoomText": "86%",
-      "rootZoom": "0.860",
-      "panX": "0px",
-      "panY": "0px",
-      "activeMode": "canvas",
-      "ariaSelectedEditor": "false",
-      "nodeCount": 3,
-      "nodes": [
-        {
-          "id": "character",
-          "x": "508px",
-          "y": "52px"
-        },
-        {
-          "id": "location",
-          "x": "397px",
-          "y": "538px"
-        },
-        {
-          "id": "video",
-          "x": "1018px",
-          "y": "333px"
-        }
-      ],
-      "connectorPaths": [
-        "M 797 290 C 911.92 256, 911.92 531, 1018 497",
-        "M 906 696 C 964.24 732, 964.24 461, 1018 497"
-      ],
-      "images": [
-        {
-          "src": "./public/assets/yuyu-captured-state.png",
-          "complete": true,
-          "width": 1920,
-          "height": 863
-        },
-        {
-          "src": "./public/assets/node-character-snapshot.png",
-          "complete": true,
-          "width": 289,
-          "height": 450
-        },
-        {
-          "src": "./public/assets/node-location-snapshot.png",
-          "complete": true,
-          "width": 509,
-          "height": 305
-        },
-        {
-          "src": "./public/assets/node-video-snapshot.png",
-          "complete": true,
-          "width": 506,
-          "height": 303
-        },
-        {
-          "src": "./public/assets/yuyu-logo.png",
-          "complete": true,
-          "width": 139,
-          "height": 256
-        }
-      ],
+      "activeTool": "upload",
+      "toolPanelHidden": false,
+      "toolPanelText": "上传参考素材\n\n支持图片、视频片段、角色设定和文档。素材会进入当前故事项目，作为角色、场景或镜头参考。\n\n上传图片\n上传视频\n导入脚本",
+      "activeCategory": "overseas",
+      "promptPrefix": "出海短剧 /",
+      "promptValue": "",
+      "templateCount": 2,
+      "selectedTemplate": "",
+      "workspaceHidden": true,
+      "workspaceTitle": "出海短剧项目已创建",
+      "workspaceCopy": "选择模板或输入灵感后，系统会拆解角色、场景、分镜与视频生成任务。",
       "toastVisible": false
     },
-    "afterMode": {
+    "afterChip": {
       "readyState": "complete",
-      "interactiveActive": true,
-      "pixelOpacity": "0",
-      "zoomText": "86%",
-      "rootZoom": "0.860",
-      "panX": "0px",
-      "panY": "0px",
-      "activeMode": "editor",
-      "ariaSelectedEditor": "true",
-      "nodeCount": 3,
-      "nodes": [
-        {
-          "id": "character",
-          "x": "508px",
-          "y": "52px"
-        },
-        {
-          "id": "location",
-          "x": "397px",
-          "y": "538px"
-        },
-        {
-          "id": "video",
-          "x": "1018px",
-          "y": "333px"
-        }
-      ],
-      "connectorPaths": [
-        "M 797 290 C 911.92 256, 911.92 531, 1018 497",
-        "M 906 696 C 964.24 732, 964.24 461, 1018 497"
-      ],
-      "images": [
-        {
-          "src": "./public/assets/yuyu-captured-state.png",
-          "complete": true,
-          "width": 1920,
-          "height": 863
-        },
-        {
-          "src": "./public/assets/node-character-snapshot.png",
-          "complete": true,
-          "width": 289,
-          "height": 450
-        },
-        {
-          "src": "./public/assets/node-location-snapshot.png",
-          "complete": true,
-          "width": 509,
-          "height": 305
-        },
-        {
-          "src": "./public/assets/node-video-snapshot.png",
-          "complete": true,
-          "width": 506,
-          "height": 303
-        },
-        {
-          "src": "./public/assets/yuyu-logo.png",
-          "complete": true,
-          "width": 139,
-          "height": 256
-        }
-      ],
+      "activeTool": "upload",
+      "toolPanelHidden": false,
+      "toolPanelText": "上传参考素材\n\n支持图片、视频片段、角色设定和文档。素材会进入当前故事项目，作为角色、场景或镜头参考。\n\n上传图片\n上传视频\n导入脚本",
+      "activeCategory": "overseas",
+      "promptPrefix": "出海短剧 /",
+      "promptValue": "上传图片",
+      "templateCount": 2,
+      "selectedTemplate": "",
+      "workspaceHidden": true,
+      "workspaceTitle": "出海短剧项目已创建",
+      "workspaceCopy": "选择模板或输入灵感后，系统会拆解角色、场景、分镜与视频生成任务。",
       "toastVisible": true
     },
-    "afterAdd": {
+    "afterCategory": {
       "readyState": "complete",
-      "interactiveActive": true,
-      "pixelOpacity": "0",
-      "zoomText": "86%",
-      "rootZoom": "0.860",
-      "panX": "0px",
-      "panY": "0px",
-      "activeMode": "editor",
-      "ariaSelectedEditor": "true",
-      "nodeCount": 4,
-      "nodes": [
-        {
-          "id": "character",
-          "x": "508px",
-          "y": "52px"
-        },
-        {
-          "id": "location",
-          "x": "397px",
-          "y": "538px"
-        },
-        {
-          "id": "video",
-          "x": "1018px",
-          "y": "333px"
-        },
-        {
-          "id": "prompt-1783079047163",
-          "x": "820px",
-          "y": "182px"
-        }
-      ],
-      "connectorPaths": [
-        "M 797 290 C 911.92 256, 911.92 531, 1018 497",
-        "M 906 696 C 964.24 732, 964.24 461, 1018 497"
-      ],
-      "images": [
-        {
-          "src": "./public/assets/yuyu-captured-state.png",
-          "complete": true,
-          "width": 1920,
-          "height": 863
-        },
-        {
-          "src": "./public/assets/node-character-snapshot.png",
-          "complete": true,
-          "width": 289,
-          "height": 450
-        },
-        {
-          "src": "./public/assets/node-location-snapshot.png",
-          "complete": true,
-          "width": 509,
-          "height": 305
-        },
-        {
-          "src": "./public/assets/node-video-snapshot.png",
-          "complete": true,
-          "width": 506,
-          "height": 303
-        },
-        {
-          "src": "./public/assets/yuyu-logo.png",
-          "complete": true,
-          "width": 139,
-          "height": 256
-        }
-      ],
+      "activeTool": "",
+      "toolPanelHidden": true,
+      "toolPanelText": "\n    上传参考素材\n    支持图片、视频片段、角色设定和文档。素材会进入当前故事项目，作为角色、场景或镜头参考。\n    \n      上传图片上传视频导入脚本\n    \n  ",
+      "activeCategory": "comic",
+      "promptPrefix": "短剧漫剧 /",
+      "promptValue": "上传图片",
+      "templateCount": 2,
+      "selectedTemplate": "",
+      "workspaceHidden": true,
+      "workspaceTitle": "出海短剧项目已创建",
+      "workspaceCopy": "选择模板或输入灵感后，系统会拆解角色、场景、分镜与视频生成任务。",
       "toastVisible": true
     },
-    "afterDrag": {
+    "afterTemplate": {
       "readyState": "complete",
-      "interactiveActive": true,
-      "pixelOpacity": "0",
-      "zoomText": "86%",
-      "rootZoom": "0.860",
-      "panX": "0px",
-      "panY": "0px",
-      "activeMode": "editor",
-      "ariaSelectedEditor": "true",
-      "nodeCount": 4,
-      "nodes": [
-        {
-          "id": "character",
-          "x": "590px",
-          "y": "92px"
-        },
-        {
-          "id": "location",
-          "x": "397px",
-          "y": "538px"
-        },
-        {
-          "id": "video",
-          "x": "1018px",
-          "y": "333px"
-        },
-        {
-          "id": "prompt-1783079047163",
-          "x": "820px",
-          "y": "182px"
-        }
-      ],
-      "connectorPaths": [
-        "M 879 330 C 951.28 296, 951.28 531, 1018 497",
-        "M 906 696 C 964.24 732, 964.24 461, 1018 497"
-      ],
-      "images": [
-        {
-          "src": "./public/assets/yuyu-captured-state.png",
-          "complete": true,
-          "width": 1920,
-          "height": 863
-        },
-        {
-          "src": "./public/assets/node-character-snapshot.png",
-          "complete": true,
-          "width": 289,
-          "height": 450
-        },
-        {
-          "src": "./public/assets/node-location-snapshot.png",
-          "complete": true,
-          "width": 509,
-          "height": 305
-        },
-        {
-          "src": "./public/assets/node-video-snapshot.png",
-          "complete": true,
-          "width": 506,
-          "height": 303
-        },
-        {
-          "src": "./public/assets/yuyu-logo.png",
-          "complete": true,
-          "width": 139,
-          "height": 256
-        }
-      ],
+      "activeTool": "",
+      "toolPanelHidden": true,
+      "toolPanelText": "\n    上传参考素材\n    支持图片、视频片段、角色设定和文档。素材会进入当前故事项目，作为角色、场景或镜头参考。\n    \n      上传图片上传视频导入脚本\n    \n  ",
+      "activeCategory": "comic",
+      "promptPrefix": "短剧漫剧 /",
+      "promptValue": "制作一段都市奇幻漫剧，女主在雨夜发现自己能听见时间倒流的声音。",
+      "templateCount": 2,
+      "selectedTemplate": "comic-dialog",
+      "workspaceHidden": false,
+      "workspaceTitle": "角色对白",
+      "workspaceCopy": "已载入「角色对白」模板，可继续生成故事策划。",
       "toastVisible": true
     },
-    "afterPan": {
+    "afterFeature": {
       "readyState": "complete",
-      "interactiveActive": true,
-      "pixelOpacity": "0",
-      "zoomText": "86%",
-      "rootZoom": "0.860",
-      "panX": "-80px",
-      "panY": "-44px",
-      "activeMode": "editor",
-      "ariaSelectedEditor": "true",
-      "nodeCount": 4,
-      "nodes": [
-        {
-          "id": "character",
-          "x": "590px",
-          "y": "92px"
-        },
-        {
-          "id": "location",
-          "x": "397px",
-          "y": "538px"
-        },
-        {
-          "id": "video",
-          "x": "1018px",
-          "y": "333px"
-        },
-        {
-          "id": "prompt-1783079047163",
-          "x": "820px",
-          "y": "182px"
-        }
-      ],
-      "connectorPaths": [
-        "M 879 330 C 951.28 296, 951.28 531, 1018 497",
-        "M 906 696 C 964.24 732, 964.24 461, 1018 497"
-      ],
-      "images": [
-        {
-          "src": "./public/assets/yuyu-captured-state.png",
-          "complete": true,
-          "width": 1920,
-          "height": 863
-        },
-        {
-          "src": "./public/assets/node-character-snapshot.png",
-          "complete": true,
-          "width": 289,
-          "height": 450
-        },
-        {
-          "src": "./public/assets/node-location-snapshot.png",
-          "complete": true,
-          "width": 509,
-          "height": 305
-        },
-        {
-          "src": "./public/assets/node-video-snapshot.png",
-          "complete": true,
-          "width": 506,
-          "height": 303
-        },
-        {
-          "src": "./public/assets/yuyu-logo.png",
-          "complete": true,
-          "width": 139,
-          "height": 256
-        }
-      ],
+      "activeTool": "",
+      "toolPanelHidden": true,
+      "toolPanelText": "\n    上传参考素材\n    支持图片、视频片段、角色设定和文档。素材会进入当前故事项目，作为角色、场景或镜头参考。\n    \n      上传图片上传视频导入脚本\n    \n  ",
+      "activeCategory": "comic",
+      "promptPrefix": "短剧漫剧 /",
+      "promptValue": "使用全能模式把故事提示词扩展为视频生成任务。",
+      "templateCount": 2,
+      "selectedTemplate": "comic-dialog",
+      "workspaceHidden": false,
+      "workspaceTitle": "Seedance2.0 视频生成",
+      "workspaceCopy": "使用全能模式把故事提示词扩展为视频生成任务。",
       "toastVisible": true
     },
-    "afterReset": {
+    "afterSend": {
       "readyState": "complete",
-      "interactiveActive": true,
-      "pixelOpacity": "0",
-      "zoomText": "78%",
-      "rootZoom": "0.780",
-      "panX": "0px",
-      "panY": "0px",
-      "activeMode": "editor",
-      "ariaSelectedEditor": "true",
-      "nodeCount": 4,
-      "nodes": [
-        {
-          "id": "character",
-          "x": "508px",
-          "y": "52px"
-        },
-        {
-          "id": "location",
-          "x": "397px",
-          "y": "538px"
-        },
-        {
-          "id": "video",
-          "x": "1018px",
-          "y": "333px"
-        },
-        {
-          "id": "prompt-1783079047163",
-          "x": "820px",
-          "y": "182px"
-        }
-      ],
-      "connectorPaths": [
-        "M 797 290 C 911.92 256, 911.92 531, 1018 497",
-        "M 906 696 C 964.24 732, 964.24 461, 1018 497"
-      ],
-      "images": [
-        {
-          "src": "./public/assets/yuyu-captured-state.png",
-          "complete": true,
-          "width": 1920,
-          "height": 863
-        },
-        {
-          "src": "./public/assets/node-character-snapshot.png",
-          "complete": true,
-          "width": 289,
-          "height": 450
-        },
-        {
-          "src": "./public/assets/node-location-snapshot.png",
-          "complete": true,
-          "width": 509,
-          "height": 305
-        },
-        {
-          "src": "./public/assets/node-video-snapshot.png",
-          "complete": true,
-          "width": 506,
-          "height": 303
-        },
-        {
-          "src": "./public/assets/yuyu-logo.png",
-          "complete": true,
-          "width": 139,
-          "height": 256
-        }
-      ],
+      "activeTool": "",
+      "toolPanelHidden": true,
+      "toolPanelText": "\n    上传参考素材\n    支持图片、视频片段、角色设定和文档。素材会进入当前故事项目，作为角色、场景或镜头参考。\n    \n      上传图片上传视频导入脚本\n    \n  ",
+      "activeCategory": "comic",
+      "promptPrefix": "短剧漫剧 /",
+      "promptValue": "使用全能模式把故事提示词扩展为视频生成任务。",
+      "templateCount": 2,
+      "selectedTemplate": "comic-dialog",
+      "workspaceHidden": false,
+      "workspaceTitle": "漫剧项目已创建",
+      "workspaceCopy": "已接收灵感：「使用全能模式把故事提示词扩展为视频生成任务。」",
       "toastVisible": true
     }
   }
