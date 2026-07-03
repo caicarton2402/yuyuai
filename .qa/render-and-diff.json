@@ -1,0 +1,50 @@
+{
+  "ok": true,
+  "chrome": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "report": [
+    {
+      "refSize": [
+        1920,
+        863
+      ],
+      "repSize": [
+        1920,
+        863
+      ],
+      "comparedSize": [
+        1920,
+        863
+      ],
+      "sizeMismatch": false,
+      "changedPixels": 0,
+      "totalPixels": 1656960,
+      "changedRatio": 0,
+      "avgChannelDelta": 0.05302,
+      "maxChannelDelta": 7,
+      "bbox": [
+        0,
+        856,
+        1920,
+        863
+      ],
+      "diff": "C:\\Users\\Administrator\\Documents\\复刻视频生成独立站\\seko-sensetime-clone\\diff\\seko-1920x863-top-diff.png",
+      "viewport": [
+        1920,
+        863
+      ],
+      "kind": "top",
+      "ref": "C:\\Users\\Administrator\\Documents\\复刻视频生成独立站\\seko-sensetime-clone\\reference\\seko-1920x863-top.png",
+      "rep": "C:\\Users\\Administrator\\Documents\\复刻视频生成独立站\\seko-sensetime-clone\\replica\\seko-1920x863-top.png"
+    }
+  ],
+  "interactiveCheck": {
+    "size": [
+      1920,
+      863
+    ],
+    "nonDarkPixels": 329871,
+    "changedFromDefaultPixels": 27901,
+    "maxDeltaFromDefault": 95,
+    "ok": true
+  }
+}

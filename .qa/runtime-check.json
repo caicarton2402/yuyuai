@@ -1,0 +1,106 @@
+{
+  "ok": true,
+  "baseUrl": "http://127.0.0.1:5210/",
+  "checks": {
+    "noConsoleErrors": true,
+    "noRuntimeExceptions": true,
+    "noNetworkFailures": true,
+    "noBadHttpResponses": true,
+    "imagesLoaded": true,
+    "canvasInitialized": true
+  },
+  "pages": [
+    {
+      "mode": "default",
+      "url": "http://127.0.0.1:5210/",
+      "state": {
+        "title": "Seko - World Class AI Video Generation Platform",
+        "readyState": "complete",
+        "url": "http://127.0.0.1:5210/",
+        "interactiveActive": false,
+        "pixelOpacity": "1",
+        "nodeCount": 3,
+        "connectorCount": 2,
+        "images": [
+          {
+            "src": "./public/assets/seko-captured-state.png",
+            "complete": true,
+            "naturalWidth": 1920,
+            "naturalHeight": 863
+          },
+          {
+            "src": "./public/assets/node-character-snapshot.png",
+            "complete": true,
+            "naturalWidth": 289,
+            "naturalHeight": 450
+          },
+          {
+            "src": "./public/assets/node-location-snapshot.png",
+            "complete": true,
+            "naturalWidth": 509,
+            "naturalHeight": 305
+          },
+          {
+            "src": "./public/assets/node-video-snapshot.png",
+            "complete": true,
+            "naturalWidth": 506,
+            "naturalHeight": 303
+          }
+        ],
+        "scripts": [
+          "./src/app.js"
+        ],
+        "stylesheets": [
+          "http://127.0.0.1:5210/src/styles.css"
+        ]
+      },
+      "eventCount": 70
+    },
+    {
+      "mode": "interactive",
+      "url": "http://127.0.0.1:5210/?interactive=1",
+      "state": {
+        "title": "Seko - World Class AI Video Generation Platform",
+        "readyState": "complete",
+        "url": "http://127.0.0.1:5210/?interactive=1",
+        "interactiveActive": true,
+        "pixelOpacity": "0",
+        "nodeCount": 3,
+        "connectorCount": 2,
+        "images": [
+          {
+            "src": "./public/assets/seko-captured-state.png",
+            "complete": true,
+            "naturalWidth": 1920,
+            "naturalHeight": 863
+          },
+          {
+            "src": "./public/assets/node-character-snapshot.png",
+            "complete": true,
+            "naturalWidth": 289,
+            "naturalHeight": 450
+          },
+          {
+            "src": "./public/assets/node-location-snapshot.png",
+            "complete": true,
+            "naturalWidth": 509,
+            "naturalHeight": 305
+          },
+          {
+            "src": "./public/assets/node-video-snapshot.png",
+            "complete": true,
+            "naturalWidth": 506,
+            "naturalHeight": 303
+          }
+        ],
+        "scripts": [
+          "./src/app.js"
+        ],
+        "stylesheets": [
+          "http://127.0.0.1:5210/src/styles.css"
+        ]
+      },
+      "eventCount": 48
+    }
+  ]
+}

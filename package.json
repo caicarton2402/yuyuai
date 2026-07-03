@@ -1,0 +1,16 @@
+{
+  "name": "seko-sensetime-clone",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "node scripts/validate.mjs",
+    "qa:http": "node scripts/check-http.mjs",
+    "qa:runtime": "node scripts/runtime-check.mjs",
+    "qa:render": "node scripts/render-and-diff.mjs",
+    "qa:interactive": "node scripts/interactive-dom-check.mjs",
+    "qa:responsive": "node scripts/responsive-check.mjs",
+    "qa": "npm run validate && npm run qa:http && npm run qa:runtime && npm run qa:render && npm run qa:interactive && npm run qa:responsive",
+    "serve": "python -m http.server 5180 --bind 127.0.0.1"
+  }
+}

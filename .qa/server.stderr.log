@@ -1,0 +1,9 @@
+127.0.0.1 - - [03/Jul/2026 18:46:49] "HEAD / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jul/2026 18:46:49] "HEAD / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jul/2026 18:46:49] "HEAD /src/styles.css HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jul/2026 18:46:49] "HEAD /src/app.js HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jul/2026 18:46:49] "HEAD /public/assets/seko-captured-state.png HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jul/2026 18:46:49] "HEAD /public/assets/node-character-snapshot.png HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jul/2026 18:46:49] "HEAD /public/assets/node-location-snapshot.png HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jul/2026 18:46:49] "HEAD /public/assets/node-video-snapshot.png HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jul/2026 18:46:49] "HEAD /public/assets/favicon.svg HTTP/1.1" 200 -

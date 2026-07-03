@@ -1,0 +1,458 @@
+{
+  "ok": true,
+  "url": "http://127.0.0.1:5190/?interactive=1",
+  "checks": {
+    "loaded": true,
+    "queryActivatesInteractiveLayer": true,
+    "imagesLoaded": true,
+    "connectorPathsGenerated": true,
+    "zoomInUpdatesLabel": true,
+    "modeSwitchUpdatesState": true,
+    "addToolCreatesPromptNode": true,
+    "nodeDragMovesCard": true,
+    "canvasPanUpdatesTransform": true,
+    "autoLayoutRestoresCapturedState": true
+  },
+  "states": {
+    "initial": {
+      "readyState": "complete",
+      "interactiveActive": true,
+      "pixelOpacity": "0",
+      "zoomText": "78%",
+      "rootZoom": "0.780",
+      "panX": "0px",
+      "panY": "0px",
+      "activeMode": "canvas",
+      "ariaSelectedEditor": "false",
+      "nodeCount": 3,
+      "nodes": [
+        {
+          "id": "character",
+          "x": "508px",
+          "y": "52px"
+        },
+        {
+          "id": "location",
+          "x": "397px",
+          "y": "538px"
+        },
+        {
+          "id": "video",
+          "x": "1018px",
+          "y": "333px"
+        }
+      ],
+      "connectorPaths": [
+        "M 797 290 C 911.92 256, 911.92 531, 1018 497",
+        "M 906 696 C 964.24 732, 964.24 461, 1018 497"
+      ],
+      "images": [
+        {
+          "src": "./public/assets/seko-captured-state.png",
+          "complete": true,
+          "width": 1920,
+          "height": 863
+        },
+        {
+          "src": "./public/assets/node-character-snapshot.png",
+          "complete": true,
+          "width": 289,
+          "height": 450
+        },
+        {
+          "src": "./public/assets/node-location-snapshot.png",
+          "complete": true,
+          "width": 509,
+          "height": 305
+        },
+        {
+          "src": "./public/assets/node-video-snapshot.png",
+          "complete": true,
+          "width": 506,
+          "height": 303
+        }
+      ],
+      "toastVisible": false
+    },
+    "afterZoom": {
+      "readyState": "complete",
+      "interactiveActive": true,
+      "pixelOpacity": "0",
+      "zoomText": "86%",
+      "rootZoom": "0.860",
+      "panX": "0px",
+      "panY": "0px",
+      "activeMode": "canvas",
+      "ariaSelectedEditor": "false",
+      "nodeCount": 3,
+      "nodes": [
+        {
+          "id": "character",
+          "x": "508px",
+          "y": "52px"
+        },
+        {
+          "id": "location",
+          "x": "397px",
+          "y": "538px"
+        },
+        {
+          "id": "video",
+          "x": "1018px",
+          "y": "333px"
+        }
+      ],
+      "connectorPaths": [
+        "M 797 290 C 911.92 256, 911.92 531, 1018 497",
+        "M 906 696 C 964.24 732, 964.24 461, 1018 497"
+      ],
+      "images": [
+        {
+          "src": "./public/assets/seko-captured-state.png",
+          "complete": true,
+          "width": 1920,
+          "height": 863
+        },
+        {
+          "src": "./public/assets/node-character-snapshot.png",
+          "complete": true,
+          "width": 289,
+          "height": 450
+        },
+        {
+          "src": "./public/assets/node-location-snapshot.png",
+          "complete": true,
+          "width": 509,
+          "height": 305
+        },
+        {
+          "src": "./public/assets/node-video-snapshot.png",
+          "complete": true,
+          "width": 506,
+          "height": 303
+        }
+      ],
+      "toastVisible": false
+    },
+    "afterMode": {
+      "readyState": "complete",
+      "interactiveActive": true,
+      "pixelOpacity": "0",
+      "zoomText": "86%",
+      "rootZoom": "0.860",
+      "panX": "0px",
+      "panY": "0px",
+      "activeMode": "editor",
+      "ariaSelectedEditor": "true",
+      "nodeCount": 3,
+      "nodes": [
+        {
+          "id": "character",
+          "x": "508px",
+          "y": "52px"
+        },
+        {
+          "id": "location",
+          "x": "397px",
+          "y": "538px"
+        },
+        {
+          "id": "video",
+          "x": "1018px",
+          "y": "333px"
+        }
+      ],
+      "connectorPaths": [
+        "M 797 290 C 911.92 256, 911.92 531, 1018 497",
+        "M 906 696 C 964.24 732, 964.24 461, 1018 497"
+      ],
+      "images": [
+        {
+          "src": "./public/assets/seko-captured-state.png",
+          "complete": true,
+          "width": 1920,
+          "height": 863
+        },
+        {
+          "src": "./public/assets/node-character-snapshot.png",
+          "complete": true,
+          "width": 289,
+          "height": 450
+        },
+        {
+          "src": "./public/assets/node-location-snapshot.png",
+          "complete": true,
+          "width": 509,
+          "height": 305
+        },
+        {
+          "src": "./public/assets/node-video-snapshot.png",
+          "complete": true,
+          "width": 506,
+          "height": 303
+        }
+      ],
+      "toastVisible": true
+    },
+    "afterAdd": {
+      "readyState": "complete",
+      "interactiveActive": true,
+      "pixelOpacity": "0",
+      "zoomText": "86%",
+      "rootZoom": "0.860",
+      "panX": "0px",
+      "panY": "0px",
+      "activeMode": "editor",
+      "ariaSelectedEditor": "true",
+      "nodeCount": 4,
+      "nodes": [
+        {
+          "id": "character",
+          "x": "508px",
+          "y": "52px"
+        },
+        {
+          "id": "location",
+          "x": "397px",
+          "y": "538px"
+        },
+        {
+          "id": "video",
+          "x": "1018px",
+          "y": "333px"
+        },
+        {
+          "id": "prompt-1783075625362",
+          "x": "820px",
+          "y": "182px"
+        }
+      ],
+      "connectorPaths": [
+        "M 797 290 C 911.92 256, 911.92 531, 1018 497",
+        "M 906 696 C 964.24 732, 964.24 461, 1018 497"
+      ],
+      "images": [
+        {
+          "src": "./public/assets/seko-captured-state.png",
+          "complete": true,
+          "width": 1920,
+          "height": 863
+        },
+        {
+          "src": "./public/assets/node-character-snapshot.png",
+          "complete": true,
+          "width": 289,
+          "height": 450
+        },
+        {
+          "src": "./public/assets/node-location-snapshot.png",
+          "complete": true,
+          "width": 509,
+          "height": 305
+        },
+        {
+          "src": "./public/assets/node-video-snapshot.png",
+          "complete": true,
+          "width": 506,
+          "height": 303
+        }
+      ],
+      "toastVisible": true
+    },
+    "afterDrag": {
+      "readyState": "complete",
+      "interactiveActive": true,
+      "pixelOpacity": "0",
+      "zoomText": "86%",
+      "rootZoom": "0.860",
+      "panX": "0px",
+      "panY": "0px",
+      "activeMode": "editor",
+      "ariaSelectedEditor": "true",
+      "nodeCount": 4,
+      "nodes": [
+        {
+          "id": "character",
+          "x": "590px",
+          "y": "92px"
+        },
+        {
+          "id": "location",
+          "x": "397px",
+          "y": "538px"
+        },
+        {
+          "id": "video",
+          "x": "1018px",
+          "y": "333px"
+        },
+        {
+          "id": "prompt-1783075625362",
+          "x": "820px",
+          "y": "182px"
+        }
+      ],
+      "connectorPaths": [
+        "M 879 330 C 951.28 296, 951.28 531, 1018 497",
+        "M 906 696 C 964.24 732, 964.24 461, 1018 497"
+      ],
+      "images": [
+        {
+          "src": "./public/assets/seko-captured-state.png",
+          "complete": true,
+          "width": 1920,
+          "height": 863
+        },
+        {
+          "src": "./public/assets/node-character-snapshot.png",
+          "complete": true,
+          "width": 289,
+          "height": 450
+        },
+        {
+          "src": "./public/assets/node-location-snapshot.png",
+          "complete": true,
+          "width": 509,
+          "height": 305
+        },
+        {
+          "src": "./public/assets/node-video-snapshot.png",
+          "complete": true,
+          "width": 506,
+          "height": 303
+        }
+      ],
+      "toastVisible": true
+    },
+    "afterPan": {
+      "readyState": "complete",
+      "interactiveActive": true,
+      "pixelOpacity": "0",
+      "zoomText": "86%",
+      "rootZoom": "0.860",
+      "panX": "-80px",
+      "panY": "-44px",
+      "activeMode": "editor",
+      "ariaSelectedEditor": "true",
+      "nodeCount": 4,
+      "nodes": [
+        {
+          "id": "character",
+          "x": "590px",
+          "y": "92px"
+        },
+        {
+          "id": "location",
+          "x": "397px",
+          "y": "538px"
+        },
+        {
+          "id": "video",
+          "x": "1018px",
+          "y": "333px"
+        },
+        {
+          "id": "prompt-1783075625362",
+          "x": "820px",
+          "y": "182px"
+        }
+      ],
+      "connectorPaths": [
+        "M 879 330 C 951.28 296, 951.28 531, 1018 497",
+        "M 906 696 C 964.24 732, 964.24 461, 1018 497"
+      ],
+      "images": [
+        {
+          "src": "./public/assets/seko-captured-state.png",
+          "complete": true,
+          "width": 1920,
+          "height": 863
+        },
+        {
+          "src": "./public/assets/node-character-snapshot.png",
+          "complete": true,
+          "width": 289,
+          "height": 450
+        },
+        {
+          "src": "./public/assets/node-location-snapshot.png",
+          "complete": true,
+          "width": 509,
+          "height": 305
+        },
+        {
+          "src": "./public/assets/node-video-snapshot.png",
+          "complete": true,
+          "width": 506,
+          "height": 303
+        }
+      ],
+      "toastVisible": true
+    },
+    "afterReset": {
+      "readyState": "complete",
+      "interactiveActive": true,
+      "pixelOpacity": "0",
+      "zoomText": "78%",
+      "rootZoom": "0.780",
+      "panX": "0px",
+      "panY": "0px",
+      "activeMode": "editor",
+      "ariaSelectedEditor": "true",
+      "nodeCount": 4,
+      "nodes": [
+        {
+          "id": "character",
+          "x": "508px",
+          "y": "52px"
+        },
+        {
+          "id": "location",
+          "x": "397px",
+          "y": "538px"
+        },
+        {
+          "id": "video",
+          "x": "1018px",
+          "y": "333px"
+        },
+        {
+          "id": "prompt-1783075625362",
+          "x": "820px",
+          "y": "182px"
+        }
+      ],
+      "connectorPaths": [
+        "M 797 290 C 911.92 256, 911.92 531, 1018 497",
+        "M 906 696 C 964.24 732, 964.24 461, 1018 497"
+      ],
+      "images": [
+        {
+          "src": "./public/assets/seko-captured-state.png",
+          "complete": true,
+          "width": 1920,
+          "height": 863
+        },
+        {
+          "src": "./public/assets/node-character-snapshot.png",
+          "complete": true,
+          "width": 289,
+          "height": 450
+        },
+        {
+          "src": "./public/assets/node-location-snapshot.png",
+          "complete": true,
+          "width": 509,
+          "height": 305
+        },
+        {
+          "src": "./public/assets/node-video-snapshot.png",
+          "complete": true,
+          "width": 506,
+          "height": 303
+        }
+      ],
+      "toastVisible": true
+    }
+  }
+}

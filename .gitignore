@@ -1,0 +1,8 @@
+node_modules/
+.env
+.env.*
+*.tmp
+*.bak
+Thumbs.db
+Desktop.ini
+.qa/chrome-*-profile/

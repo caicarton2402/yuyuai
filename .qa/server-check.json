@@ -1,0 +1,50 @@
+[
+  {
+    "url": "http://127.0.0.1:5180/",
+    "status": 200,
+    "type": "text/html",
+    "length": "5390"
+  },
+  {
+    "url": "http://127.0.0.1:5180/src/styles.css",
+    "status": 200,
+    "type": "text/css",
+    "length": "9879"
+  },
+  {
+    "url": "http://127.0.0.1:5180/src/app.js",
+    "status": 200,
+    "type": "text/javascript",
+    "length": "7197"
+  },
+  {
+    "url": "http://127.0.0.1:5180/public/assets/seko-captured-state.png",
+    "status": 200,
+    "type": "image/png",
+    "length": "97546"
+  },
+  {
+    "url": "http://127.0.0.1:5180/public/assets/node-character-snapshot.png",
+    "status": 200,
+    "type": "image/png",
+    "length": "147091"
+  },
+  {
+    "url": "http://127.0.0.1:5180/public/assets/node-location-snapshot.png",
+    "status": 200,
+    "type": "image/png",
+    "length": "83485"
+  },
+  {
+    "url": "http://127.0.0.1:5180/public/assets/node-video-snapshot.png",
+    "status": 200,
+    "type": "image/png",
+    "length": "15185"
+  },
+  {
+    "url": "http://127.0.0.1:5180/public/assets/favicon.svg",
+    "status": 200,
+    "type": "image/svg+xml",
+    "length": "221"
+  }
+]
