@@ -29,7 +29,7 @@
     "selectedTemplate": "comic-dialog",
     "workspaceHidden": true,
     "workspaceTitle": "漫剧项目已创建",
-    "modalHidden": false,
+    "modalHidden": true,
     "modalTitle": "会员方案",
     "libraryTab": "story",
     "storyFilter": "comic",

@@ -76,6 +76,38 @@ async function screenshot(cdp, filePath) {
   await writeFile(filePath, Buffer.from(result.data, "base64"));
 }
 
+async function getCanvasLayout(cdp) {
+  return evaluate(cdp, `(() => {
+    const rectOf = selector => {
+      const el = document.querySelector(selector);
+      if (!el) return null;
+      const rect = el.getBoundingClientRect();
+      return {
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        width: rect.width,
+        height: rect.height
+      };
+    };
+    const overlaps = (a, b) => Boolean(a && b && a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top);
+    const toolbar = rectOf(".floating-generate-toolbar");
+    const selectedNode = rectOf(".canvas-node.selected");
+    const inspector = rectOf("#nodeInspector");
+    const bottomBar = rectOf(".canvas-bottom-bar");
+    return {
+      toolbar,
+      selectedNode,
+      inspector,
+      bottomBar,
+      toolbarOverlapsSelected: overlaps(toolbar, selectedNode),
+      inspectorOverlapsSelected: overlaps(inspector, selectedNode),
+      bottomBarOverlapsInspector: overlaps(bottomBar, inspector)
+    };
+  })()`);
+}
+
 async function navigateHome(cdp, url) {
   await cdp.send("Page.navigate", { url });
   await waitForCondition(cdp, `document.readyState === "complete"`);
@@ -139,6 +171,10 @@ try {
     const canvasEvidence = path.join(outDir, `yuyu-fullsite-${viewport.width}x${viewport.height}-${viewport.name}-canvas.png`);
     await screenshot(cdp, canvasEvidence);
     assertCheck(canvasState.visible.canvas && canvasState.visible.graph && canvasState.counts.canvasNodes >= 10, "Canvas graph is not responsive-ready", { viewport, canvasState });
+    const canvasLayout = await getCanvasLayout(cdp);
+    if (viewport.width <= 480) {
+      assertCheck(!canvasLayout.toolbarOverlapsSelected && !canvasLayout.inspectorOverlapsSelected && !canvasLayout.bottomBarOverlapsInspector, "Mobile canvas controls overlap content", { viewport, canvasLayout });
+    }
 
     results.push({
       ...viewport,
@@ -149,7 +185,8 @@ try {
       exploreState,
       libraryState,
       scriptState,
-      canvasState
+      canvasState,
+      canvasLayout
     });
   }
 
@@ -166,7 +203,8 @@ try {
       canvasEvidence: item.canvasEvidence,
       storyCount: item.libraryState.counts.stories,
       plannerMessages: item.scriptState.counts.plannerMessages,
-      canvasNodes: item.canvasState.counts.canvasNodes
+      canvasNodes: item.canvasState.counts.canvasNodes,
+      mobileCanvasClear: item.width > 480 || (!item.canvasLayout.toolbarOverlapsSelected && !item.canvasLayout.inspectorOverlapsSelected && !item.canvasLayout.bottomBarOverlapsInspector)
     }))
   };
   await writeFile(path.join(qaDir, "responsive-check.json"), JSON.stringify(result, null, 2), "utf8");

@@ -3283,15 +3283,70 @@ body .generate-panel {
     justify-self: stretch;
     width: auto;
     margin: 8px 14px;
+    overflow-x: auto;
+    border-radius: 20px;
   }
 
   body .graph-surface {
-    min-height: 620px;
+    min-height: 690px;
+    overflow: auto;
+    padding-bottom: 18px;
+    overscroll-behavior: contain;
+  }
+
+  body .floating-generate-toolbar {
+    position: sticky;
+    left: 14px;
+    top: 12px;
+    right: auto;
+    width: calc(100vw - 28px);
+    height: auto;
+    min-height: 44px;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: flex-start;
+    padding: 8px;
+    border-radius: 20px;
+  }
+
+  body .floating-generate-toolbar button {
+    min-width: 44px;
+  }
+
+  body .graph-plane {
+    position: relative;
+    left: 0;
+    top: 0;
+    translate: none;
+    margin: 36px 0 0 18px;
+  }
+
+  body .node-inspector {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    width: calc(100% - 24px);
+    max-height: none;
+    margin: 8px 12px 18px;
+  }
+
+  body .minimap {
+    display: none;
+  }
+
+  body .canvas-bottom-bar {
+    position: sticky;
+    left: 14px;
+    bottom: 12px;
+    width: max-content;
+    max-width: calc(100vw - 28px);
+    margin: 8px 14px 14px;
   }
 
   body .generate-panel {
     left: 12px;
-    top: 76px;
+    top: 124px;
     width: calc(100vw - 24px);
   }
 }

@@ -12,7 +12,8 @@
       "canvasEvidence": "replica/responsive/yuyu-fullsite-1920x1000-desktop-wide-canvas.png",
       "storyCount": 4,
       "plannerMessages": 4,
-      "canvasNodes": 10
+      "canvasNodes": 10,
+      "mobileCanvasClear": true
     },
     {
       "width": 1440,
@@ -24,7 +25,8 @@
       "canvasEvidence": "replica/responsive/yuyu-fullsite-1440x1000-desktop-canvas.png",
       "storyCount": 4,
       "plannerMessages": 4,
-      "canvasNodes": 10
+      "canvasNodes": 10,
+      "mobileCanvasClear": true
     },
     {
       "width": 1024,
@@ -36,7 +38,8 @@
       "canvasEvidence": "replica/responsive/yuyu-fullsite-1024x1000-tablet-landscape-canvas.png",
       "storyCount": 4,
       "plannerMessages": 4,
-      "canvasNodes": 10
+      "canvasNodes": 10,
+      "mobileCanvasClear": true
     },
     {
       "width": 768,
@@ -48,7 +51,8 @@
       "canvasEvidence": "replica/responsive/yuyu-fullsite-768x1000-tablet-canvas.png",
       "storyCount": 4,
       "plannerMessages": 4,
-      "canvasNodes": 10
+      "canvasNodes": 10,
+      "mobileCanvasClear": true
     },
     {
       "width": 375,
@@ -60,7 +64,8 @@
       "canvasEvidence": "replica/responsive/yuyu-fullsite-375x812-mobile-canvas.png",
       "storyCount": 4,
       "plannerMessages": 4,
-      "canvasNodes": 10
+      "canvasNodes": 10,
+      "mobileCanvasClear": true
     }
   ]
 }

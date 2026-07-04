@@ -236,6 +236,8 @@ try {
   state = await evaluate(cdp, snapshotExpression);
   assertCheck(!state.modalHidden && state.modalTitle.includes("会员"), "Plans modal failed", state);
   await click(cdp, "[data-action='close-modal']");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(state.modalHidden === true, "Plans modal did not close", state);
 
   const result = {
     ok: true,
