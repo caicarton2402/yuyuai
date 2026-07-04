@@ -90,6 +90,21 @@ async function dragSelectedNode(cdp) {
   return { before: rect.before, after };
 }
 
+async function getRectOverlap(cdp, firstSelector, secondSelector) {
+  return evaluate(cdp, `(() => {
+    const rectOf = selector => {
+      const el = document.querySelector(selector);
+      if (!el) return null;
+      const rect = el.getBoundingClientRect();
+      return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height };
+    };
+    const first = rectOf(${JSON.stringify(firstSelector)});
+    const second = rectOf(${JSON.stringify(secondSelector)});
+    const overlaps = Boolean(first && second && first.left < second.right && first.right > second.left && first.top < second.bottom && first.bottom > second.top);
+    return { first, second, overlaps };
+  })()`);
+}
+
 const serverPort = Number(process.env.YUYU_INTERACTIVE_QA_PORT || await findFreePort(5190));
 const debugPort = Number(process.env.YUYU_CDP_PORT || await findFreePort(9290));
 const url = `http://127.0.0.1:${serverPort}/`;
@@ -120,6 +135,8 @@ try {
   await click(cdp, "[data-tool='upload']");
   state = await evaluate(cdp, snapshotExpression);
   assertCheck(state.activeTool === "upload" && state.toolPanelHidden === false, "Upload panel did not open", state);
+  const uploadPanelLayout = await getRectOverlap(cdp, "#toolPanel", ".category-tabs");
+  assertCheck(!uploadPanelLayout.overlaps, "Upload tool panel overlaps category tabs", uploadPanelLayout);
 
   await click(cdp, "[data-chip='上传图片']");
   state = await evaluate(cdp, snapshotExpression);

@@ -1379,12 +1379,18 @@ svg {
 .prompt-box {
   position: relative;
   min-height: 128px;
+  margin-bottom: 0;
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 22px;
   background: rgba(42, 40, 38, 0.64);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 16px 60px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(14px);
   text-align: left;
+  transition: margin-bottom 160ms ease;
+}
+
+.prompt-box:has(.tool-panel:not([hidden])) {
+  margin-bottom: 220px;
 }
 
 .prompt-textline {
@@ -1536,9 +1542,9 @@ svg {
 
 .tool-panel {
   position: absolute;
-  z-index: 8;
+  z-index: 18;
   left: 12px;
-  bottom: -134px;
+  top: calc(100% + 10px);
   width: min(480px, calc(100vw - 170px));
   padding: 14px 16px 16px;
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -2977,8 +2983,12 @@ svg {
 
   .tool-panel {
     left: 0;
-    bottom: -164px;
+    top: calc(100% + 10px);
     width: 100%;
+  }
+
+  .prompt-box:has(.tool-panel:not([hidden])) {
+    margin-bottom: 240px;
   }
 
   .category-tabs {
