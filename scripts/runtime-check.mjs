@@ -47,10 +47,16 @@ const stateExpression = `(() => {
     plannerMessages: document.querySelectorAll(".planner-message").length,
     docSections: document.querySelectorAll(".doc-section").length,
     assets: document.querySelectorAll(".asset-card").length,
+    assetDetailVisible: !!document.querySelector("#assetDetailPanel h2"),
     members: document.querySelectorAll(".member-row").length,
     ledgerRows: document.querySelectorAll(".ledger-row").length,
+    planCards: document.querySelectorAll(".plan-card").length,
+    queueItems: document.querySelectorAll(".queue-item").length,
+    queueHidden: document.querySelector("#queueDrawer")?.hidden,
     canvasHidden: document.querySelector("#canvasStudio")?.hidden,
     canvasNodes: document.querySelectorAll(".canvas-node").length,
+    nodeInspectorVisible: !!document.querySelector("#nodeInspector h2"),
+    generationHistoryItems: document.querySelectorAll("#generationHistory [data-result]").length,
     generatePanelHidden: document.querySelector("#generatePanel")?.hidden,
     editorPanelHidden: document.querySelector("#editorPanel")?.hidden,
     modalHidden: document.querySelector("#modalLayer")?.hidden,
@@ -106,9 +112,10 @@ try {
   assertCheck(state.promptTools === 4 && state.categories === 4 && state.templates === 2 && state.features === 5, "Explore controls did not initialize", state);
   assertCheck(state.libraryTabs === 3 && state.libraryFilters === 5 && state.storyCards >= 4, "Story library did not initialize", state);
   assertCheck(state.plannerMessages >= 4 && state.docSections >= 4, "Script planning view did not initialize", state);
-  assertCheck(state.assets >= 3 && state.members >= 4 && state.ledgerRows >= 4, "Secondary modules did not render", state);
-  assertCheck(state.canvasHidden === true && state.generatePanelHidden === true && state.editorPanelHidden === true && state.modalHidden === true, "Hidden surfaces should start hidden", state);
+  assertCheck(state.assets >= 3 && state.assetDetailVisible && state.members >= 4 && state.ledgerRows >= 4 && state.planCards >= 3, "Secondary modules did not render", state);
+  assertCheck(state.canvasHidden === true && state.queueHidden === true && state.generatePanelHidden === true && state.editorPanelHidden === true && state.modalHidden === true, "Hidden surfaces should start hidden", state);
   assertCheck(state.canvasNodes >= 10 && state.zoomLabel === "33%", "Canvas graph did not initialize", state);
+  assertCheck(state.queueItems >= 3 && state.nodeInspectorVisible && state.generationHistoryItems >= 3, "Deep workflow panels did not initialize", state);
   assertCheck(badImages.length === 0, "Broken images detected", { badImages, state });
   assertCheck(Object.values(bad).every(items => items.length === 0), "Runtime has console/network errors", bad);
 

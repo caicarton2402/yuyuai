@@ -36,6 +36,7 @@
         <div class="account-stack">
           <button class="credit-pill" type="button" data-route="account"><strong id="creditCount">5083</strong><span>标准会员</span></button>
           <button class="avatar-btn" type="button" title="账户" data-route="account"></button>
+          <button type="button" title="任务队列" data-action="open-queue"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5.5h12M4 10h12M4 14.5h7M2.8 3.5h14.4v13H2.8z" /></svg></button>
           <button type="button" title="通知" data-action="notifications"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 15.4h8M7.1 8.4a3 3 0 0 1 6 0c0 4 1.6 4.7 1.6 6H5.5c0-1.3 1.6-2 1.6-6ZM8.7 17a1.5 1.5 0 0 0 2.6 0" /></svg></button>
           <button type="button" title="更多" data-action="more"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 6h10M5 10h10M5 14h10" /></svg></button>
         </div>
@@ -171,7 +172,10 @@
           <button class="secondary-action" type="button" data-action="batch-import">批量导入</button>
           <button class="primary-action compact" type="button" data-action="use-selected-asset">加入当前项目</button>
         </div>
-        <div class="asset-grid" id="assetGrid"></div>
+        <div class="asset-workbench">
+          <div class="asset-grid" id="assetGrid"></div>
+          <aside class="asset-detail-panel" id="assetDetailPanel" aria-label="asset detail"></aside>
+        </div>
       </section>
 
       <section class="view console-view" data-view="team" aria-labelledby="teamTitle">
@@ -191,7 +195,15 @@
           <section class="metric-card"><span>生成队列</span><strong id="queueCount">3</strong><small>2 个视频，1 个九宫格</small></section>
           <section class="metric-card"><span>团队席位</span><strong>4 / 8</strong><small>可继续邀请 4 人</small></section>
         </div>
-        <div class="ledger-panel"><h2>用量记录</h2><div id="usageLedger" class="usage-ledger"></div></div>
+        <div class="account-actions">
+          <button class="primary-action compact" type="button" data-action="open-plans">升级会员</button>
+          <button class="secondary-action" type="button" data-action="open-queue">查看生成队列</button>
+          <button class="secondary-action" type="button" data-action="open-billing">充值记录</button>
+        </div>
+        <div class="account-split">
+          <div class="ledger-panel"><h2>用量记录</h2><div id="usageLedger" class="usage-ledger"></div></div>
+          <div class="ledger-panel plan-panel"><h2>会员权益</h2><div id="planGrid" class="plan-grid"></div></div>
+        </div>
       </section>
 
       <section class="canvas-studio" id="canvasStudio" hidden aria-label="YUYU canvas editor">
@@ -276,7 +288,9 @@
               <label>全景<input type="checkbox" id="panoramaToggle" /></label><button type="button">1张</button><button type="button">+5</button>
               <button class="send-btn" type="button" data-action="run-generator">↑</button>
             </div>
+            <div class="generation-history" id="generationHistory" aria-label="generation history"></div>
           </aside>
+          <aside class="node-inspector" id="nodeInspector" aria-label="node inspector"></aside>
           <aside class="minimap"><i></i><b></b><b></b><b></b><b></b></aside>
           <footer class="canvas-bottom-bar">
             <button type="button" data-canvas-view="outline">▦</button>
@@ -304,6 +318,19 @@
         <ol class="workflow-list" id="workflowList"></ol>
         <div class="progress-track"><i id="workflowProgress"></i></div>
         <button class="primary-action" type="button" data-action="open-script">进入策划</button>
+      </aside>
+
+      <aside class="queue-drawer" id="queueDrawer" hidden aria-label="generation queue">
+        <header>
+          <span class="eyebrow">Queue</span>
+          <button type="button" data-action="close-queue" title="关闭">×</button>
+        </header>
+        <h2>生成任务队列</h2>
+        <div id="queueList" class="queue-list"></div>
+        <div class="queue-actions">
+          <button class="secondary-action" type="button" data-action="pause-queue">暂停全部</button>
+          <button class="primary-action compact" type="button" data-action="clear-finished">清理完成</button>
+        </div>
       </aside>
 
       <section class="modal-layer" id="modalLayer" hidden aria-live="polite">

@@ -22,6 +22,12 @@ const editorPanel = $("#editorPanel");
 const zoomLabel = $("#zoomLabel");
 const bottomZoomLabel = $("#bottomZoomLabel");
 const toast = $("#toast");
+const queueDrawer = $("#queueDrawer");
+const queueList = $("#queueList");
+const assetDetailPanel = $("#assetDetailPanel");
+const nodeInspector = $("#nodeInspector");
+const generationHistory = $("#generationHistory");
+const planGrid = $("#planGrid");
 
 const categories = {
   overseas: {
@@ -234,6 +240,24 @@ const usageLedger = [
   ["会员补给", "+500", "标准会员"]
 ];
 
+const generationQueue = [
+  { id: "q1", type: "视频", title: "电梯超载反转镜头", state: "生成中", progress: 78, cost: 120 },
+  { id: "q2", type: "图片", title: "云朵表情参考图", state: "排队中", progress: 32, cost: 30 },
+  { id: "q3", type: "导出", title: "EP01 分镜 PDF", state: "已完成", progress: 100, cost: 20 }
+];
+
+const generationResults = [
+  { type: "视频", title: "EP01 预览片段", meta: "00:06 / 16:9 / 1080P" },
+  { type: "图片", title: "蛋卷正面参考", meta: "2K / 主体一致性" },
+  { type: "文本", title: "镜头 03 动作说明", meta: "已同步到策划文档" }
+];
+
+const planOptions = [
+  { name: "标准会员", price: "当前", quota: "每月 6,000 点", perks: ["高清预览", "多剧集策划", "团队 8 席"] },
+  { name: "专业会员", price: "¥199/月", quota: "每月 30,000 点", perks: ["4K 导出", "并发 5 任务", "批量素材管理"] },
+  { name: "团队旗舰", price: "联系销售", quota: "自定义额度", perks: ["权限审计", "品牌模板", "项目归档"] }
+];
+
 const featureDetails = {
   blank: ["空白画布", "从零开始搭建角色、场景、提示词和视频节点。"],
   effects: ["特效模板", "套用热门视觉特效模板，快速生成可复用片段。"],
@@ -290,8 +314,18 @@ function setCredits(next) {
   $("#accountCredits").textContent = String(credits);
 }
 
+function syncQueueCount() {
+  const active = generationQueue.filter(item => item.state !== "已完成").length;
+  const queueCount = $("#queueCount");
+  if (queueCount) queueCount.textContent = String(active);
+}
+
 function closeModal() {
   modalLayer.hidden = true;
+}
+
+function closeQueue() {
+  queueDrawer.hidden = true;
 }
 
 function closeToolPanel() {
@@ -306,6 +340,7 @@ function routeTo(name) {
   $$("[data-route]").forEach(button => button.classList.toggle("active", button.dataset.route === name));
   canvasStudio.hidden = true;
   closeModal();
+  closeQueue();
   closeToolPanel();
   if (name === "projects") renderLibrary();
   if (name === "script") {
@@ -389,18 +424,111 @@ function showWorkspace(title = categories[activeCategory].title, copy = categori
   showToast("工作台已准备");
 }
 
+function renderQueue() {
+  syncQueueCount();
+  queueList.innerHTML = generationQueue.map(item => `
+    <article class="queue-item" data-queue-id="${item.id}">
+      <div><span>${escapeHtml(item.type)}</span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.state)} · ${item.cost} 点</small></div>
+      <em>${item.progress}%</em>
+      <i style="width:${item.progress}%"></i>
+    </article>
+  `).join("");
+}
+
+function openQueueDrawer() {
+  renderQueue();
+  queueDrawer.hidden = false;
+}
+
+function renderGenerationHistory() {
+  generationHistory.innerHTML = generationResults.map(item => `
+    <button type="button" data-result="${escapeHtml(item.title)}">
+      <span>${escapeHtml(item.type)}</span>
+      <strong>${escapeHtml(item.title)}</strong>
+      <small>${escapeHtml(item.meta)}</small>
+    </button>
+  `).join("");
+}
+
+function renderPlanGrid() {
+  if (!planGrid) return;
+  planGrid.innerHTML = planOptions.map((plan, index) => `
+    <article class="plan-card ${index === 0 ? "current" : ""}">
+      <span>${escapeHtml(plan.name)}</span>
+      <strong>${escapeHtml(plan.price)}</strong>
+      <small>${escapeHtml(plan.quota)}</small>
+      <p>${plan.perks.map(escapeHtml).join(" · ")}</p>
+      <button type="button" data-plan="${escapeHtml(plan.name)}">${index === 0 ? "当前方案" : "选择方案"}</button>
+    </article>
+  `).join("");
+}
+
+function getSelectedAsset() {
+  const items = assets[activeAssetTab] || [];
+  return items.find(item => item.title === selectedAsset) || items[0];
+}
+
+function renderAssetDetail() {
+  const asset = getSelectedAsset();
+  if (!asset || !assetDetailPanel) return;
+  assetDetailPanel.innerHTML = `
+    <span class="eyebrow">Asset Detail</span>
+    <h2>${escapeHtml(asset.title)}</h2>
+    <div class="asset-detail-preview" style="--swatch:${asset.color};${asset.image ? `background-image:linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.42)), url('${asset.image}')` : ""}"></div>
+    <p>${escapeHtml(asset.meta)}</p>
+    <dl>
+      <div><dt>一致性</dt><dd>92%</dd></div>
+      <div><dt>引用次数</dt><dd>${activeAssetTab === "characters" ? 18 : 7}</dd></div>
+      <div><dt>绑定项目</dt><dd>职场萌宠喜剧</dd></div>
+    </dl>
+    <div class="asset-detail-actions">
+      <button type="button" data-action="use-selected-asset">加入项目</button>
+      <button type="button" data-action="copy-asset-prompt">复制提示词</button>
+    </div>
+  `;
+}
+
+function renderNodeInspector(node = $(".canvas-node.selected")) {
+  if (!nodeInspector || !node) return;
+  const label = node.querySelector("span")?.textContent || "视频节点";
+  const type = node.classList.contains("subject-node") ? "主体" : node.classList.contains("scene-node") ? "场景" : "视频";
+  const image = node.querySelector("img")?.getAttribute("src") || "./public/assets/story/video-elevator-dog.png";
+  nodeInspector.innerHTML = `
+    <span class="eyebrow">Inspector</span>
+    <h2>${escapeHtml(label)}</h2>
+    <img src="${escapeHtml(image)}" alt="" />
+    <dl>
+      <div><dt>类型</dt><dd>${type}</dd></div>
+      <div><dt>状态</dt><dd>${type === "视频" ? "可重生成" : "已锁定一致性"}</dd></div>
+      <div><dt>位置</dt><dd>${node.style.getPropertyValue("--x") || "0px"}, ${node.style.getPropertyValue("--y") || "0px"}</dd></div>
+    </dl>
+    <textarea>${type === "视频" ? "保持角色一致，强化电梯门口反转，镜头轻微手持。" : "作为当前故事的核心参考资产，保持风格和细节一致。"}</textarea>
+    <div class="asset-detail-actions">
+      <button type="button" data-action="regenerate-node">重生成</button>
+      <button type="button" data-action="duplicate-node">复制节点</button>
+    </div>
+  `;
+}
+
 function startGeneration() {
   const text = promptInput.value.trim();
   showWorkspace(categories[activeCategory].title, text ? `已接收灵感：${text}` : categories[activeCategory].copy, 1);
+  generationQueue.unshift({ id: `q${Date.now()}`, type: "策划", title: text || categories[activeCategory].title, state: "生成中", progress: 8, cost: 80 });
+  renderQueue();
   let step = 1;
   window.clearInterval(generationTimer);
   generationTimer = window.setInterval(() => {
     step += 1;
     renderWorkflow(step);
+    generationQueue[0].progress = Math.min(100, step * 25);
     if (step === 2) workspaceCopy.textContent = "正在抽取角色、场景和道具资产。";
     if (step === 3) workspaceCopy.textContent = "正在生成分镜脚本和镜头调度。";
     if (step >= 4) {
       workspaceCopy.textContent = "视频任务已进入预览阶段，可进入策划或画布继续编辑。";
+      generationQueue[0].state = "已完成";
+      generationResults.unshift({ type: "策划", title: text || categories[activeCategory].title, meta: "已生成脚本、角色、场景和分镜" });
+      renderGenerationHistory();
+      renderQueue();
       setCredits(credits - 80);
       window.clearInterval(generationTimer);
     }
@@ -432,6 +560,7 @@ function renderLibrary() {
       </div>
       <div class="bar"><i style="width:${project.progress}%"></i></div>
       <div class="card-actions">
+        <button type="button" data-project-action="detail">详情</button>
         <button type="button" data-project-action="continue">继续</button>
         <button type="button" data-project-action="duplicate">复制</button>
         <button type="button" data-project-action="export">导出</button>
@@ -494,6 +623,8 @@ function renderAssets() {
       <small>${escapeHtml(asset.meta)}</small>
     </button>
   `).join("");
+  if (!selectedAsset && items[0]) selectedAsset = items[0].title;
+  renderAssetDetail();
 }
 
 function renderTeam() {
@@ -518,6 +649,8 @@ function renderAccount() {
   $("#usageLedger").innerHTML = usageLedger.map(row => `
     <div class="ledger-row"><span>${row[0]}</span><strong>${row[1]}</strong><small>${row[2]}</small></div>
   `).join("");
+  renderPlanGrid();
+  syncQueueCount();
 }
 
 function renderShotList() {
@@ -539,7 +672,7 @@ function openModal(kind, data = {}) {
     model: {
       kicker: "Model",
       title: "模型与生成参数",
-      body: `<div class="option-grid"><button class="selected">YUYU Video 2.0 全能模式</button><button>快速草稿</button><button>高清成片</button><button>图像序列</button></div><label class="range-row">创意强度<input type="range" value="72" /></label><label class="range-row">镜头稳定<input type="range" value="66" /></label>`,
+      body: `<div class="option-grid"><button class="selected">YUYU Video 2.0 全能模式</button><button>快速草稿</button><button>高清成片</button><button>图像序列</button></div><label class="range-row">创意强度<input type="range" value="72" /></label><label class="range-row">镜头稳定<input type="range" value="66" /></label><label class="range-row">角色一致性<input type="range" value="88" /></label><label class="range-row">时长<select><option>6 秒</option><option>12 秒</option><option>30 秒</option></select></label>`,
       actions: [["应用参数", "apply-model"]]
     },
     notifications: {
@@ -577,6 +710,36 @@ function openModal(kind, data = {}) {
       title: "风格控制",
       body: `<div class="option-grid"><button class="selected">写实短剧</button><button>轻喜剧质感</button><button>广告大片</button><button>办公冷灰</button></div>`,
       actions: [["应用风格", "apply-style"]]
+    },
+    more: {
+      kicker: "Menu",
+      title: "更多工具",
+      body: `<div class="option-grid"><button data-modal-shortcut="queue">任务队列</button><button data-modal-shortcut="billing">会员与充值</button><button data-modal-shortcut="archive">项目归档</button><button data-modal-shortcut="help">快捷键</button></div><div class="modal-list"><p>支持回收站、生成记录、项目复制、批量导入、导出任务和团队权限模拟。</p></div>`,
+      actions: [["打开任务队列", "open-queue"], ["查看快捷键", "open-help"]]
+    },
+    plans: {
+      kicker: "Plans",
+      title: "会员方案",
+      body: `<div class="plan-grid modal-plans">${planOptions.map((plan, index) => `<article class="plan-card ${index === 0 ? "current" : ""}"><span>${escapeHtml(plan.name)}</span><strong>${escapeHtml(plan.price)}</strong><small>${escapeHtml(plan.quota)}</small><p>${plan.perks.map(escapeHtml).join(" · ")}</p></article>`).join("")}</div>`,
+      actions: [["模拟升级", "upgrade-plan"]]
+    },
+    billing: {
+      kicker: "Billing",
+      title: "充值与账单",
+      body: `<div class="modal-list"><p>2026/07/03 标准会员补给 +500 点</p><p>2026/07/03 视频生成 -180 点</p><p>2026/07/02 批量导出 -80 点</p></div><div class="option-grid"><button>500 点</button><button class="selected">2000 点</button><button>10000 点</button><button>团队包</button></div>`,
+      actions: [["模拟充值", "top-up"]]
+    },
+    help: {
+      kicker: "Help",
+      title: "快捷键与帮助",
+      body: `<div class="modal-list"><p>Cmd/Ctrl + Enter：发送策划消息</p><p>Ctrl + 滚轮：缩放画布</p><p>拖拽节点：调整镜头和素材关系</p><p>点击 +：打开生成面板</p></div>`,
+      actions: [["知道了", "close-help"]]
+    },
+    "project-detail": {
+      kicker: "Project",
+      title: data.project?.title || "项目详情",
+      body: `<div class="project-detail-modal"><div class="project-detail-cover" style="background:${data.project?.cover || "rgba(255,255,255,.08)"}"></div><p>${escapeHtml(data.project?.subtitle || "当前项目")}</p><dl><div><dt>状态</dt><dd>${escapeHtml(data.project?.status || "草稿")}</dd></div><div><dt>模式</dt><dd>${escapeHtml(data.project?.mode || "策划")}</dd></div><div><dt>进度</dt><dd>${data.project?.progress || 0}%</dd></div><div><dt>更新时间</dt><dd>${escapeHtml(data.project?.updated || "刚刚")}</dd></div></dl></div>`,
+      actions: [["继续制作", "continue-project"], ["创建副本", "duplicate-project"], ["导出", "export-confirm"]]
     }
   };
   const config = configs[kind] || configs.notifications;
@@ -614,6 +777,7 @@ function setCanvasMode(mode) {
 
 function selectCanvasNode(node) {
   $$(".canvas-node").forEach(item => item.classList.toggle("selected", item === node));
+  renderNodeInspector(node);
   showToast(`已选择节点：${node.querySelector("span")?.textContent || "视频"}`);
 }
 
@@ -665,6 +829,7 @@ function openGeneratePanel() {
   generatePanel.hidden = false;
   $$("[data-canvas-mode]").forEach(button => button.classList.toggle("active", button.dataset.canvasMode === "canvas"));
   editorPanel.hidden = true;
+  renderGenerationHistory();
   showToast("生成面板已打开");
 }
 
@@ -675,19 +840,46 @@ function switchGeneratorTab(tab) {
 
 function runGenerator() {
   const active = $("[data-generator-tab].active")?.dataset.generatorTab || "image";
-  addGeneratedNode(active === "video" ? "生成视频" : active === "text" ? "脚本节点" : "生成图片");
+  const label = active === "video" ? "生成视频" : active === "text" ? "脚本节点" : "生成图片";
+  addGeneratedNode(label);
+  generationQueue.unshift({ id: `q${Date.now()}`, type: active === "video" ? "视频" : active === "text" ? "文本" : "图片", title: label, state: "已完成", progress: 100, cost: active === "video" ? 120 : 30 });
+  generationResults.unshift({ type: generationQueue[0].type, title: `${label} ${generationResults.length + 1}`, meta: "刚刚生成 · 已加入画布" });
+  renderGenerationHistory();
+  renderQueue();
   setCredits(credits - (active === "video" ? 120 : 30));
   showToast("已生成新节点");
 }
 
 function handleAction(action) {
   if (action === "close-workspace") workspacePanel.hidden = true;
+  if (action === "open-queue") openQueueDrawer();
+  if (action === "close-queue") closeQueue();
+  if (action === "pause-queue") {
+    generationQueue.forEach(item => {
+      if (item.state !== "已完成") item.state = item.state === "已暂停" ? "排队中" : "已暂停";
+    });
+    renderQueue();
+    showToast("队列状态已更新");
+  }
+  if (action === "clear-finished") {
+    for (let index = generationQueue.length - 1; index >= 0; index -= 1) {
+      if (generationQueue[index].state === "已完成") generationQueue.splice(index, 1);
+    }
+    renderQueue();
+    showToast("已清理完成任务");
+  }
   if (action === "open-script") routeTo("script");
   if (action === "open-canvas") openCanvas("canvas");
   if (action === "close-canvas") routeTo("projects");
   if (action === "model") openModal("model");
-  if (action === "assistant") showToast("YUYU 助手已打开");
+  if (action === "assistant") {
+    openModal("help");
+    showToast("YUYU 助手已打开");
+  }
   if (action === "notifications") openModal("notifications");
+  if (action === "more") openModal("more");
+  if (action === "open-plans") openModal("plans");
+  if (action === "open-billing") openModal("billing");
   if (action === "upload-modal" || action === "batch-import" || action === "attach-reference") openModal("upload-modal");
   if (action === "mention-character") {
     const input = $("#plannerInput");
@@ -729,8 +921,25 @@ function handleAction(action) {
     showToast(`已加入当前项目：${selectedAsset}`);
     showWorkspace("资产已加入", "选中的角色、场景或风格已绑定到当前生成流程。", 2);
   }
+  if (action === "copy-asset-prompt") {
+    promptInput.value = `${promptInput.value.trim()} ${selectedAsset}，保持角色和场景一致性。`.trim();
+    showToast("资产提示词已复制到首页输入框");
+  }
   if (action === "select-generated") showToast("已选择生成结果");
   if (action === "run-generator") runGenerator();
+  if (action === "regenerate-node") {
+    switchGeneratorTab("video");
+    openGeneratePanel();
+    showToast("已把节点送入重生成面板");
+  }
+  if (action === "duplicate-node") {
+    const selected = $(".canvas-node.selected");
+    if (selected) {
+      const clone = addGeneratedNode(`${selected.querySelector("span")?.textContent || "节点"}副本`);
+      clone.style.setProperty("--x", `${(Number.parseFloat(selected.style.getPropertyValue("--x")) || 0) + 80}px`);
+      clone.style.setProperty("--y", `${(Number.parseFloat(selected.style.getPropertyValue("--y")) || 0) + 60}px`);
+    }
+  }
   if (action === "render-preview") openModal("preview");
   if (action === "invite") openModal("invite");
   if (action === "add-comment") {
@@ -742,14 +951,30 @@ function handleAction(action) {
     }
   }
   if (action === "approve-version") showToast("版本已批准");
-  if (action === "more") showToast("更多菜单已打开");
   if (action === "close-modal") closeModal();
 }
 
 function handleModalAction(action) {
   closeModal();
+  if (action === "open-queue") openQueueDrawer();
+  if (action === "open-help") openModal("help");
   if (action.includes("upload")) routeTo("assets");
   if (action.includes("export")) setCredits(credits - 20);
+  if (action === "top-up") {
+    usageLedger.unshift(["模拟充值", "+2000", "前端演示充值"]);
+    setCredits(credits + 2000);
+    renderAccount();
+  }
+  if (action === "upgrade-plan") {
+    usageLedger.unshift(["会员升级", "-199", "专业会员演示"]);
+    setCredits(credits - 199);
+    renderAccount();
+  }
+  if (action === "continue-project") routeTo("script");
+  if (action === "duplicate-project") {
+    storyProjects.unshift({ ...storyProjects[0], id: `copy-${Date.now()}`, title: `${storyProjects[0].title} 副本`, updated: "刚刚", status: "草稿", progress: 18 });
+    routeTo("projects");
+  }
   if (action === "apply-mention") {
     promptInput.value = `${promptInput.value.trim()} @蛋卷`.trim();
   }
@@ -758,6 +983,7 @@ function handleModalAction(action) {
 
 function handleProjectAction(action, card) {
   const project = storyProjects.find(item => item.id === card?.dataset.project);
+  if (action === "detail" && project) openModal("project-detail", { project });
   if (action === "continue") {
     if (project?.tab === "canvas") openCanvas("canvas");
     else routeTo("script");
@@ -867,7 +1093,15 @@ document.addEventListener("click", event => {
   if (assetCard) {
     selectedAsset = assetCard.dataset.asset;
     $$(".asset-card").forEach(item => item.classList.toggle("selected", item === assetCard));
+    renderAssetDetail();
     showToast(`已选择 ${selectedAsset}`);
+    return;
+  }
+
+  const planButton = event.target.closest("[data-plan]");
+  if (planButton) {
+    if (planButton.dataset.plan === "标准会员") showToast("当前已是标准会员");
+    else openModal("plans");
     return;
   }
 
@@ -905,6 +1139,13 @@ document.addEventListener("click", event => {
   if (preset) {
     openGeneratePanel();
     $("#generatorPrompt").value = `${event.target.textContent}：${generatorCopy.image}`;
+    return;
+  }
+
+  const result = event.target.closest("[data-result]");
+  if (result) {
+    $("#generatorPrompt").value = `基于「${result.dataset.result}」继续优化，保持主体一致并输出可用镜头。`;
+    showToast("已载入生成历史");
     return;
   }
 
@@ -995,5 +1236,8 @@ renderAssets();
 renderTeam();
 renderAccount();
 renderShotList();
+renderQueue();
+renderGenerationHistory();
+renderNodeInspector();
 setCredits(credits);
 setZoom(zoom);

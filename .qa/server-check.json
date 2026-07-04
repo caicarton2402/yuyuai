@@ -6,19 +6,19 @@
       "url": "http://127.0.0.1:5181/",
       "status": 200,
       "type": "text/html; charset=utf-8",
-      "length": "23734"
+      "length": "25470"
     },
     {
       "url": "http://127.0.0.1:5181/src/styles.css",
       "status": 200,
       "type": "text/css; charset=utf-8",
-      "length": "51008"
+      "length": "56904"
     },
     {
       "url": "http://127.0.0.1:5181/src/app.js",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "length": "39902"
+      "length": "52154"
     },
     {
       "url": "http://127.0.0.1:5181/scripts/browser-helpers.mjs",

@@ -27,10 +27,16 @@
     "plannerMessages": 4,
     "docSections": 4,
     "assets": 3,
+    "assetDetailVisible": true,
     "members": 4,
     "ledgerRows": 4,
+    "planCards": 3,
+    "queueItems": 3,
+    "queueHidden": true,
     "canvasHidden": true,
     "canvasNodes": 10,
+    "nodeInspectorVisible": true,
+    "generationHistoryItems": 3,
     "generatePanelHidden": true,
     "editorPanelHidden": true,
     "modalHidden": true,
@@ -130,6 +136,12 @@
         "src": "./public/assets/story/video-dog-sit.png",
         "complete": true,
         "naturalWidth": 212,
+        "naturalHeight": 118
+      },
+      {
+        "src": "./public/assets/story/dog.png",
+        "complete": true,
+        "naturalWidth": 218,
         "naturalHeight": 118
       }
     ]

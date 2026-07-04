@@ -64,10 +64,11 @@ const checks = {
   hasPromptTools: ["upload", "asset", "mention", "style"].every(name => html.includes(`data-tool="${name}"`)),
   hasCategoryTabs: ["overseas", "comic", "mv", "knowledge"].every(name => html.includes(`data-category="${name}"`)),
   hasCanvasGraph: ["canvasStudio", "canvasPlane", "generatePanel", "editorPanel", "shotList", "bottomZoomLabel"].every(id => html.includes(id)),
+  hasDeepWorkflowPanels: ["queueDrawer", "queueList", "assetDetailPanel", "nodeInspector", "generationHistory", "planGrid"].every(id => html.includes(id)),
   hasGraphAssets: ["story/dog.png", "story/cat.png", "story/elevator.png", "story/hall.png", "story/video-elevator-dog.png", "story/video-dog-side.png", "story/video-cat-close.png", "story/video-dog-sit.png"].every(asset => html.includes(asset)),
-  hasExpandedStyles: [".library-view", ".script-view", ".story-card", ".planner-message", ".script-document", ".graph-surface", ".generate-panel", ".editor-panel"].every(token => styles.includes(token)),
+  hasExpandedStyles: [".library-view", ".script-view", ".story-card", ".planner-message", ".script-document", ".graph-surface", ".generate-panel", ".editor-panel", ".queue-drawer", ".asset-detail-panel", ".node-inspector", ".plan-card"].every(token => styles.includes(token)),
   hasResponsiveRules: styles.includes("@media (max-width: 1180px)") && styles.includes("@media (max-width: 760px)"),
-  hasInteractionData: ["const storyProjects", "const plannerMessages", "function renderLibrary", "function renderPlannerChat", "function renderScriptDocument", "function setCanvasMode", "function runGenerator"].every(token => app.includes(token)),
+  hasInteractionData: ["const storyProjects", "const plannerMessages", "const generationQueue", "function renderLibrary", "function renderPlannerChat", "function renderScriptDocument", "function renderQueue", "function renderAssetDetail", "function renderNodeInspector", "function setCanvasMode", "function runGenerator"].every(token => app.includes(token)),
   hasNoReplacementMojibake: !servedText.includes("\uFFFD")
 };
 

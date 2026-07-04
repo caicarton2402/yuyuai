@@ -43,12 +43,18 @@ const snapshotExpression = `(() => ({
   selectedAsset: document.querySelector(".asset-card.selected")?.dataset.asset || "",
   commentText: document.querySelector("#commentFeed")?.innerText || "",
   credits: Number(document.querySelector("#creditCount")?.textContent || 0),
+  queueHidden: document.querySelector("#queueDrawer")?.hidden,
+  queueItems: document.querySelectorAll(".queue-item").length,
+  assetDetailTitle: document.querySelector("#assetDetailPanel h2")?.textContent || "",
+  planCards: document.querySelectorAll(".plan-card").length,
   canvasHidden: document.querySelector("#canvasStudio")?.hidden,
   canvasNodes: document.querySelectorAll(".canvas-node").length,
   selectedNodeText: document.querySelector(".canvas-node.selected span")?.textContent || "",
+  nodeInspectorTitle: document.querySelector("#nodeInspector h2")?.textContent || "",
   generatePanelHidden: document.querySelector("#generatePanel")?.hidden,
   activeGeneratorTab: document.querySelector("[data-generator-tab].active")?.dataset.generatorTab || "",
   generatorPrompt: document.querySelector("#generatorPrompt")?.value || "",
+  generationHistoryItems: document.querySelectorAll("#generationHistory [data-result]").length,
   editorHidden: document.querySelector("#editorPanel")?.hidden,
   shotCount: document.querySelectorAll("[data-shot]").length,
   zoomLabel: document.querySelector("#zoomLabel")?.textContent || "",
@@ -123,6 +129,11 @@ try {
   assertCheck(!state.modalHidden && state.modalTitle.includes("模型"), "Model modal did not open", state);
   await click(cdp, "[data-action='close-modal']");
 
+  await click(cdp, "[data-action='open-queue']");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(state.queueHidden === false && state.queueItems >= 3, "Queue drawer did not open", state);
+  await click(cdp, "[data-action='close-queue']");
+
   await click(cdp, "[data-category='comic']");
   state = await evaluate(cdp, snapshotExpression);
   assertCheck(state.activeCategory === "comic" && state.promptPrefix.includes("漫剧"), "Category switch failed", state);
@@ -139,6 +150,10 @@ try {
   await click(cdp, "[data-route='projects']");
   state = await evaluate(cdp, snapshotExpression);
   assertCheck(state.activeView === "projects" && state.libraryTab === "story" && state.storyCount >= 4, "Story library route did not render", state);
+  await click(cdp, "[data-project-action='detail']");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(!state.modalHidden && state.modalTitle.length > 2, "Project detail modal failed", state);
+  await click(cdp, "[data-action='close-modal']");
   await click(cdp, "[data-story-filter='comic']");
   state = await evaluate(cdp, snapshotExpression);
   assertCheck(state.storyFilter === "comic" && state.storyCount >= 1, "Story filter failed", state);
@@ -161,7 +176,7 @@ try {
 
   await click(cdp, "[data-action='open-canvas']");
   state = await evaluate(cdp, snapshotExpression);
-  assertCheck(state.canvasHidden === false && state.canvasNodes >= 10 && state.zoomLabel === "33%", "Canvas did not open", state);
+  assertCheck(state.canvasHidden === false && state.canvasNodes >= 10 && state.zoomLabel === "33%" && state.nodeInspectorTitle.length > 0, "Canvas did not open", state);
 
   const dragState = await dragSelectedNode(cdp);
   assertCheck(dragState.before !== dragState.after, "Canvas node drag did not change x position", dragState);
@@ -173,7 +188,10 @@ try {
 
   await click(cdp, "[data-canvas-action='open-generate']");
   state = await evaluate(cdp, snapshotExpression);
-  assertCheck(state.generatePanelHidden === false && state.activeGeneratorTab === "image", "Generate panel did not open", state);
+  assertCheck(state.generatePanelHidden === false && state.activeGeneratorTab === "image" && state.generationHistoryItems >= 3, "Generate panel did not open", state);
+  await click(cdp, "#generationHistory [data-result]");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(state.generatorPrompt.includes("继续优化"), "Generation history did not load into prompt", state);
   await click(cdp, "[data-generator-tab='video']");
   state = await evaluate(cdp, snapshotExpression);
   assertCheck(state.activeGeneratorTab === "video" && state.generatorPrompt.includes("6 秒视频"), "Generator tab switch failed", state);
@@ -200,10 +218,10 @@ try {
   await click(cdp, "[data-route='assets']");
   await click(cdp, "[data-asset-tab='scenes']");
   state = await evaluate(cdp, snapshotExpression);
-  assertCheck(state.activeView === "assets" && state.assetTab === "scenes" && state.selectedAsset, "Asset tab switch failed", state);
+  assertCheck(state.activeView === "assets" && state.assetTab === "scenes" && state.selectedAsset && state.assetDetailTitle.length > 0, "Asset tab switch failed", state);
   await click(cdp, ".asset-card:nth-child(2)");
   state = await evaluate(cdp, snapshotExpression);
-  assertCheck(state.selectedAsset.length > 0, "Asset selection failed", state);
+  assertCheck(state.selectedAsset.length > 0 && state.assetDetailTitle === state.selectedAsset, "Asset selection failed", state);
 
   await click(cdp, "[data-route='team']");
   await typeValue(cdp, "#commentInput", "测试评论");
@@ -213,7 +231,11 @@ try {
 
   await click(cdp, "[data-route='account']");
   state = await evaluate(cdp, snapshotExpression);
-  assertCheck(state.activeView === "account" && state.credits > 0, "Account route failed", state);
+  assertCheck(state.activeView === "account" && state.credits > 0 && state.planCards >= 3, "Account route failed", state);
+  await click(cdp, "[data-action='open-plans']");
+  state = await evaluate(cdp, snapshotExpression);
+  assertCheck(!state.modalHidden && state.modalTitle.includes("会员"), "Plans modal failed", state);
+  await click(cdp, "[data-action='close-modal']");
 
   const result = {
     ok: true,
@@ -222,11 +244,14 @@ try {
       exploreTools: true,
       categoryAndTemplate: true,
       generationWorkflow: true,
+      queueAndProjectDetail: true,
       storyLibrary: true,
       scriptPlanning: true,
       canvasGraphAndGenerator: true,
+      generationHistoryAndInspector: true,
       editorPreviewExport: true,
-      assetsTeamAccount: true
+      assetsTeamAccount: true,
+      membershipPanels: true
     },
     dragState,
     finalState: state
