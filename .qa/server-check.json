@@ -6,25 +6,25 @@
       "url": "http://127.0.0.1:5181/",
       "status": 200,
       "type": "text/html; charset=utf-8",
-      "length": "25470"
+      "length": "26714"
     },
     {
       "url": "http://127.0.0.1:5181/src/styles.css",
       "status": 200,
       "type": "text/css; charset=utf-8",
-      "length": "57929"
+      "length": "58858"
     },
     {
       "url": "http://127.0.0.1:5181/src/app.js",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "length": "52154"
+      "length": "60150"
     },
     {
       "url": "http://127.0.0.1:5181/scripts/browser-helpers.mjs",
       "status": 200,
       "type": "text/javascript; charset=utf-8",
-      "length": "8422"
+      "length": "8594"
     },
     {
       "url": "http://127.0.0.1:5181/public/assets/yuyu-logo.png",

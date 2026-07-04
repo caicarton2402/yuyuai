@@ -6,11 +6,15 @@
   "scripts": {
     "validate": "node scripts/validate.mjs",
     "qa:http": "node scripts/check-http.mjs",
+    "qa:api": "node scripts/api-check.mjs",
+    "qa:backend-ui": "node scripts/backend-ui-check.mjs",
     "qa:runtime": "node scripts/runtime-check.mjs",
     "qa:render": "node scripts/render-and-diff.mjs",
     "qa:interactive": "node scripts/interactive-dom-check.mjs",
     "qa:responsive": "node scripts/responsive-check.mjs",
-    "qa": "npm run validate && npm run qa:http && npm run qa:runtime && npm run qa:render && npm run qa:interactive && npm run qa:responsive",
-    "serve": "python -m http.server 5180 --bind 127.0.0.1"
+    "qa": "npm run validate && npm run qa:http && npm run qa:api && npm run qa:backend-ui && npm run qa:runtime && npm run qa:render && npm run qa:interactive && npm run qa:responsive",
+    "serve": "python -m http.server 5180 --bind 127.0.0.1",
+    "backend": "node server/server.mjs",
+    "dev": "node server/server.mjs"
   }
 }

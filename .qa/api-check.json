@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "baseUrl": "http://127.0.0.1:5320",
+  "checks": {
+    "health": true,
+    "registered": true,
+    "me": true,
+    "seededProjects": true,
+    "projectCreateAndDuplicate": true,
+    "commentSaved": true,
+    "generationSaved": true,
+    "billingSaved": true,
+    "loginAfterLogout": true
+  }
+}

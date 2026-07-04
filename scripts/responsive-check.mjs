@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import {
   assertCheck,
+  closeBrowser,
   delay,
   evaluate,
   findFreePort,
@@ -221,10 +222,7 @@ try {
   console.error(JSON.stringify(result, null, 2));
   process.exitCode = 1;
 } finally {
-  try {
-    await cdp?.send("Browser.close");
-  } catch {}
-  cdp?.close();
+  await closeBrowser(cdp);
   await stopProcess(chromeProcess);
   await stopProcess(server);
   await removeWithRetry(profileDir);

@@ -2,6 +2,7 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import {
+  closeBrowser,
   evaluate,
   findFreePort,
   launchChrome,
@@ -107,10 +108,7 @@ print(json.dumps(result, indent=2, ensure_ascii=False))
   await writeFile(path.join(qaDir, "render-and-diff.json"), JSON.stringify(report, null, 2), "utf8");
   console.log(JSON.stringify(report, null, 2));
 } finally {
-  try {
-    await cdp?.send("Browser.close");
-  } catch {}
-  cdp?.close();
+  await closeBrowser(cdp);
   await stopProcess(chromeProcess);
   await stopProcess(server);
   await removeWithRetry(profileDir);

@@ -191,10 +191,29 @@
         <div class="view-head"><span class="eyebrow">Account</span><h1 id="accountTitle">账户与会员</h1><p>展示积分、会员、用量和通知中心，并与全站功能联动。</p></div>
         <div class="account-grid">
           <section class="metric-card"><span>剩余积分</span><strong id="accountCredits">5083</strong><small>今日已使用 320 点</small></section>
-          <section class="metric-card"><span>会员等级</span><strong>标准会员</strong><small>支持高清预览和多剧集策划</small></section>
+          <section class="metric-card"><span>会员等级</span><strong id="planName">标准会员</strong><small>支持高清预览和多剧集策划</small></section>
           <section class="metric-card"><span>生成队列</span><strong id="queueCount">3</strong><small>2 个视频，1 个九宫格</small></section>
-          <section class="metric-card"><span>团队席位</span><strong>4 / 8</strong><small>可继续邀请 4 人</small></section>
+          <section class="metric-card"><span>团队席位</span><strong id="seatCount">4 / 8</strong><small id="seatHint">可继续邀请 4 人</small></section>
         </div>
+        <section class="backend-panel" id="backendPanel">
+          <div>
+            <span class="eyebrow">Backend</span>
+            <h2>用户与数据同步</h2>
+            <p id="backendStatus">正在检查后端连接...</p>
+            <strong id="authUserSummary">静态演示模式</strong>
+          </div>
+          <div class="auth-fields">
+            <input id="authName" type="text" autocomplete="name" placeholder="昵称（注册时填写）" />
+            <input id="authEmail" type="email" autocomplete="email" placeholder="邮箱，例如 demo@yuyu.ai" />
+            <input id="authPassword" type="password" autocomplete="current-password" placeholder="密码，至少 8 位" />
+          </div>
+          <div class="auth-actions">
+            <button class="primary-action compact" type="button" data-action="auth-login">登录</button>
+            <button class="secondary-action" type="button" data-action="auth-register">注册</button>
+            <button class="secondary-action" type="button" data-action="auth-sync">同步</button>
+            <button class="secondary-action" type="button" data-action="auth-logout">退出</button>
+          </div>
+        </section>
         <div class="account-actions">
           <button class="primary-action compact" type="button" data-action="open-plans">升级会员</button>
           <button class="secondary-action" type="button" data-action="open-queue">查看生成队列</button>

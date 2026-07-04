@@ -192,6 +192,13 @@ export function assertCheck(condition, message, details = {}) {
   }
 }
 
+export async function closeBrowser(cdp, timeoutMs = 1200) {
+  try {
+    await Promise.race([cdp?.send("Browser.close"), delay(timeoutMs)]);
+  } catch {}
+  cdp?.close();
+}
+
 export async function startStaticServer(port) {
   const output = { stdout: "", stderr: "" };
   const mime = {

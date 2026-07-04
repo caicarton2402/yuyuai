@@ -28,6 +28,14 @@ const assetDetailPanel = $("#assetDetailPanel");
 const nodeInspector = $("#nodeInspector");
 const generationHistory = $("#generationHistory");
 const planGrid = $("#planGrid");
+const backendStatus = $("#backendStatus");
+const authUserSummary = $("#authUserSummary");
+const authName = $("#authName");
+const authEmail = $("#authEmail");
+const authPassword = $("#authPassword");
+const planName = $("#planName");
+const seatCount = $("#seatCount");
+const seatHint = $("#seatHint");
 
 const categories = {
   overseas: {
@@ -233,6 +241,12 @@ const members = [
   { name: "Designer", role: "美术", state: "待反馈" }
 ];
 
+const teamComments = [
+  { author: "导演", body: "镜头 3 的反转需要更明确。" },
+  { author: "编剧", body: "已补充蛋卷内心独白。" },
+  { author: "美术", body: "场景色调已统一为冷灰金属。" }
+];
+
 const usageLedger = [
   ["视频生成", "-180", "职场萌宠喜剧 EP01"],
   ["九宫格图", "-60", "封面拆图"],
@@ -291,6 +305,16 @@ let zoom = 0.33;
 let renderScale = 0.72;
 let activeCanvasTool = "select";
 let selectedAsset = "蛋卷 Eggrol";
+let accountPlan = "标准会员";
+let seatLimit = 8;
+
+const apiState = {
+  available: false,
+  checked: false,
+  token: window.localStorage.getItem("yuyu_token") || "",
+  user: null,
+  saveTimer: 0
+};
 
 function escapeHtml(value) {
   return String(value)
@@ -299,6 +323,212 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function replaceList(target, next = []) {
+  if (!Array.isArray(next)) return;
+  target.splice(0, target.length, ...next);
+}
+
+function replaceAssets(next = {}) {
+  Object.keys(assets).forEach(key => {
+    assets[key] = Array.isArray(next[key]) ? next[key] : assets[key];
+  });
+}
+
+function setBackendStatus(message) {
+  if (backendStatus) backendStatus.textContent = message;
+}
+
+function renderAuthState() {
+  if (!authUserSummary) return;
+  if (!apiState.checked) {
+    setBackendStatus("正在检查后端连接...");
+    authUserSummary.textContent = "静态演示模式";
+    return;
+  }
+  if (!apiState.available) {
+    setBackendStatus("当前页面未连接后端，功能以本地静态演示运行。");
+    authUserSummary.textContent = "部署到 GitHub Pages 时保持静态可用";
+    return;
+  }
+  if (!apiState.user) {
+    setBackendStatus("后端在线。登录或注册后，项目、积分、评论和任务会写入 data/db.json。");
+    authUserSummary.textContent = "可使用 demo@yuyu.ai / Yuyu123456";
+    return;
+  }
+  setBackendStatus("后端在线，数据已按当前用户保存。");
+  authUserSummary.textContent = `${apiState.user.name} · ${apiState.user.email}`;
+  if (authEmail) authEmail.value = apiState.user.email;
+  if (authName) authName.value = apiState.user.name;
+}
+
+async function apiFetch(path, options = {}) {
+  const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
+  if (apiState.token) headers.Authorization = `Bearer ${apiState.token}`;
+  const response = await fetch(`/api${path}`, {
+    ...options,
+    headers,
+    cache: "no-store",
+    body: options.body && typeof options.body !== "string" ? JSON.stringify(options.body) : options.body
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.message || `API ${path} failed`);
+  }
+  return data;
+}
+
+function snapshotWorkspace() {
+  return {
+    credits,
+    plan: accountPlan,
+    seatLimit,
+    projects: storyProjects,
+    assets,
+    plannerMessages,
+    scriptSections,
+    members,
+    comments: teamComments,
+    usageLedger,
+    generationQueue,
+    generationResults
+  };
+}
+
+function applyWorkspace(workspace = {}) {
+  replaceList(storyProjects, workspace.projects);
+  replaceAssets(workspace.assets);
+  replaceList(plannerMessages, workspace.plannerMessages);
+  replaceList(scriptSections, workspace.scriptSections);
+  replaceList(members, workspace.members);
+  replaceList(teamComments, workspace.comments);
+  replaceList(usageLedger, workspace.usageLedger);
+  replaceList(generationQueue, workspace.generationQueue);
+  replaceList(generationResults, workspace.generationResults);
+  accountPlan = workspace.plan || accountPlan;
+  seatLimit = Number(workspace.seatLimit || seatLimit);
+  if (Number.isFinite(Number(workspace.credits))) setCredits(Number(workspace.credits));
+  if (!assets[activeAssetTab]?.some(item => item.title === selectedAsset)) {
+    selectedAsset = assets[activeAssetTab]?.[0]?.title || "";
+  }
+  renderLibrary();
+  renderPlannerChat();
+  renderScriptDocument();
+  renderAssets();
+  renderTeam();
+  renderAccount();
+  renderQueue();
+  renderGenerationHistory();
+  renderNodeInspector();
+}
+
+function persistWorkspace(reason = "auto") {
+  if (!apiState.available || !apiState.user) return;
+  window.clearTimeout(apiState.saveTimer);
+  apiState.saveTimer = window.setTimeout(async () => {
+    try {
+      await apiFetch("/workspace", { method: "PUT", body: { workspace: snapshotWorkspace() } });
+      setBackendStatus(`后端在线，${reason}已保存。`);
+    } catch (error) {
+      setBackendStatus(`后端保存失败：${error.message}`);
+    }
+  }, 180);
+}
+
+async function loadBackendWorkspace() {
+  if (!apiState.available || !apiState.token) return;
+  const data = await apiFetch("/auth/me");
+  apiState.user = data.user;
+  window.localStorage.setItem("yuyu_token", apiState.token);
+  applyWorkspace(data.workspace);
+  renderAuthState();
+}
+
+async function detectBackend() {
+  if (!["http:", "https:"].includes(window.location.protocol)) {
+    apiState.checked = true;
+    renderAuthState();
+    return;
+  }
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), 900);
+  try {
+    const response = await fetch("/api/health", { cache: "no-store", signal: controller.signal });
+    apiState.available = response.ok;
+  } catch {
+    apiState.available = false;
+  } finally {
+    window.clearTimeout(timer);
+    apiState.checked = true;
+  }
+  renderAuthState();
+  if (apiState.available && apiState.token) {
+    try {
+      await loadBackendWorkspace();
+    } catch {
+      apiState.token = "";
+      apiState.user = null;
+      window.localStorage.removeItem("yuyu_token");
+      renderAuthState();
+    }
+  }
+}
+
+async function authenticate(mode) {
+  if (!apiState.available) {
+    showToast("请用 npm.cmd run backend 启动后端");
+    return;
+  }
+  const email = authEmail?.value.trim() || "";
+  const password = authPassword?.value || "";
+  const name = authName?.value.trim() || "YUYU 用户";
+  try {
+    const data = await apiFetch(`/auth/${mode}`, {
+      method: "POST",
+      body: mode === "register" ? { email, password, name } : { email, password }
+    });
+    apiState.token = data.token;
+    apiState.user = data.user;
+    window.localStorage.setItem("yuyu_token", data.token);
+    applyWorkspace(data.workspace);
+    renderAuthState();
+    showToast(mode === "register" ? "注册成功，后端工作区已创建" : "登录成功，数据已同步");
+  } catch (error) {
+    showToast(error.message);
+    setBackendStatus(`认证失败：${error.message}`);
+  }
+}
+
+async function logoutBackend() {
+  if (apiState.available && apiState.token) {
+    try {
+      await apiFetch("/auth/logout", { method: "POST" });
+    } catch {}
+  }
+  apiState.token = "";
+  apiState.user = null;
+  window.localStorage.removeItem("yuyu_token");
+  renderAuthState();
+  showToast("已退出后端账户");
+}
+
+async function syncBackendNow() {
+  if (!apiState.available) {
+    showToast("后端未连接");
+    return;
+  }
+  if (!apiState.user) {
+    showToast("请先登录后端账户");
+    return;
+  }
+  try {
+    await apiFetch("/workspace", { method: "PUT", body: { workspace: snapshotWorkspace() } });
+    await loadBackendWorkspace();
+    showToast("已同步后端数据");
+  } catch (error) {
+    showToast(error.message);
+  }
 }
 
 function showToast(message) {
@@ -530,6 +760,7 @@ function startGeneration() {
       renderGenerationHistory();
       renderQueue();
       setCredits(credits - 80);
+      persistWorkspace("生成任务");
       window.clearInterval(generationTimer);
     }
   }, 520);
@@ -608,6 +839,7 @@ function sendPlannerMessage() {
   input.value = "";
   renderPlannerChat();
   renderScriptDocument();
+  persistWorkspace("策划内容");
   showToast("策划内容已更新");
 }
 
@@ -635,20 +867,16 @@ function renderTeam() {
       <small>${escapeHtml(member.role)} · ${escapeHtml(member.state)}</small>
     </div>
   `).join("");
-  if (!$("#commentFeed").dataset.rendered) {
-    $("#commentFeed").innerHTML = [
-      "导演：镜头 3 的反转需要更明确。",
-      "编剧：已补充蛋卷内心独白。",
-      "美术：场景色调已统一为冷灰金属。"
-    ].map(text => `<p>${text}</p>`).join("");
-    $("#commentFeed").dataset.rendered = "true";
-  }
+  $("#commentFeed").innerHTML = teamComments.map(comment => `<p>${escapeHtml(comment.author || "我")}：${escapeHtml(comment.body || "")}</p>`).join("");
 }
 
 function renderAccount() {
   $("#usageLedger").innerHTML = usageLedger.map(row => `
     <div class="ledger-row"><span>${row[0]}</span><strong>${row[1]}</strong><small>${row[2]}</small></div>
   `).join("");
+  if (planName) planName.textContent = accountPlan;
+  if (seatCount) seatCount.textContent = `${members.length} / ${seatLimit}`;
+  if (seatHint) seatHint.textContent = `可继续邀请 ${Math.max(0, seatLimit - members.length)} 人`;
   renderPlanGrid();
   syncQueueCount();
 }
@@ -847,6 +1075,7 @@ function runGenerator() {
   renderGenerationHistory();
   renderQueue();
   setCredits(credits - (active === "video" ? 120 : 30));
+  persistWorkspace("生成节点");
   showToast("已生成新节点");
 }
 
@@ -859,6 +1088,7 @@ function handleAction(action) {
       if (item.state !== "已完成") item.state = item.state === "已暂停" ? "排队中" : "已暂停";
     });
     renderQueue();
+    persistWorkspace("队列状态");
     showToast("队列状态已更新");
   }
   if (action === "clear-finished") {
@@ -866,6 +1096,7 @@ function handleAction(action) {
       if (generationQueue[index].state === "已完成") generationQueue.splice(index, 1);
     }
     renderQueue();
+    persistWorkspace("队列清理");
     showToast("已清理完成任务");
   }
   if (action === "open-script") routeTo("script");
@@ -915,6 +1146,7 @@ function handleAction(action) {
     });
     activeLibraryTab = "story";
     renderLibrary();
+    persistWorkspace("新建故事");
     showToast("新故事已创建");
   }
   if (action === "use-selected-asset") {
@@ -945,11 +1177,17 @@ function handleAction(action) {
   if (action === "add-comment") {
     const input = $("#commentInput");
     if (input.value.trim()) {
-      $("#commentFeed").insertAdjacentHTML("afterbegin", `<p>我：${escapeHtml(input.value.trim())}</p>`);
+      teamComments.unshift({ id: `comment-${Date.now()}`, author: apiState.user?.name || "我", body: input.value.trim(), createdAt: new Date().toISOString() });
       input.value = "";
+      renderTeam();
+      persistWorkspace("评论");
       showToast("评论已发送");
     }
   }
+  if (action === "auth-login") authenticate("login");
+  if (action === "auth-register") authenticate("register");
+  if (action === "auth-logout") logoutBackend();
+  if (action === "auth-sync") syncBackendNow();
   if (action === "approve-version") showToast("版本已批准");
   if (action === "close-modal") closeModal();
 }
@@ -959,20 +1197,27 @@ function handleModalAction(action) {
   if (action === "open-queue") openQueueDrawer();
   if (action === "open-help") openModal("help");
   if (action.includes("upload")) routeTo("assets");
-  if (action.includes("export")) setCredits(credits - 20);
+  if (action.includes("export")) {
+    setCredits(credits - 20);
+    persistWorkspace("导出扣费");
+  }
   if (action === "top-up") {
     usageLedger.unshift(["模拟充值", "+2000", "前端演示充值"]);
     setCredits(credits + 2000);
     renderAccount();
+    persistWorkspace("充值");
   }
   if (action === "upgrade-plan") {
     usageLedger.unshift(["会员升级", "-199", "专业会员演示"]);
+    accountPlan = "专业会员";
     setCredits(credits - 199);
     renderAccount();
+    persistWorkspace("会员升级");
   }
   if (action === "continue-project") routeTo("script");
   if (action === "duplicate-project") {
     storyProjects.unshift({ ...storyProjects[0], id: `copy-${Date.now()}`, title: `${storyProjects[0].title} 副本`, updated: "刚刚", status: "草稿", progress: 18 });
+    persistWorkspace("项目副本");
     routeTo("projects");
   }
   if (action === "apply-mention") {
@@ -991,6 +1236,7 @@ function handleProjectAction(action, card) {
   if (action === "duplicate" && project) {
     storyProjects.unshift({ ...project, id: `copy-${Date.now()}`, title: `${project.title} 副本`, updated: "刚刚", status: "草稿", progress: Math.min(project.progress, 20) });
     renderLibrary();
+    persistWorkspace("项目副本");
     showToast("项目副本已创建");
   }
   if (action === "export") openModal("export", { title: `导出${project?.title || "项目"}` });
@@ -1241,3 +1487,5 @@ renderGenerationHistory();
 renderNodeInspector();
 setCredits(credits);
 setZoom(zoom);
+renderAuthState();
+detectBackend();

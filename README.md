@@ -20,9 +20,30 @@ https://caicarton2402.github.io/yuyuai/
 - Node canvas editor with add node, drag, zoom, auto layout, inspector edits, preview, and export.
 - Global modal system, toast feedback, responsive desktop/tablet/mobile layout, and YUYU logo/branding.
 
-## Boundary
+## Backend And User System
 
-This repository is a deployable static frontend. Authentication, billing, storage, real video generation, private model APIs, and production downloads are mocked in the browser so the page can run on GitHub Pages.
+The app now runs in two modes:
+
+- Static mode on GitHub Pages, where all flows remain available as browser-side demo interactions.
+- Backend mode with the local Node server, where users, sessions, workspace data, projects, assets, comments, queue items, credits, billing actions, and generation records are persisted to `data/db.json`.
+
+Demo account created on first backend start:
+
+```text
+demo@yuyu.ai
+Yuyu123456
+```
+
+Main API groups:
+
+- `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`
+- `GET/PUT /api/workspace`
+- `GET/POST/PATCH/DELETE /api/projects`
+- `GET/POST /api/assets`
+- `GET/POST /api/team/members`, `GET/POST /api/team/comments`
+- `GET/POST/PATCH/DELETE /api/queue`
+- `POST /api/billing/top-up`, `POST /api/billing/upgrade`
+- `POST /api/generate`
 
 ## Local Run
 
@@ -38,6 +59,20 @@ Then visit:
 http://127.0.0.1:5180/
 ```
 
+To run the full frontend plus backend:
+
+```powershell
+npm.cmd run backend
+```
+
+Then visit:
+
+```text
+http://127.0.0.1:5180/
+```
+
+The frontend automatically detects `/api/health`. If the backend is online, use the account panel to log in, register, sync, or log out.
+
 ## QA
 
 Run the complete repeatable check:
@@ -51,6 +86,8 @@ The QA suite validates:
 - Static file and branding checks.
 - Local HTTP resources.
 - Runtime console/network/image health in Chrome.
+- Backend API registration/login/workspace persistence.
+- Browser-level backend login and persisted comment flow.
 - Full interaction flow across explore, projects, assets, team, account, and canvas.
 - Headless render screenshot at `1920x863`.
 - Responsive screenshots at `1920x1000`, `1440x1000`, `1024x1000`, `768x1000`, and `375x812`.

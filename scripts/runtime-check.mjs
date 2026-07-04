@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import {
   assertCheck,
+  closeBrowser,
   delay,
   evaluate,
   findFreePort,
@@ -70,7 +71,11 @@ function runtimeProblems(events) {
     consoleErrors: events.filter(event => event.method === "Runtime.consoleAPICalled" && event.params?.type === "error"),
     exceptions: events.filter(event => event.method === "Runtime.exceptionThrown"),
     failedRequests: events.filter(event => event.method === "Network.loadingFailed" && event.params?.errorText !== "net::ERR_ABORTED"),
-    badResponses: events.filter(event => event.method === "Network.responseReceived" && event.params?.response?.status >= 400)
+    badResponses: events.filter(event => {
+      const response = event.params?.response;
+      if (!response || response.status < 400) return false;
+      return !(response.url.endsWith("/api/health") && response.status === 404);
+    })
   };
 }
 
@@ -146,10 +151,7 @@ try {
   console.error(JSON.stringify(result, null, 2));
   process.exitCode = 1;
 } finally {
-  try {
-    await cdp?.send("Browser.close");
-  } catch {}
-  cdp?.close();
+  await closeBrowser(cdp);
   await stopProcess(chromeProcess);
   await stopProcess(server);
   await removeWithRetry(profileDir);
