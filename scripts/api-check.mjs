@@ -88,6 +88,12 @@ try {
     body: { name: "qa-creator", role: "可编辑" }
   });
   const paused = await api("/api/queue/pause", { method: "POST", token });
+  const patchedQueueItem = await api(`/api/queue/${generated.task.id}`, {
+    method: "PATCH",
+    token,
+    body: { state: "已暂停" }
+  });
+  const deletedQueueItem = await api(`/api/queue/${generated.task.id}`, { method: "DELETE", token });
   const exported = await api("/api/exports", {
     method: "POST",
     token,
@@ -132,6 +138,8 @@ try {
     assetSaved: asset.workspace.assets.characters.some(item => item.title === "QA 上传素材"),
     inviteSaved: invited.workspace.members.some(item => item.name === "qa-creator" && item.state === "待接受"),
     queuePauseSaved: paused.paused === true && paused.queue.some(item => item.state === "已暂停"),
+    queuePatchSaved: patchedQueueItem.task.state === "已暂停",
+    queueDeleteSaved: !deletedQueueItem.queue.some(item => item.id === generated.task.id),
     exportSaved: exported.workspace.generationQueue[0].type === "导出" && exported.workspace.usageLedger[0][0] === "导出任务",
     assetActionSaved: assetUsed.workspace.usageLedger[0][0] === "资产绑定" && assetUsed.workspace.comments[0].body.includes("QA 上传素材"),
     modelActionSaved: modelApplied.workspace.usageLedger[0][0] === "参数应用",

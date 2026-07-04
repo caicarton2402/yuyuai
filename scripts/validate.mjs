@@ -59,6 +59,38 @@ const styles = await readFile(path.join(root, "src/styles.css"), "utf8");
 const app = await readFile(path.join(root, "src/app.js"), "utf8");
 const servedText = `${html}\n${styles}\n${app}`;
 const sourceBrandPattern = new RegExp(`${"se"}${"ko"}|${"sense"}${"time"}`, "i");
+const staticButtons = [...html.matchAll(/<button\b[^>]*>/g)].map(match => match[0]);
+const unmarkedStaticButtons = staticButtons.filter(tag => !/(data-[\w-]+|id=)/.test(tag));
+const requiredControlHandlers = [
+  "[data-route]",
+  "[data-tool]",
+  "[data-category]",
+  "[data-feature]",
+  "[data-template]",
+  "[data-panel-action]",
+  "[data-doc-mode]",
+  "[data-library-tab]",
+  "[data-story-filter]",
+  "[data-episode]",
+  "[data-asset-tab]",
+  "[data-asset]",
+  "[data-plan]",
+  "[data-action]",
+  "[data-modal-action]",
+  "[data-modal-shortcut]",
+  ".option-grid button",
+  "[data-queue-action]",
+  "[data-project-action]",
+  "[data-canvas-mode]",
+  "[data-generator-tab]",
+  "[data-generator-setting]",
+  "[data-generator-preset]",
+  "[data-result]",
+  "[data-canvas-action]",
+  "[data-canvas-view]",
+  "[data-canvas-tool]",
+  "[data-shot]"
+];
 
 const checks = {
   noOriginalBranding: !sourceBrandPattern.test(servedText),
@@ -76,6 +108,8 @@ const checks = {
   hasExpandedStyles: [".library-view", ".script-view", ".story-card", ".planner-message", ".script-document", ".graph-surface", ".generate-panel", ".editor-panel", ".queue-drawer", ".asset-detail-panel", ".node-inspector", ".plan-card"].every(token => styles.includes(token)),
   hasResponsiveRules: styles.includes("@media (max-width: 1180px)") && styles.includes("@media (max-width: 760px)"),
   hasInteractionData: ["const storyProjects", "const plannerMessages", "const generationQueue", "function renderLibrary", "function renderPlannerChat", "function renderScriptDocument", "function renderQueue", "function renderAssetDetail", "function renderNodeInspector", "function setCanvasMode", "function runGenerator"].every(token => app.includes(token)),
+  hasMarkedStaticButtons: unmarkedStaticButtons.length === 0,
+  hasControlHandlers: requiredControlHandlers.every(token => app.includes(token)),
   hasNoReplacementMojibake: !servedText.includes("\uFFFD")
 };
 

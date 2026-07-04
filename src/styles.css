@@ -600,6 +600,11 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
+.floating-generate-toolbar button.active {
+  color: #101010;
+  background: var(--lime);
+}
+
 .graph-plane {
   left: 50%;
   top: 52%;
@@ -741,6 +746,11 @@
 .generator-tabs button.active {
   color: #fff;
   background: rgba(255, 255, 255, 0.12);
+}
+
+.generator-settings button.active {
+  color: #101010;
+  background: #b8e948;
 }
 
 .generator-tools {
@@ -2416,6 +2426,11 @@ svg {
   background: rgba(255, 255, 255, 0.06);
 }
 
+.queue-status {
+  min-width: 52px;
+  text-align: right;
+}
+
 .queue-item span,
 .queue-item small {
   display: block;
@@ -2433,6 +2448,27 @@ svg {
   color: var(--lime);
   font-style: normal;
   font-weight: 800;
+}
+
+.queue-controls {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.queue-controls button {
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: #cfd4da;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+}
+
+.queue-controls button:hover {
+  color: #101010;
+  background: var(--lime);
 }
 
 .queue-item i {
@@ -3200,6 +3236,22 @@ body .graph-surface {
   background:
     radial-gradient(circle, rgba(255, 255, 255, 0.12) 1px, transparent 1px) 0 0 / 10px 10px,
     #0b0b0c;
+}
+
+body .graph-surface[data-canvas-view="outline"] .graph-plane {
+  filter: saturate(0.7) brightness(0.88);
+}
+
+body .graph-surface[data-canvas-view="map"] .graph-plane {
+  filter: contrast(1.08) saturate(1.12);
+}
+
+body .graph-surface[data-canvas-view="hand"] {
+  cursor: grab;
+}
+
+body .graph-surface.panning {
+  cursor: grabbing;
 }
 
 body .graph-plane {

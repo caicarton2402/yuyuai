@@ -114,6 +114,11 @@ try {
   await waitForCondition(cdp, `document.querySelector("#queueDrawer")?.hidden === false && document.querySelector("#queueList")?.innerText.includes("导出")`);
   await click(cdp, "[data-action='pause-queue']");
   await waitForCondition(cdp, `document.querySelector("#queueList")?.innerText.includes("已暂停")`);
+  const queueItemsBeforeRemove = await evaluate(cdp, `document.querySelectorAll(".queue-item").length`);
+  await click(cdp, "[data-queue-action='resume']");
+  await waitForCondition(cdp, `document.querySelector("#queueList")?.innerText.includes("排队中")`);
+  await click(cdp, "[data-queue-action='remove']");
+  await waitForCondition(cdp, `document.querySelectorAll(".queue-item").length === ${queueItemsBeforeRemove - 1}`);
 
   const creditsBeforeBilling = await evaluate(cdp, `Number(document.querySelector("#creditCount")?.textContent || 0)`);
   await click(cdp, "[data-route='account']");

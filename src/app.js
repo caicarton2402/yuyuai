@@ -303,10 +303,21 @@ let toastTimer = 0;
 let generationTimer = 0;
 let zoom = 0.33;
 let renderScale = 0.72;
+let panX = 0;
+let panY = 0;
 let activeCanvasTool = "select";
+let activeCanvasView = "grid";
 let selectedAsset = "蛋卷 Eggrol";
 let accountPlan = "标准会员";
 let seatLimit = 8;
+const generatorSettings = {
+  model: "全能图片 G2",
+  aspect: "16:9",
+  quality: "2K",
+  count: "1张",
+  panorama: false,
+  boost: 0
+};
 
 const apiState = {
   available: false,
@@ -704,7 +715,11 @@ function renderQueue() {
   queueList.innerHTML = generationQueue.map(item => `
     <article class="queue-item" data-queue-id="${item.id}">
       <div><span>${escapeHtml(item.type)}</span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.state)} · ${item.cost} 点</small></div>
-      <em>${item.progress}%</em>
+      <div class="queue-status"><em>${item.progress}%</em></div>
+      <div class="queue-controls" aria-label="${escapeHtml(item.title)} 操作">
+        ${item.state === "已完成" ? `<button type="button" data-queue-action="rerun" data-queue-id="${item.id}">再生成</button>` : `<button type="button" data-queue-action="${item.state === "已暂停" ? "resume" : "pause"}" data-queue-id="${item.id}">${item.state === "已暂停" ? "恢复" : "暂停"}</button>`}
+        <button type="button" data-queue-action="remove" data-queue-id="${item.id}">删除</button>
+      </div>
       <i style="width:${item.progress}%"></i>
     </article>
   `).join("");
@@ -1001,6 +1016,12 @@ function openModal(kind, data = {}) {
       body: `<div class="option-grid"><button data-modal-shortcut="queue">任务队列</button><button data-modal-shortcut="billing">会员与充值</button><button data-modal-shortcut="archive">项目归档</button><button data-modal-shortcut="help">快捷键</button></div><div class="modal-list"><p>支持回收站、生成记录、项目复制、批量导入、导出任务和团队权限模拟。</p></div>`,
       actions: [["打开任务队列", "open-queue"], ["查看快捷键", "open-help"]]
     },
+    archive: {
+      kicker: "Archive",
+      title: "项目归档",
+      body: `<div class="modal-list"><p>霸总猫与憨憨狗的职场日常 · 已保留 12 个版本</p><p>电梯里的 15 秒主题曲 · 可恢复 MV 素材包</p><p>用画布拆解一条宠物短剧 · 草稿归档中</p></div>`,
+      actions: [["返回故事库", "continue-project"]]
+    },
     plans: {
       kicker: "Plans",
       title: "会员方案",
@@ -1059,6 +1080,31 @@ function setCanvasMode(mode) {
   }
 }
 
+function setCanvasView(view) {
+  activeCanvasView = view;
+  $$("[data-canvas-view]").forEach(button => {
+    button.classList.toggle("active", button.dataset.canvasView === view);
+  });
+  const surface = $(".graph-surface");
+  if (surface) surface.dataset.canvasView = view;
+  if (view === "outline") {
+    setCanvasMode("editor");
+    showToast("已切换到镜头大纲");
+  } else if (view === "map") {
+    setCanvasMode("canvas");
+    showToast("已显示画布地图");
+  } else if (view === "hand") {
+    setCanvasMode("canvas");
+    activeCanvasTool = "hand";
+    $$("[data-canvas-tool]").forEach(item => item.classList.remove("active"));
+    showToast("已切换到手型浏览");
+  } else {
+    setCanvasMode("canvas");
+    activeCanvasTool = "select";
+    showToast("已切换到点阵视图");
+  }
+}
+
 function selectCanvasNode(node) {
   $$(".canvas-node").forEach(item => item.classList.toggle("selected", item === node));
   renderNodeInspector(node);
@@ -1068,10 +1114,14 @@ function selectCanvasNode(node) {
 function setZoom(nextZoom) {
   zoom = Math.min(0.9, Math.max(0.22, Math.round(nextZoom * 100) / 100));
   renderScale = Math.min(1.15, Math.max(0.55, Math.round(zoom * 220) / 100));
-  canvasPlane.style.transform = `scale(${renderScale})`;
+  updateCanvasTransform();
   const label = `${Math.round(zoom * 100)}%`;
   zoomLabel.textContent = label;
   bottomZoomLabel.textContent = label;
+}
+
+function updateCanvasTransform() {
+  canvasPlane.style.transform = `translate(${panX}px, ${panY}px) scale(${renderScale})`;
 }
 
 function resetCanvasLayout() {
@@ -1093,6 +1143,8 @@ function resetCanvasLayout() {
     node.style.setProperty("--x", x);
     node.style.setProperty("--y", y);
   });
+  panX = 0;
+  panY = 0;
   setZoom(0.33);
 }
 
@@ -1122,9 +1174,158 @@ function switchGeneratorTab(tab) {
   $("#generatorPrompt").value = generatorCopy[tab] || generatorCopy.image;
 }
 
+function handleGeneratorPreset(preset, label) {
+  $$("[data-generator-preset]").forEach(button => button.classList.toggle("active", button.dataset.generatorPreset === preset));
+  openGeneratePanel();
+  const prompt = $("#generatorPrompt");
+  const presetCopy = {
+    panorama: "720° 全景空间，保持主体一致，输出可漫游场景。",
+    "multi-angle": "同一角色多角度参考，正面、侧面、近景、全身。",
+    grid: "九宫格连续动作拆图，展示完整镜头节奏。",
+    split: "把当前画面切分为分镜镜头，每格包含动作和景别。",
+    story: "基于当前故事继续推演下一集冲突和反转。",
+    dialog: "生成对口型片段，保留角色表情与台词节奏。",
+    eraser: "消除画面干扰元素，补全干净背景。",
+    hd: "超清重绘，强化细节、质感和边缘稳定性。"
+  };
+  prompt.value = `${label}：${presetCopy[preset] || generatorCopy.image}`;
+  if (preset === "panorama") {
+    generatorSettings.panorama = true;
+    $("#panoramaToggle").checked = true;
+  }
+  if (preset === "grid") generatorSettings.count = "9张";
+  if (preset === "hd") generatorSettings.quality = "4K";
+  showToast(`已选择${label}预设`);
+}
+
+function handleCanvasTool(button) {
+  activeCanvasTool = button.dataset.canvasTool;
+  $$("[data-canvas-tool]").forEach(item => item.classList.toggle("active", item === button));
+  const prompt = $("#generatorPrompt");
+  const copy = {
+    asset: `${selectedAsset}，作为当前镜头核心资产，保持外观、颜色和比例一致。`,
+    character: "抽取当前主体角色设定，生成正面、侧面、表情和动作参考。",
+    reference: "引用当前画布参考图，保持构图、光线和镜头语言一致。"
+  };
+  if (prompt && copy[activeCanvasTool]) {
+    openGeneratePanel();
+    prompt.value = copy[activeCanvasTool];
+  }
+  showToast(`已切换到${button.textContent}工具`);
+}
+
+function handleGeneratorSetting(button) {
+  const setting = button.dataset.generatorSetting;
+  const value = button.dataset.settingValue || button.textContent.trim();
+  const prompt = $("#generatorPrompt");
+  if (setting === "mention") {
+    prompt.value = `${prompt.value.trim()} ${selectedAsset ? `@${selectedAsset}` : "@蛋卷"}`.trim();
+    showToast("已加入资产引用");
+    return;
+  }
+  if (setting === "boost") {
+    generatorSettings.boost += 5;
+    button.classList.add("active");
+    prompt.value = `${prompt.value.trim()} 细节权重 +${generatorSettings.boost}`.trim();
+    showToast(`细节权重已提升到 +${generatorSettings.boost}`);
+    return;
+  }
+  generatorSettings[setting] = value;
+  $$(`[data-generator-setting="${setting}"]`).forEach(item => item.classList.toggle("active", item === button));
+  showToast(`已选择${value}`);
+}
+
+function handleGeneratorToggle(toggle) {
+  if (toggle.dataset.generatorToggle === "panorama") {
+    generatorSettings.panorama = toggle.checked;
+    const prompt = $("#generatorPrompt");
+    if (toggle.checked && !prompt.value.includes("720° 全景")) {
+      prompt.value = `${prompt.value.trim()} 720° 全景空间。`.trim();
+    }
+    showToast(toggle.checked ? "已开启全景生成" : "已关闭全景生成");
+  }
+}
+
+function selectModalOption(button) {
+  const group = button.closest(".option-grid");
+  if (!group) return;
+  $$("button", group).forEach(item => item.classList.toggle("selected", item === button));
+  showToast(`已选择${button.textContent.trim()}`);
+}
+
+function handleModalShortcut(shortcut) {
+  if (shortcut === "queue") {
+    closeModal();
+    openQueueDrawer();
+    return;
+  }
+  if (shortcut === "billing") {
+    openModal("billing");
+    return;
+  }
+  if (shortcut === "archive") {
+    openModal("archive");
+    return;
+  }
+  if (shortcut === "help") {
+    openModal("help");
+  }
+}
+
+async function handleQueueItemAction(action, id) {
+  const item = generationQueue.find(entry => entry.id === id);
+  if (!item) return;
+
+  if (action === "pause" || action === "resume") {
+    const nextState = action === "pause" ? "已暂停" : "排队中";
+    const backendResult = await runBackendAction("队列单项状态", () => apiFetch(`/queue/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: { state: nextState }
+    }));
+    if (backendResult?.task) {
+      Object.assign(item, backendResult.task);
+    } else {
+      item.state = nextState;
+    }
+    renderQueue();
+    persistWorkspace("队列单项状态");
+    showToast(`${item.title} 已${nextState === "已暂停" ? "暂停" : "恢复"}`);
+    return;
+  }
+
+  if (action === "rerun") {
+    const typeMap = { 视频: "video", 图片: "image", 文本: "text", 策划: "story" };
+    const rerunTitle = `${item.title} · 再生成`;
+    const backendResult = await runBackendAction("队列再生成", () => apiFetch("/generate", {
+      method: "POST",
+      body: { type: typeMap[item.type] || "video", title: rerunTitle, cost: item.cost || 30 }
+    }));
+    if (applyBackendWorkspace(backendResult, "再生成任务已保存到后端")) {
+      openQueueDrawer();
+      return;
+    }
+    generationQueue.unshift({ ...item, id: `rerun-${Date.now()}`, title: rerunTitle, state: "排队中", progress: 0 });
+    renderQueue();
+    persistWorkspace("队列再生成");
+    showToast("再生成任务已加入队列");
+    return;
+  }
+
+  if (action === "remove") {
+    const backendResult = await runBackendAction("队列单项删除", () => apiFetch(`/queue/${encodeURIComponent(id)}`, { method: "DELETE" }));
+    const index = generationQueue.findIndex(entry => entry.id === id);
+    if (index >= 0) generationQueue.splice(index, 1);
+    if (backendResult?.queue) replaceList(generationQueue, backendResult.queue);
+    renderQueue();
+    persistWorkspace("队列单项删除");
+    showToast("队列任务已删除");
+  }
+}
+
 async function runGenerator() {
   const active = $("[data-generator-tab].active")?.dataset.generatorTab || "image";
-  const label = active === "video" ? "生成视频" : active === "text" ? "脚本节点" : "生成图片";
+  const baseLabel = active === "video" ? "生成视频" : active === "text" ? "脚本节点" : "生成图片";
+  const label = `${baseLabel} · ${generatorSettings.aspect} · ${generatorSettings.quality}${generatorSettings.panorama ? " · 全景" : ""}`;
   addGeneratedNode(label);
   const cost = active === "video" ? 120 : 30;
   const backendResult = await runBackendAction("生成节点保存", () => apiFetch("/generate", {
@@ -1257,7 +1458,12 @@ async function handleAction(action) {
     promptInput.value = `${promptInput.value.trim()} ${selectedAsset}，保持角色和场景一致性。`.trim();
     showToast("资产提示词已复制到首页输入框");
   }
-  if (action === "select-generated") showToast("已选择生成结果");
+  if (action === "select-generated") {
+    openGeneratePanel();
+    const first = generationResults[0];
+    if (first) $("#generatorPrompt").value = `选择「${first.title}」作为当前镜头参考，继续保持主体和风格一致。`;
+    showToast("已选择生成结果");
+  }
   if (action === "run-generator") runGenerator();
   if (action === "regenerate-node") {
     switchGeneratorTab("video");
@@ -1334,6 +1540,7 @@ async function handleModalAction(action) {
   const currentModalTitle = modalTitle.textContent || "";
   const modalInput = modalBody.querySelector("input")?.value.trim() || "";
   const modalSelect = modalBody.querySelector("select")?.value || "";
+  const selectedOption = modalBody.querySelector(".option-grid button.selected")?.textContent.trim() || "";
   closeModal();
   if (action === "open-queue") openQueueDrawer();
   if (action === "open-help") openModal("help");
@@ -1366,12 +1573,13 @@ async function handleModalAction(action) {
   }
 
   if (action === "apply-model" || action === "apply-style") {
+    const selectedModel = selectedOption || (action === "apply-style" ? "写实短剧风格" : "YUYU Video 2.0 全能模式");
     const backendResult = await runBackendAction("参数应用", () => apiFetch("/actions/model", {
       method: "POST",
-      body: { model: action === "apply-style" ? "写实短剧风格" : "YUYU Video 2.0 全能模式" }
+      body: { model: selectedModel }
     }));
     if (applyBackendWorkspace(backendResult, "生成参数已保存到后端")) return;
-    usageLedger.unshift(["参数应用", "0", action === "apply-style" ? "写实短剧风格" : "YUYU Video 2.0 全能模式"]);
+    usageLedger.unshift(["参数应用", "0", selectedModel]);
     renderAccount();
     persistWorkspace("生成参数");
     showToast("生成参数已应用");
@@ -1399,7 +1607,8 @@ async function handleModalAction(action) {
   }
 
   if (action === "export-confirm") {
-    const title = currentModalTitle.startsWith("导出") ? `${currentModalTitle} 下载任务` : "项目导出下载任务";
+    const format = selectedOption || "MP4 1080P";
+    const title = currentModalTitle.startsWith("导出") ? `${currentModalTitle} · ${format} 下载任务` : `项目导出 · ${format} 下载任务`;
     const backendResult = await runBackendAction("导出任务", () => apiFetch("/exports", {
       method: "POST",
       body: { title, cost: 20 }
@@ -1448,13 +1657,14 @@ async function handleModalAction(action) {
   }
 
   if (action === "top-up") {
+    const amount = Number((selectedOption.match(/\d+/) || [2000])[0]);
     const backendResult = await runBackendAction("充值", () => apiFetch("/billing/top-up", {
       method: "POST",
-      body: { amount: 2000, memo: "前端充值" }
+      body: { amount, memo: `前端充值 ${selectedOption || "2000 点"}` }
     }));
     if (applyBackendWorkspace(backendResult, "充值已保存到后端")) return;
-    usageLedger.unshift(["模拟充值", "+2000", "前端演示充值"]);
-    setCredits(credits + 2000);
+    usageLedger.unshift(["模拟充值", `+${amount}`, `前端演示充值 ${selectedOption || "2000 点"}`]);
+    setCredits(credits + amount);
     renderAccount();
     persistWorkspace("充值");
     showToast("充值已完成");
@@ -1482,7 +1692,7 @@ async function handleModalAction(action) {
     routeTo("projects");
   }
   if (action === "apply-mention") {
-    promptInput.value = `${promptInput.value.trim()} @蛋卷`.trim();
+    promptInput.value = `${promptInput.value.trim()} ${selectedOption || "@蛋卷"}`.trim();
     showToast("角色引用已加入提示词");
     return;
   }
@@ -1579,6 +1789,12 @@ document.addEventListener("click", event => {
     return;
   }
 
+  const docMode = event.target.closest("[data-doc-mode]")?.dataset.docMode;
+  if (docMode) {
+    openCanvas(docMode);
+    return;
+  }
+
   const libraryTab = event.target.closest("[data-library-tab]");
   if (libraryTab) {
     activeLibraryTab = libraryTab.dataset.libraryTab;
@@ -1638,6 +1854,24 @@ document.addEventListener("click", event => {
     return;
   }
 
+  const modalShortcut = event.target.closest("[data-modal-shortcut]")?.dataset.modalShortcut;
+  if (modalShortcut) {
+    handleModalShortcut(modalShortcut);
+    return;
+  }
+
+  const modalOption = event.target.closest(".option-grid button");
+  if (modalOption) {
+    selectModalOption(modalOption);
+    return;
+  }
+
+  const queueAction = event.target.closest("[data-queue-action]");
+  if (queueAction) {
+    handleQueueItemAction(queueAction.dataset.queueAction, queueAction.dataset.queueId);
+    return;
+  }
+
   const projectAction = event.target.closest("[data-project-action]")?.dataset.projectAction;
   if (projectAction) {
     handleProjectAction(projectAction, event.target.closest(".project-card"));
@@ -1656,10 +1890,15 @@ document.addEventListener("click", event => {
     return;
   }
 
+  const generatorSetting = event.target.closest("[data-generator-setting]");
+  if (generatorSetting) {
+    handleGeneratorSetting(generatorSetting);
+    return;
+  }
+
   const preset = event.target.closest("[data-generator-preset]")?.dataset.generatorPreset;
   if (preset) {
-    openGeneratePanel();
-    $("#generatorPrompt").value = `${event.target.textContent}：${generatorCopy.image}`;
+    handleGeneratorPreset(preset, event.target.textContent.trim());
     return;
   }
 
@@ -1676,11 +1915,15 @@ document.addEventListener("click", event => {
     return;
   }
 
+  const canvasView = event.target.closest("[data-canvas-view]")?.dataset.canvasView;
+  if (canvasView) {
+    setCanvasView(canvasView);
+    return;
+  }
+
   const canvasTool = event.target.closest("[data-canvas-tool]");
   if (canvasTool) {
-    activeCanvasTool = canvasTool.dataset.canvasTool;
-    $$("[data-canvas-tool]").forEach(item => item.classList.toggle("active", item === canvasTool));
-    showToast(`已切换到${canvasTool.textContent}工具`);
+    handleCanvasTool(canvasTool);
     return;
   }
 
@@ -1727,10 +1970,52 @@ document.addEventListener("pointerdown", event => {
   node.addEventListener("pointercancel", up);
 });
 
+$("#canvasSurface").addEventListener("pointerdown", event => {
+  if (canvasStudio.hidden || activeCanvasTool !== "hand") return;
+  if (event.target.closest(".canvas-node, button, textarea, input, select")) return;
+  event.preventDefault();
+  const surface = event.currentTarget;
+  surface.classList.add("panning");
+  try {
+    surface.setPointerCapture(event.pointerId);
+  } catch {}
+  const startX = event.clientX;
+  const startY = event.clientY;
+  const originX = panX;
+  const originY = panY;
+
+  function move(moveEvent) {
+    panX = originX + moveEvent.clientX - startX;
+    panY = originY + moveEvent.clientY - startY;
+    updateCanvasTransform();
+  }
+
+  function up() {
+    surface.classList.remove("panning");
+    surface.removeEventListener("pointermove", move);
+    surface.removeEventListener("pointerup", up);
+    surface.removeEventListener("pointercancel", up);
+  }
+
+  surface.addEventListener("pointermove", move);
+  surface.addEventListener("pointerup", up);
+  surface.addEventListener("pointercancel", up);
+});
+
 $("#sendBtn").addEventListener("click", startGeneration);
 
 $("#seriesToggle").addEventListener("change", event => {
   showToast(event.target.checked ? "已开启多剧集策划" : "已切换为单集创作");
+});
+
+$("#panoramaToggle").addEventListener("change", event => {
+  handleGeneratorToggle(event.target);
+});
+
+$("#promptPrefix").addEventListener("click", () => {
+  const keys = Object.keys(categories);
+  const index = keys.indexOf(activeCategory);
+  selectCategory(keys[(index + 1) % keys.length]);
 });
 
 $("#projectSearch").addEventListener("input", renderLibrary);

@@ -283,6 +283,11 @@ async function handleQueue(method, segments, request, response, context) {
     await updateWorkspace(context.user.id, workspace);
     return sendJson(response, 200, { task: workspace.generationQueue[index] });
   }
+  if (method === "DELETE") {
+    const [task] = workspace.generationQueue.splice(index, 1);
+    await updateWorkspace(context.user.id, workspace);
+    return sendJson(response, 200, { task, queue: workspace.generationQueue });
+  }
   return sendJson(response, 405, { ok: false, message: "Method not allowed" });
 }
 

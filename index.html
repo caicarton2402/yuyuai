@@ -303,8 +303,8 @@
             <div class="generator-tools"><button type="button" data-action="upload-modal">上传</button><button type="button" data-action="select-generated">选择</button></div>
             <textarea id="generatorPrompt">写实。全景，正面拍摄，拉布拉多犬，拉布拉多犬，耳朵下垂、尾巴自然伸展，体型匀称、毛发短而光滑，黄色，姿态端正，眼神平静专注。</textarea>
             <div class="generator-settings">
-              <button type="button">全能图片 G2</button><button type="button">16:9</button><button type="button">2K</button><button type="button">@</button>
-              <label>全景<input type="checkbox" id="panoramaToggle" /></label><button type="button">1张</button><button type="button">+5</button>
+              <button class="active" type="button" data-generator-setting="model" data-setting-value="全能图片 G2">全能图片 G2</button><button class="active" type="button" data-generator-setting="aspect" data-setting-value="16:9">16:9</button><button class="active" type="button" data-generator-setting="quality" data-setting-value="2K">2K</button><button type="button" data-generator-setting="mention" data-setting-value="@">＠</button>
+              <label>全景<input type="checkbox" id="panoramaToggle" data-generator-toggle="panorama" /></label><button class="active" type="button" data-generator-setting="count" data-setting-value="1张">1张</button><button type="button" data-generator-setting="boost" data-setting-value="+5">+5</button>
               <button class="send-btn" type="button" data-action="run-generator">↑</button>
             </div>
             <div class="generation-history" id="generationHistory" aria-label="generation history"></div>
