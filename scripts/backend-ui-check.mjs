@@ -82,10 +82,38 @@ try {
   await click(cdp, "[data-project-action='duplicate']");
   await waitForCondition(cdp, `[...document.querySelectorAll(".project-card h2")].some(item => item.textContent.includes("副本"))`);
 
+  await click(cdp, "[data-route='assets']");
+  await click(cdp, "[data-action='upload-modal']");
+  await waitForCondition(cdp, `document.querySelector("#modalTitle")?.textContent.includes("上传素材")`);
+  await click(cdp, "[data-modal-action='confirm-upload']");
+  await waitForCondition(cdp, `document.querySelector("#assetGrid")?.innerText.includes("YUYU 上传素材")`);
+  await click(cdp, "[data-action='use-selected-asset']");
+  await waitForCondition(cdp, `document.querySelector("#workspaceTitle")?.textContent.includes("资产已加入")`);
+
   await click(cdp, "[data-route='team']");
+  await click(cdp, "[data-action='invite']");
+  await waitForCondition(cdp, `document.querySelector("#modalTitle")?.textContent.includes("邀请成员")`);
+  await click(cdp, "[data-modal-action='send-invite']");
+  await waitForCondition(cdp, `document.querySelector("#memberList")?.innerText.includes("creator")`);
   await typeValue(cdp, "#commentInput", commentText);
   await click(cdp, "[data-action='add-comment']");
   await waitForCondition(cdp, `document.querySelector("#commentFeed")?.innerText.includes(${JSON.stringify(commentText)})`);
+  await click(cdp, "[data-action='approve-version']");
+  await waitForCondition(cdp, `document.querySelector("#commentFeed")?.innerText.includes("已批准版本")`);
+
+  await click(cdp, "[data-action='open-canvas']");
+  await waitForCondition(cdp, `document.querySelector("#canvasStudio")?.hidden === false`);
+  await click(cdp, "[data-canvas-mode='editor']");
+  await waitForCondition(cdp, `document.querySelector("#editorPanel")?.hidden === false`);
+  await click(cdp, "[data-action='render-preview']");
+  await waitForCondition(cdp, `document.querySelector("#modalTitle")?.textContent.includes("视频预览")`);
+  await click(cdp, "[data-modal-action='approve-preview']");
+  await click(cdp, "[data-canvas-action='export']");
+  await waitForCondition(cdp, `document.querySelector("#modalTitle")?.textContent.includes("导出")`);
+  await click(cdp, "[data-modal-action='export-confirm']");
+  await waitForCondition(cdp, `document.querySelector("#queueDrawer")?.hidden === false && document.querySelector("#queueList")?.innerText.includes("导出")`);
+  await click(cdp, "[data-action='pause-queue']");
+  await waitForCondition(cdp, `document.querySelector("#queueList")?.innerText.includes("已暂停")`);
 
   const creditsBeforeBilling = await evaluate(cdp, `Number(document.querySelector("#creditCount")?.textContent || 0)`);
   await click(cdp, "[data-route='account']");
@@ -102,17 +130,34 @@ try {
   await cdp.send("Page.navigate", { url });
   await waitForCondition(cdp, `document.readyState === "complete"`);
   await waitForCondition(cdp, `document.querySelector("#authUserSummary")?.textContent.includes("demo@yuyu.ai")`);
+  await click(cdp, "[data-route='projects']");
+  const projectText = await evaluate(cdp, `document.querySelector("#projectBoard")?.innerText || ""`);
+  await click(cdp, "[data-route='assets']");
+  const assetText = await evaluate(cdp, `document.querySelector("#assetGrid")?.innerText || ""`);
   await click(cdp, "[data-route='team']");
+  const memberText = await evaluate(cdp, `document.querySelector("#memberList")?.innerText || ""`);
+  const commentFeedText = await evaluate(cdp, `document.querySelector("#commentFeed")?.innerText || ""`);
+  await click(cdp, "[data-route='account']");
+  await click(cdp, "[data-action='open-queue']");
+  const queueText = await evaluate(cdp, `document.querySelector("#queueList")?.innerText || ""`);
   const state = await evaluate(cdp, `(() => ({
     authSummary: document.querySelector("#authUserSummary")?.textContent || "",
     backendStatus: document.querySelector("#backendStatus")?.textContent || "",
-    projectText: document.querySelector("#projectBoard")?.innerText || "",
-    commentText: document.querySelector("#commentFeed")?.innerText || "",
+    projectText: ${JSON.stringify(projectText)},
+    assetText: ${JSON.stringify(assetText)},
+    memberText: ${JSON.stringify(memberText)},
+    commentText: ${JSON.stringify(commentFeedText)},
+    ledgerText: document.querySelector("#usageLedger")?.innerText || "",
+    queueText: ${JSON.stringify(queueText)},
     credits: Number(document.querySelector("#creditCount")?.textContent || 0),
     planName: document.querySelector("#planName")?.textContent || ""
   }))()`);
   assertCheck(state.projectText.includes("新的 YUYU 故事") && state.projectText.includes("副本"), "Backend UI project actions did not persist after reload", state);
+  assertCheck(state.assetText.includes("YUYU 上传素材"), "Backend UI asset upload did not persist after reload", state);
+  assertCheck(state.memberText.includes("creator"), "Backend UI invite did not persist after reload", state);
   assertCheck(state.commentText.includes(commentText), "Backend UI comment did not persist after reload", state);
+  assertCheck(state.commentText.includes("已批准版本") && state.commentText.includes("预览成片"), "Backend UI approval actions did not persist after reload", state);
+  assertCheck(state.ledgerText.includes("资产绑定") && state.ledgerText.includes("导出任务") && state.queueText.includes("已暂停"), "Backend UI queue/export/asset actions did not persist after reload", state);
   assertCheck(state.planName.includes("专业会员") && state.credits >= creditsBeforeBilling + 1800, "Backend UI billing actions did not persist after reload", state);
 
   const result = { ok: true, url, commentText, state };

@@ -398,6 +398,13 @@ async function runBackendAction(label, action) {
   }
 }
 
+function applyBackendWorkspace(result, message) {
+  if (!result?.workspace) return false;
+  applyWorkspace(result.workspace);
+  if (message) showToast(message);
+  return true;
+}
+
 function snapshotWorkspace() {
   return {
     credits,
@@ -569,6 +576,25 @@ function syncQueueCount() {
   if (queueCount) queueCount.textContent = String(active);
 }
 
+async function upgradeToPlan(plan, cost = plan === "团队旗舰" ? 999 : 199) {
+  if (!plan || plan === accountPlan) {
+    showToast("当前已是该会员方案");
+    return true;
+  }
+  const backendResult = await runBackendAction("会员升级", () => apiFetch("/billing/upgrade", {
+    method: "POST",
+    body: { cost, plan }
+  }));
+  if (applyBackendWorkspace(backendResult, "会员方案已保存到后端")) return true;
+  usageLedger.unshift(["会员升级", `-${cost}`, `${plan}演示`]);
+  accountPlan = plan;
+  setCredits(credits - cost);
+  renderAccount();
+  persistWorkspace("会员升级");
+  showToast("会员方案已更新");
+  return true;
+}
+
 function closeModal() {
   modalLayer.hidden = true;
 }
@@ -701,13 +727,13 @@ function renderGenerationHistory() {
 
 function renderPlanGrid() {
   if (!planGrid) return;
-  planGrid.innerHTML = planOptions.map((plan, index) => `
-    <article class="plan-card ${index === 0 ? "current" : ""}">
+  planGrid.innerHTML = planOptions.map(plan => `
+    <article class="plan-card ${plan.name === accountPlan ? "current" : ""}">
       <span>${escapeHtml(plan.name)}</span>
       <strong>${escapeHtml(plan.price)}</strong>
       <small>${escapeHtml(plan.quota)}</small>
       <p>${plan.perks.map(escapeHtml).join(" · ")}</p>
-      <button type="button" data-plan="${escapeHtml(plan.name)}">${index === 0 ? "当前方案" : "选择方案"}</button>
+      <button type="button" data-plan="${escapeHtml(plan.name)}">${plan.name === accountPlan ? "当前方案" : "选择方案"}</button>
     </article>
   `).join("");
 }
@@ -978,7 +1004,7 @@ function openModal(kind, data = {}) {
     plans: {
       kicker: "Plans",
       title: "会员方案",
-      body: `<div class="plan-grid modal-plans">${planOptions.map((plan, index) => `<article class="plan-card ${index === 0 ? "current" : ""}"><span>${escapeHtml(plan.name)}</span><strong>${escapeHtml(plan.price)}</strong><small>${escapeHtml(plan.quota)}</small><p>${plan.perks.map(escapeHtml).join(" · ")}</p></article>`).join("")}</div>`,
+      body: `<div class="plan-grid modal-plans">${planOptions.map(plan => `<article class="plan-card ${plan.name === accountPlan ? "current" : ""}"><span>${escapeHtml(plan.name)}</span><strong>${escapeHtml(plan.price)}</strong><small>${escapeHtml(plan.quota)}</small><p>${plan.perks.map(escapeHtml).join(" · ")}</p></article>`).join("")}</div>`,
       actions: [["模拟升级", "upgrade-plan"]]
     },
     billing: {
@@ -1124,6 +1150,13 @@ async function handleAction(action) {
   if (action === "open-queue") openQueueDrawer();
   if (action === "close-queue") closeQueue();
   if (action === "pause-queue") {
+    const backendResult = await runBackendAction("队列状态", () => apiFetch("/queue/pause", { method: "POST" }));
+    if (backendResult?.queue) {
+      replaceList(generationQueue, backendResult.queue);
+      renderQueue();
+      showToast(backendResult.paused ? "已暂停全部未完成任务" : "已恢复全部未完成任务");
+      return;
+    }
     generationQueue.forEach(item => {
       if (item.state !== "已完成") item.state = item.state === "已暂停" ? "排队中" : "已暂停";
     });
@@ -1208,6 +1241,15 @@ async function handleAction(action) {
     showToast("新故事已创建");
   }
   if (action === "use-selected-asset") {
+    const asset = getSelectedAsset();
+    const backendResult = await runBackendAction("资产绑定", () => apiFetch("/actions/use-asset", {
+      method: "POST",
+      body: { title: asset?.title || selectedAsset, kind: activeAssetTab }
+    }));
+    if (applyBackendWorkspace(backendResult, `已保存资产绑定：${asset?.title || selectedAsset}`)) {
+      showWorkspace("资产已加入", "选中的角色、场景或风格已绑定到当前生成流程。", 2);
+      return;
+    }
     showToast(`已加入当前项目：${selectedAsset}`);
     showWorkspace("资产已加入", "选中的角色、场景或风格已绑定到当前生成流程。", 2);
   }
@@ -1230,7 +1272,21 @@ async function handleAction(action) {
       clone.style.setProperty("--y", `${(Number.parseFloat(selected.style.getPropertyValue("--y")) || 0) + 60}px`);
     }
   }
-  if (action === "render-preview") openModal("preview");
+  if (action === "render-preview") {
+    const backendResult = await runBackendAction("预览生成", () => apiFetch("/generate", {
+      method: "POST",
+      body: { type: "video", title: "镜头预览任务", cost: 40 }
+    }));
+    if (!applyBackendWorkspace(backendResult, "预览任务已保存到后端")) {
+      generationQueue.unshift({ id: `preview-${Date.now()}`, type: "视频", title: "镜头预览任务", state: "排队中", progress: 18, cost: 40 });
+      usageLedger.unshift(["视频预览", "-40", "镜头预览任务"]);
+      setCredits(credits - 40);
+      renderQueue();
+      renderAccount();
+      persistWorkspace("预览任务");
+    }
+    openModal("preview");
+  }
   if (action === "invite") openModal("invite");
   if (action === "add-comment") {
     const input = $("#commentInput");
@@ -1258,49 +1314,155 @@ async function handleAction(action) {
   if (action === "auth-register") authenticate("register");
   if (action === "auth-logout") logoutBackend();
   if (action === "auth-sync") syncBackendNow();
-  if (action === "approve-version") showToast("版本已批准");
+  if (action === "approve-version") {
+    const backendResult = await runBackendAction("版本审批", () => apiFetch("/actions/approve", {
+      method: "POST",
+      body: { version: "第1集 v3" }
+    }));
+    if (applyBackendWorkspace(backendResult, "版本审批已保存到后端")) return;
+    teamComments.unshift({ id: `approval-${Date.now()}`, author: apiState.user?.name || "我", body: "已批准版本：第1集 v3", createdAt: new Date().toISOString() });
+    usageLedger.unshift(["版本审批", "0", "第1集 v3"]);
+    renderTeam();
+    renderAccount();
+    persistWorkspace("版本审批");
+    showToast("版本已批准");
+  }
   if (action === "close-modal") closeModal();
 }
 
 async function handleModalAction(action) {
+  const currentModalTitle = modalTitle.textContent || "";
+  const modalInput = modalBody.querySelector("input")?.value.trim() || "";
+  const modalSelect = modalBody.querySelector("select")?.value || "";
   closeModal();
   if (action === "open-queue") openQueueDrawer();
   if (action === "open-help") openModal("help");
-  if (action.includes("upload")) routeTo("assets");
-  if (action.includes("export")) {
-    setCredits(credits - 20);
-    persistWorkspace("导出扣费");
+
+  if (action === "confirm-upload") {
+    const assetDraft = {
+      kind: activeAssetTab,
+      title: "YUYU 上传素材",
+      meta: "上传导入 / 后端保存",
+      color: "#54bce6"
+    };
+    const backendResult = await runBackendAction("素材导入", () => apiFetch("/assets", {
+      method: "POST",
+      body: assetDraft
+    }));
+    if (backendResult?.workspace) {
+      applyWorkspace(backendResult.workspace);
+      activeAssetTab = assetDraft.kind;
+      selectedAsset = assetDraft.title;
+      routeTo("assets");
+      showToast("素材已导入并保存到后端");
+      return;
+    }
+    assets[assetDraft.kind].unshift(assetDraft);
+    selectedAsset = assetDraft.title;
+    routeTo("assets");
+    persistWorkspace("素材导入");
+    showToast("素材已导入资产库");
+    return;
   }
+
+  if (action === "apply-model" || action === "apply-style") {
+    const backendResult = await runBackendAction("参数应用", () => apiFetch("/actions/model", {
+      method: "POST",
+      body: { model: action === "apply-style" ? "写实短剧风格" : "YUYU Video 2.0 全能模式" }
+    }));
+    if (applyBackendWorkspace(backendResult, "生成参数已保存到后端")) return;
+    usageLedger.unshift(["参数应用", "0", action === "apply-style" ? "写实短剧风格" : "YUYU Video 2.0 全能模式"]);
+    renderAccount();
+    persistWorkspace("生成参数");
+    showToast("生成参数已应用");
+    return;
+  }
+
+  if (action === "send-invite") {
+    const email = modalInput || `creator-${Date.now()}@yuyu.ai`;
+    const name = email.split("@")[0] || "Creator";
+    const backendResult = await runBackendAction("成员邀请", () => apiFetch("/team/members", {
+      method: "POST",
+      body: { name, role: modalSelect || "可编辑" }
+    }));
+    if (backendResult?.workspace) {
+      applyWorkspace(backendResult.workspace);
+      routeTo("team");
+      showToast("成员邀请已保存到后端");
+      return;
+    }
+    members.push({ id: `member-${Date.now()}`, name, role: modalSelect || "可编辑", state: "待接受" });
+    routeTo("team");
+    persistWorkspace("成员邀请");
+    showToast("成员邀请已发送");
+    return;
+  }
+
+  if (action === "export-confirm") {
+    const title = currentModalTitle.startsWith("导出") ? `${currentModalTitle} 下载任务` : "项目导出下载任务";
+    const backendResult = await runBackendAction("导出任务", () => apiFetch("/exports", {
+      method: "POST",
+      body: { title, cost: 20 }
+    }));
+    if (applyBackendWorkspace(backendResult, "导出任务已保存到后端")) {
+      openQueueDrawer();
+      return;
+    }
+    generationQueue.unshift({ id: `export-${Date.now()}`, type: "导出", title, state: "排队中", progress: 12, cost: 20 });
+    usageLedger.unshift(["导出任务", "-20", title]);
+    setCredits(credits - 20);
+    renderQueue();
+    renderAccount();
+    persistWorkspace("导出扣费");
+    openQueueDrawer();
+    showToast("导出任务已生成");
+    return;
+  }
+
+  if (action === "regen") {
+    const backendResult = await runBackendAction("重新生成", () => apiFetch("/generate", {
+      method: "POST",
+      body: { type: "video", title: "重新生成预览", cost: 60 }
+    }));
+    if (applyBackendWorkspace(backendResult, "重新生成任务已保存到后端")) return;
+    generationQueue.unshift({ id: `regen-${Date.now()}`, type: "视频", title: "重新生成预览", state: "排队中", progress: 5, cost: 60 });
+    setCredits(credits - 60);
+    renderQueue();
+    renderAccount();
+    persistWorkspace("重新生成");
+    showToast("重新生成任务已创建");
+    return;
+  }
+
+  if (action === "approve-preview") {
+    const backendResult = await runBackendAction("成片确认", () => apiFetch("/actions/approve", {
+      method: "POST",
+      body: { version: "预览成片" }
+    }));
+    if (applyBackendWorkspace(backendResult, "成片确认已保存到后端")) return;
+    teamComments.unshift({ id: `approval-${Date.now()}`, author: apiState.user?.name || "我", body: "已确认预览成片。", createdAt: new Date().toISOString() });
+    renderTeam();
+    persistWorkspace("成片确认");
+    showToast("成片已确认");
+    return;
+  }
+
   if (action === "top-up") {
     const backendResult = await runBackendAction("充值", () => apiFetch("/billing/top-up", {
       method: "POST",
       body: { amount: 2000, memo: "前端充值" }
     }));
-    if (backendResult?.workspace) {
-      applyWorkspace(backendResult.workspace);
-      showToast("充值已保存到后端");
-      return;
-    }
+    if (applyBackendWorkspace(backendResult, "充值已保存到后端")) return;
     usageLedger.unshift(["模拟充值", "+2000", "前端演示充值"]);
     setCredits(credits + 2000);
     renderAccount();
     persistWorkspace("充值");
+    showToast("充值已完成");
+    return;
   }
   if (action === "upgrade-plan") {
-    const backendResult = await runBackendAction("会员升级", () => apiFetch("/billing/upgrade", {
-      method: "POST",
-      body: { cost: 199, plan: "专业会员" }
-    }));
-    if (backendResult?.workspace) {
-      applyWorkspace(backendResult.workspace);
-      showToast("会员升级已保存到后端");
-      return;
-    }
-    usageLedger.unshift(["会员升级", "-199", "专业会员演示"]);
-    accountPlan = "专业会员";
-    setCredits(credits - 199);
-    renderAccount();
-    persistWorkspace("会员升级");
+    await upgradeToPlan("专业会员", 199);
+    return;
   }
   if (action === "continue-project") routeTo("script");
   if (action === "duplicate-project") {
@@ -1321,6 +1483,12 @@ async function handleModalAction(action) {
   }
   if (action === "apply-mention") {
     promptInput.value = `${promptInput.value.trim()} @蛋卷`.trim();
+    showToast("角色引用已加入提示词");
+    return;
+  }
+  if (action === "mark-read" || action === "close-help") {
+    showToast("操作已完成");
+    return;
   }
   showToast("操作已完成");
 }
@@ -1454,8 +1622,7 @@ document.addEventListener("click", event => {
 
   const planButton = event.target.closest("[data-plan]");
   if (planButton) {
-    if (planButton.dataset.plan === "标准会员") showToast("当前已是标准会员");
-    else openModal("plans");
+    upgradeToPlan(planButton.dataset.plan);
     return;
   }
 

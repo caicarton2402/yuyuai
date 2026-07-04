@@ -77,6 +77,37 @@ try {
     token,
     body: { type: "story", title: "QA 故事策划", cost: 80 }
   });
+  const asset = await api("/api/assets", {
+    method: "POST",
+    token,
+    body: { kind: "characters", title: "QA 上传素材", meta: "QA 后端素材", color: "#54bce6" }
+  });
+  const invited = await api("/api/team/members", {
+    method: "POST",
+    token,
+    body: { name: "qa-creator", role: "可编辑" }
+  });
+  const paused = await api("/api/queue/pause", { method: "POST", token });
+  const exported = await api("/api/exports", {
+    method: "POST",
+    token,
+    body: { title: "QA 导出任务", cost: 25 }
+  });
+  const assetUsed = await api("/api/actions/use-asset", {
+    method: "POST",
+    token,
+    body: { title: "QA 上传素材", kind: "characters" }
+  });
+  const modelApplied = await api("/api/actions/model", {
+    method: "POST",
+    token,
+    body: { model: "QA 模型参数", summary: "创意 70" }
+  });
+  const approved = await api("/api/actions/approve", {
+    method: "POST",
+    token,
+    body: { version: "QA v1" }
+  });
   const toppedUp = await api("/api/billing/top-up", {
     method: "POST",
     token,
@@ -98,6 +129,13 @@ try {
     commentSaved: comment.comments.some(item => item.body === "后端评论保存检查"),
     generationSaved: generated.workspace.generationQueue[0].title === "QA 视频任务",
     storyGenerationSaved: storyGenerated.workspace.generationQueue[0].type === "策划" && storyGenerated.workspace.usageLedger[0][1] === "-80",
+    assetSaved: asset.workspace.assets.characters.some(item => item.title === "QA 上传素材"),
+    inviteSaved: invited.workspace.members.some(item => item.name === "qa-creator" && item.state === "待接受"),
+    queuePauseSaved: paused.paused === true && paused.queue.some(item => item.state === "已暂停"),
+    exportSaved: exported.workspace.generationQueue[0].type === "导出" && exported.workspace.usageLedger[0][0] === "导出任务",
+    assetActionSaved: assetUsed.workspace.usageLedger[0][0] === "资产绑定" && assetUsed.workspace.comments[0].body.includes("QA 上传素材"),
+    modelActionSaved: modelApplied.workspace.usageLedger[0][0] === "参数应用",
+    approvalSaved: approved.workspace.usageLedger[0][0] === "版本审批" && approved.workspace.comments[0].body.includes("QA v1"),
     billingSaved: toppedUp.workspace.usageLedger[0][0] === "充值",
     loginAfterLogout: Boolean(loggedIn.token)
   };

@@ -219,7 +219,7 @@ async function handleAssets(method, request, response, context) {
     };
     workspace.assets[kind].unshift(asset);
     await updateWorkspace(context.user.id, workspace);
-    return sendJson(response, 201, { asset, assets: workspace.assets });
+    return sendJson(response, 201, { asset, assets: workspace.assets, workspace });
   }
   return sendJson(response, 405, { ok: false, message: "Method not allowed" });
 }
@@ -233,7 +233,7 @@ async function handleTeam(method, segments, request, response, context) {
       const member = { id: randomUUID(), name: body.name || "New Member", role: body.role || "成员", state: "待接受" };
       workspace.members.push(member);
       await updateWorkspace(context.user.id, workspace);
-      return sendJson(response, 201, { member });
+      return sendJson(response, 201, { member, members: workspace.members, workspace });
     }
   }
   if (segments[1] === "comments") {
@@ -254,6 +254,15 @@ async function handleQueue(method, segments, request, response, context) {
   const workspace = await getWorkspace(context.user.id);
   const id = segments[1];
   if (method === "GET") return sendJson(response, 200, { queue: workspace.generationQueue });
+  if (method === "POST" && id === "pause") {
+    const nextPaused = workspace.generationQueue.some(item => item.state !== "已完成" && item.state !== "已暂停");
+    workspace.generationQueue = workspace.generationQueue.map(item => {
+      if (item.state === "已完成") return item;
+      return { ...item, state: nextPaused ? "已暂停" : "排队中" };
+    });
+    await updateWorkspace(context.user.id, workspace);
+    return sendJson(response, 200, { queue: workspace.generationQueue, paused: nextPaused });
+  }
   if (method === "POST") {
     const body = await readJson(request);
     const task = { id: body.id || `q${Date.now()}`, type: body.type || "视频", title: body.title || "生成任务", state: body.state || "排队中", progress: Number(body.progress || 0), cost: Number(body.cost || 30) };
@@ -275,6 +284,52 @@ async function handleQueue(method, segments, request, response, context) {
     return sendJson(response, 200, { task: workspace.generationQueue[index] });
   }
   return sendJson(response, 405, { ok: false, message: "Method not allowed" });
+}
+
+async function handleExports(method, request, response, context) {
+  if (method !== "POST") return sendJson(response, 405, { ok: false, message: "Method not allowed" });
+  const body = await readJson(request);
+  const workspace = await getWorkspace(context.user.id);
+  const cost = Number.isFinite(Number(body.cost)) ? Math.max(0, Number(body.cost)) : 20;
+  const title = body.title || "项目导出任务";
+  const task = {
+    id: `export-${Date.now()}`,
+    type: "导出",
+    title,
+    state: "排队中",
+    progress: 12,
+    cost
+  };
+  workspace.generationQueue.unshift(task);
+  workspace.usageLedger.unshift(["导出任务", `-${cost}`, title]);
+  workspace.credits = Math.max(0, workspace.credits - cost);
+  const next = await updateWorkspace(context.user.id, workspace);
+  return sendJson(response, 201, { task, workspace: next });
+}
+
+async function handleActions(method, segments, request, response, context) {
+  if (method !== "POST") return sendJson(response, 405, { ok: false, message: "Method not allowed" });
+  const action = segments[1];
+  const body = await readJson(request);
+  const workspace = await getWorkspace(context.user.id);
+  if (action === "use-asset") {
+    const title = body.title || "当前素材";
+    const kind = body.kind || "素材";
+    workspace.usageLedger.unshift(["资产绑定", "0", `${title} · ${kind}`]);
+    workspace.comments.unshift({ id: randomUUID(), author: context.user.name || "我", body: `已将「${title}」加入当前项目。`, createdAt: nowIso() });
+  } else if (action === "model") {
+    const model = body.model || "YUYU Video 2.0 全能模式";
+    const summary = body.summary || "创意 72 · 稳定 66 · 一致性 88";
+    workspace.usageLedger.unshift(["参数应用", "0", `${model} · ${summary}`]);
+  } else if (action === "approve") {
+    const version = body.version || "第1集 v3";
+    workspace.comments.unshift({ id: randomUUID(), author: context.user.name || "我", body: `已批准版本：${version}`, createdAt: nowIso() });
+    workspace.usageLedger.unshift(["版本审批", "0", version]);
+  } else {
+    return sendJson(response, 404, { ok: false, message: "Unknown action endpoint" });
+  }
+  const next = await updateWorkspace(context.user.id, workspace);
+  return sendJson(response, 200, { workspace: next });
 }
 
 async function handleBilling(method, segments, request, response, context) {
@@ -339,6 +394,8 @@ async function handleApi(request, response, url) {
   if (resource === "queue") return handleQueue(request.method, segments, request, response, context);
   if (resource === "billing") return handleBilling(request.method, segments, request, response, context);
   if (resource === "generate") return handleGenerate(request.method, request, response, context);
+  if (resource === "exports") return handleExports(request.method, request, response, context);
+  if (resource === "actions") return handleActions(request.method, segments, request, response, context);
   if (resource === "account") {
     return sendJson(response, 200, { user: publicUser(context.user), workspace: await getWorkspace(context.user.id) });
   }
