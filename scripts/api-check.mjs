@@ -72,6 +72,11 @@ try {
     token,
     body: { type: "video", title: "QA 视频任务" }
   });
+  const storyGenerated = await api("/api/generate", {
+    method: "POST",
+    token,
+    body: { type: "story", title: "QA 故事策划", cost: 80 }
+  });
   const toppedUp = await api("/api/billing/top-up", {
     method: "POST",
     token,
@@ -92,6 +97,7 @@ try {
     projectCreateAndDuplicate: workspace.workspace.projects.some(item => item.title === "QA 后端项目") && workspace.workspace.projects.some(item => item.title === "QA 后端项目 副本"),
     commentSaved: comment.comments.some(item => item.body === "后端评论保存检查"),
     generationSaved: generated.workspace.generationQueue[0].title === "QA 视频任务",
+    storyGenerationSaved: storyGenerated.workspace.generationQueue[0].type === "策划" && storyGenerated.workspace.usageLedger[0][1] === "-80",
     billingSaved: toppedUp.workspace.usageLedger[0][0] === "充值",
     loginAfterLogout: Boolean(loggedIn.token)
   };

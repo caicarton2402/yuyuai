@@ -76,10 +76,27 @@ try {
   await click(cdp, "[data-action='auth-login']");
   await waitForCondition(cdp, `document.querySelector("#authUserSummary")?.textContent.includes("demo@yuyu.ai")`);
 
+  await click(cdp, "[data-route='projects']");
+  await click(cdp, "[data-action='new-project']");
+  await waitForCondition(cdp, `[...document.querySelectorAll(".project-card h2")].some(item => item.textContent.includes("新的 YUYU 故事"))`);
+  await click(cdp, "[data-project-action='duplicate']");
+  await waitForCondition(cdp, `[...document.querySelectorAll(".project-card h2")].some(item => item.textContent.includes("副本"))`);
+
   await click(cdp, "[data-route='team']");
   await typeValue(cdp, "#commentInput", commentText);
   await click(cdp, "[data-action='add-comment']");
   await waitForCondition(cdp, `document.querySelector("#commentFeed")?.innerText.includes(${JSON.stringify(commentText)})`);
+
+  const creditsBeforeBilling = await evaluate(cdp, `Number(document.querySelector("#creditCount")?.textContent || 0)`);
+  await click(cdp, "[data-route='account']");
+  await click(cdp, "[data-action='open-billing']");
+  await waitForCondition(cdp, `document.querySelector("#modalTitle")?.textContent.includes("充值")`);
+  await click(cdp, "[data-modal-action='top-up']");
+  await waitForCondition(cdp, `Number(document.querySelector("#creditCount")?.textContent || 0) >= ${creditsBeforeBilling + 2000}`);
+  await click(cdp, "[data-action='open-plans']");
+  await waitForCondition(cdp, `document.querySelector("#modalTitle")?.textContent.includes("会员")`);
+  await click(cdp, "[data-modal-action='upgrade-plan']");
+  await waitForCondition(cdp, `document.querySelector("#planName")?.textContent.includes("专业会员")`);
   await delay(800);
 
   await cdp.send("Page.navigate", { url });
@@ -89,10 +106,14 @@ try {
   const state = await evaluate(cdp, `(() => ({
     authSummary: document.querySelector("#authUserSummary")?.textContent || "",
     backendStatus: document.querySelector("#backendStatus")?.textContent || "",
+    projectText: document.querySelector("#projectBoard")?.innerText || "",
     commentText: document.querySelector("#commentFeed")?.innerText || "",
-    credits: Number(document.querySelector("#creditCount")?.textContent || 0)
+    credits: Number(document.querySelector("#creditCount")?.textContent || 0),
+    planName: document.querySelector("#planName")?.textContent || ""
   }))()`);
+  assertCheck(state.projectText.includes("新的 YUYU 故事") && state.projectText.includes("副本"), "Backend UI project actions did not persist after reload", state);
   assertCheck(state.commentText.includes(commentText), "Backend UI comment did not persist after reload", state);
+  assertCheck(state.planName.includes("专业会员") && state.credits >= creditsBeforeBilling + 1800, "Backend UI billing actions did not persist after reload", state);
 
   const result = { ok: true, url, commentText, state };
   await writeFile(path.join(qaDir, "backend-ui-check.json"), JSON.stringify(result, null, 2), "utf8");

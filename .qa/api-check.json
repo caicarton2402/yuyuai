@@ -9,6 +9,7 @@
     "projectCreateAndDuplicate": true,
     "commentSaved": true,
     "generationSaved": true,
+    "storyGenerationSaved": true,
     "billingSaved": true,
     "loginAfterLogout": true
   }

@@ -379,6 +379,25 @@ async function apiFetch(path, options = {}) {
   return data;
 }
 
+function canUseBackend() {
+  return Boolean(apiState.available && apiState.user);
+}
+
+function reportBackendActionError(label, error) {
+  setBackendStatus(`${label}失败：${error.message}`);
+  showToast(`${label}失败，已保留本地演示状态`);
+}
+
+async function runBackendAction(label, action) {
+  if (!canUseBackend()) return null;
+  try {
+    return await action();
+  } catch (error) {
+    reportBackendActionError(label, error);
+    return null;
+  }
+}
+
 function snapshotWorkspace() {
   return {
     credits,
@@ -742,26 +761,37 @@ function renderNodeInspector(node = $(".canvas-node.selected")) {
 
 function startGeneration() {
   const text = promptInput.value.trim();
+  const title = text || categories[activeCategory].title;
   showWorkspace(categories[activeCategory].title, text ? `已接收灵感：${text}` : categories[activeCategory].copy, 1);
-  generationQueue.unshift({ id: `q${Date.now()}`, type: "策划", title: text || categories[activeCategory].title, state: "生成中", progress: 8, cost: 80 });
+  generationQueue.unshift({ id: `q${Date.now()}`, type: "策划", title, state: "生成中", progress: 8, cost: 80 });
   renderQueue();
   let step = 1;
   window.clearInterval(generationTimer);
-  generationTimer = window.setInterval(() => {
+  generationTimer = window.setInterval(async () => {
     step += 1;
     renderWorkflow(step);
     generationQueue[0].progress = Math.min(100, step * 25);
     if (step === 2) workspaceCopy.textContent = "正在抽取角色、场景和道具资产。";
     if (step === 3) workspaceCopy.textContent = "正在生成分镜脚本和镜头调度。";
     if (step >= 4) {
+      window.clearInterval(generationTimer);
       workspaceCopy.textContent = "视频任务已进入预览阶段，可进入策划或画布继续编辑。";
       generationQueue[0].state = "已完成";
-      generationResults.unshift({ type: "策划", title: text || categories[activeCategory].title, meta: "已生成脚本、角色、场景和分镜" });
+      generationResults.unshift({ type: "策划", title, meta: "已生成脚本、角色、场景和分镜" });
       renderGenerationHistory();
       renderQueue();
-      setCredits(credits - 80);
-      persistWorkspace("生成任务");
-      window.clearInterval(generationTimer);
+      const backendResult = await runBackendAction("生成任务保存", () => apiFetch("/generate", {
+        method: "POST",
+        body: { type: "story", title, cost: 80 }
+      }));
+      if (backendResult?.workspace) {
+        applyWorkspace(backendResult.workspace);
+        showWorkspace(categories[activeCategory].title, "生成任务已保存到后端，可继续进入策划或画布编辑。", 4);
+        showToast("生成任务已保存到后端");
+      } else {
+        setCredits(credits - 80);
+        persistWorkspace("生成任务");
+      }
     }
   }, 520);
 }
@@ -1066,20 +1096,30 @@ function switchGeneratorTab(tab) {
   $("#generatorPrompt").value = generatorCopy[tab] || generatorCopy.image;
 }
 
-function runGenerator() {
+async function runGenerator() {
   const active = $("[data-generator-tab].active")?.dataset.generatorTab || "image";
   const label = active === "video" ? "生成视频" : active === "text" ? "脚本节点" : "生成图片";
   addGeneratedNode(label);
+  const cost = active === "video" ? 120 : 30;
+  const backendResult = await runBackendAction("生成节点保存", () => apiFetch("/generate", {
+    method: "POST",
+    body: { type: active, title: label, cost }
+  }));
+  if (backendResult?.workspace) {
+    applyWorkspace(backendResult.workspace);
+    showToast("已生成新节点并保存到后端");
+    return;
+  }
   generationQueue.unshift({ id: `q${Date.now()}`, type: active === "video" ? "视频" : active === "text" ? "文本" : "图片", title: label, state: "已完成", progress: 100, cost: active === "video" ? 120 : 30 });
   generationResults.unshift({ type: generationQueue[0].type, title: `${label} ${generationResults.length + 1}`, meta: "刚刚生成 · 已加入画布" });
   renderGenerationHistory();
   renderQueue();
-  setCredits(credits - (active === "video" ? 120 : 30));
+  setCredits(credits - cost);
   persistWorkspace("生成节点");
   showToast("已生成新节点");
 }
 
-function handleAction(action) {
+async function handleAction(action) {
   if (action === "close-workspace") workspacePanel.hidden = true;
   if (action === "open-queue") openQueueDrawer();
   if (action === "close-queue") closeQueue();
@@ -1092,6 +1132,13 @@ function handleAction(action) {
     showToast("队列状态已更新");
   }
   if (action === "clear-finished") {
+    const backendResult = await runBackendAction("队列清理", () => apiFetch("/queue/finished", { method: "DELETE" }));
+    if (backendResult?.queue) {
+      replaceList(generationQueue, backendResult.queue);
+      renderQueue();
+      showToast("已从后端清理完成任务");
+      return;
+    }
     for (let index = generationQueue.length - 1; index >= 0; index -= 1) {
       if (generationQueue[index].state === "已完成") generationQueue.splice(index, 1);
     }
@@ -1132,7 +1179,7 @@ function handleAction(action) {
     showToast(`已新增第 ${next} 集`);
   }
   if (action === "new-project") {
-    storyProjects.unshift({
+    const projectDraft = {
       id: `story-${Date.now()}`,
       tab: "story",
       category: activeStoryFilter === "all" ? "overseas" : activeStoryFilter,
@@ -1143,8 +1190,19 @@ function handleAction(action) {
       updated: "刚刚",
       progress: 8,
       cover: "linear-gradient(135deg, rgba(184,233,72,.18), rgba(84,188,230,.18))"
+    };
+    const backendResult = await runBackendAction("新建故事", async () => {
+      const created = await apiFetch("/projects", { method: "POST", body: projectDraft });
+      await loadBackendWorkspace();
+      return created;
     });
     activeLibraryTab = "story";
+    if (backendResult?.project) {
+      renderLibrary();
+      showToast("新故事已保存到后端");
+      return;
+    }
+    storyProjects.unshift(projectDraft);
     renderLibrary();
     persistWorkspace("新建故事");
     showToast("新故事已创建");
@@ -1176,8 +1234,20 @@ function handleAction(action) {
   if (action === "invite") openModal("invite");
   if (action === "add-comment") {
     const input = $("#commentInput");
-    if (input.value.trim()) {
-      teamComments.unshift({ id: `comment-${Date.now()}`, author: apiState.user?.name || "我", body: input.value.trim(), createdAt: new Date().toISOString() });
+    const body = input.value.trim();
+    if (body) {
+      const backendResult = await runBackendAction("评论发送", () => apiFetch("/team/comments", {
+        method: "POST",
+        body: { body }
+      }));
+      if (backendResult?.comments) {
+        replaceList(teamComments, backendResult.comments);
+        input.value = "";
+        renderTeam();
+        showToast("评论已保存到后端");
+        return;
+      }
+      teamComments.unshift({ id: `comment-${Date.now()}`, author: apiState.user?.name || "我", body, createdAt: new Date().toISOString() });
       input.value = "";
       renderTeam();
       persistWorkspace("评论");
@@ -1192,7 +1262,7 @@ function handleAction(action) {
   if (action === "close-modal") closeModal();
 }
 
-function handleModalAction(action) {
+async function handleModalAction(action) {
   closeModal();
   if (action === "open-queue") openQueueDrawer();
   if (action === "open-help") openModal("help");
@@ -1202,12 +1272,30 @@ function handleModalAction(action) {
     persistWorkspace("导出扣费");
   }
   if (action === "top-up") {
+    const backendResult = await runBackendAction("充值", () => apiFetch("/billing/top-up", {
+      method: "POST",
+      body: { amount: 2000, memo: "前端充值" }
+    }));
+    if (backendResult?.workspace) {
+      applyWorkspace(backendResult.workspace);
+      showToast("充值已保存到后端");
+      return;
+    }
     usageLedger.unshift(["模拟充值", "+2000", "前端演示充值"]);
     setCredits(credits + 2000);
     renderAccount();
     persistWorkspace("充值");
   }
   if (action === "upgrade-plan") {
+    const backendResult = await runBackendAction("会员升级", () => apiFetch("/billing/upgrade", {
+      method: "POST",
+      body: { cost: 199, plan: "专业会员" }
+    }));
+    if (backendResult?.workspace) {
+      applyWorkspace(backendResult.workspace);
+      showToast("会员升级已保存到后端");
+      return;
+    }
     usageLedger.unshift(["会员升级", "-199", "专业会员演示"]);
     accountPlan = "专业会员";
     setCredits(credits - 199);
@@ -1216,6 +1304,17 @@ function handleModalAction(action) {
   }
   if (action === "continue-project") routeTo("script");
   if (action === "duplicate-project") {
+    const source = storyProjects[0];
+    const backendResult = source && await runBackendAction("项目复制", async () => {
+      const copy = await apiFetch(`/projects/${encodeURIComponent(source.id)}/duplicate`, { method: "POST" });
+      await loadBackendWorkspace();
+      return copy;
+    });
+    if (backendResult?.project) {
+      routeTo("projects");
+      showToast("项目副本已保存到后端");
+      return;
+    }
     storyProjects.unshift({ ...storyProjects[0], id: `copy-${Date.now()}`, title: `${storyProjects[0].title} 副本`, updated: "刚刚", status: "草稿", progress: 18 });
     persistWorkspace("项目副本");
     routeTo("projects");
@@ -1226,7 +1325,7 @@ function handleModalAction(action) {
   showToast("操作已完成");
 }
 
-function handleProjectAction(action, card) {
+async function handleProjectAction(action, card) {
   const project = storyProjects.find(item => item.id === card?.dataset.project);
   if (action === "detail" && project) openModal("project-detail", { project });
   if (action === "continue") {
@@ -1234,6 +1333,15 @@ function handleProjectAction(action, card) {
     else routeTo("script");
   }
   if (action === "duplicate" && project) {
+    const backendResult = await runBackendAction("项目复制", async () => {
+      const copy = await apiFetch(`/projects/${encodeURIComponent(project.id)}/duplicate`, { method: "POST" });
+      await loadBackendWorkspace();
+      return copy;
+    });
+    if (backendResult?.project) {
+      showToast("项目副本已保存到后端");
+      return;
+    }
     storyProjects.unshift({ ...project, id: `copy-${Date.now()}`, title: `${project.title} 副本`, updated: "刚刚", status: "草稿", progress: Math.min(project.progress, 20) });
     renderLibrary();
     persistWorkspace("项目副本");

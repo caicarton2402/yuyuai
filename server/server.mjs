@@ -302,9 +302,11 @@ async function handleGenerate(method, request, response, context) {
   const body = await readJson(request);
   const workspace = await getWorkspace(context.user.id);
   const type = body.type || "video";
-  const cost = type === "video" ? 120 : type === "text" ? 30 : 30;
-  const title = body.title || (type === "video" ? "生成视频" : type === "text" ? "脚本节点" : "生成图片");
-  const task = { id: `q${Date.now()}`, type: type === "video" ? "视频" : type === "text" ? "文本" : "图片", title, state: "已完成", progress: 100, cost };
+  const defaultCost = type === "video" ? 120 : type === "story" ? 80 : type === "text" ? 30 : 30;
+  const cost = Number.isFinite(Number(body.cost)) ? Math.max(0, Number(body.cost)) : defaultCost;
+  const title = body.title || (type === "video" ? "生成视频" : type === "story" ? "故事策划" : type === "text" ? "脚本节点" : "生成图片");
+  const taskType = type === "video" ? "视频" : type === "story" ? "策划" : type === "text" ? "文本" : "图片";
+  const task = { id: `q${Date.now()}`, type: taskType, title, state: "已完成", progress: 100, cost };
   const result = { type: task.type, title: `${title} ${workspace.generationResults.length + 1}`, meta: "后端生成任务 · 已保存" };
   workspace.generationQueue.unshift(task);
   workspace.generationResults.unshift(result);
